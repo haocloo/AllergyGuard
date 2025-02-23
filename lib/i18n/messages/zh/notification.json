@@ -1,0 +1,21 @@
+{
+  "notification": {
+    "success": {
+      "label": "Success",
+      "update": {},
+      "create": {
+        "register user": "成功注册用户。"
+      },
+      "delete": {}
+    },
+    "error": {
+      "label": "错误",
+      "update": {},
+      "create": {
+        "register user": "注册用户失败。"
+      },
+      "delete": {}
+    },
+    "pending": {}
+  }
+}

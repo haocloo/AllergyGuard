@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 220 33% 98%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 220 70% 22%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 220 8% 46%;
+    --accent: 220 14% 94%;
+    --accent-foreground: 220 70% 22%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 94%; /* Lighter, more subtle border for light mode */
+
+    --input: 220 13% 91%;
+    --ring: 224 71% 4%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 262 83% 58%;
+    --chart-3: 199 89% 48%;
+    --chart-4: 168 76% 42%;
+    --chart-5: 241 65% 58%;
+    --radius: 0.5rem;
+    --sidebar-background: 221 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 223 14% 20%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 223 14% 20%;
+    --sidebar-ring: 221 83% 65%;
+
+    /* rainbow button magicui */
+    --color-1: 0 100% 63%;
+    --color-2: 270 100% 63%;
+    --color-3: 210 100% 63%;
+    --color-4: 195 100% 63%;
+    --color-5: 90 100% 63%;
+  }
+  .dark {
+    --background: 222 47% 4%; /* Deep blue-black */
+    --foreground: 210 40% 98%;
+    --card: 222 47% 7%; /* Slightly lighter than background but still subtle */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 19% 27%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 19% 27%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 19% 27%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 221 18% 16%; /* Slightly lighter than the background but still subtle */
+    --input: 217 19% 27%;
+    --ring: 224 76% 48%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 262 83% 68%;
+    --chart-3: 199 89% 58%;
+    --chart-4: 168 76% 52%;
+    --chart-5: 241 65% 68%;
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 223 14% 20%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 223 14% 20%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.foreground / 85%') transparent;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.screen-size-check {
+  @apply max-xs:bg-emerald-400/30 xs:bg-blue-400/30 sm:bg-orange-300/30 md:bg-green-400/30 2md:bg-purple-400/30 lg:bg-red-400/30 xl:bg-yellow-400/30;
+}
+
+.rdp {
+  width: 100% !important;
+}
+
+.rdp-months {
+  width: 100% !important;
+}
+
+.rdp-month {
+  width: 100% !important;
+}
+
+.rdp-table {
+  width: 100% !important;
+}
+
+.rdp-cell {
+  width: calc(100% / 7) !important;
+}
+
+.rdp-head_cell {
+  width: calc(100% / 7) !important;
+}

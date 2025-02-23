@@ -1,0 +1,32 @@
+{
+  "validation": {
+    "required": "{label} is required",
+    "invalid": "{label} is invalid",
+    "invalid option": "{label} is not a valid option",
+    "nonNegative": "{label} must be non-negative",
+    "min": "At least {min} {label}",
+    "translation": {
+      "en": "English version is required",
+      "zh": "Chinese version is required"
+    },
+    "file": {
+      "noFileSelected": "No file selected",
+      "fileSizeExceedsLimit": "File size must not exceed {limit}MB",
+      "fileMustBeImage": "File must be an image",
+      "uploadFailed": "Failed to upload file. Please try again. If the problem persists, please contact technical support.",
+      "fileUrlNotFound": "File URL not found. Please try again. If the problem persists, please contact technical support."
+    },
+    "payment": {
+      "methodNotSupported": "Payment method not supported"
+    },
+    "developer": "Please contact technical support.",
+    "rateLimit": {
+      "title": "Rate limit exceeded for {feature}. ",
+      "tryAgainLater": "Please try again later.",
+      "features": {
+        "createMenu": "Create Menu",
+        "registerUser": "Create Account"
+      }
+    }
+  }
+}

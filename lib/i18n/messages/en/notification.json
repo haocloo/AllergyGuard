@@ -1,0 +1,21 @@
+{
+  "notification": {
+    "success": {
+      "label": "Success",
+      "update": {},
+      "create": {
+        "register user": "Successfully registered user."
+      },
+      "delete": {}
+    },
+    "error": {
+      "label": "Uh oh! Something went wrong.",
+      "update": {},
+      "create": {
+        "register user": "Failed to register user. "
+      },
+      "delete": {}
+    },
+    "pending": {}
+  }
+}

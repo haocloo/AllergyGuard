@@ -1,0 +1,53 @@
+{
+  "LocaleSwitcher": {
+    "label": "切换语言",
+    "en": "English",
+    "zh": "中文 (简体)",
+    "toggle theme": "切换主题"
+  },
+  "Language": {
+    "en": "英语",
+    "zh": "中文"
+  },
+  "common": {
+    "close": "关闭",
+    "cancel": "取消",
+    "edit": "编辑",
+    "delete": "删除",
+    "try again": "重试",
+    "actions": "操作",
+    "toggle": "切换",
+    "toggle navigation menu": "切换导航菜单",
+    "no data": "没有数据",
+    "not found page": {
+      "title": "找不到页面",
+      "description": "抱歉，您正在寻找的页面不存在或已被移动。",
+      "btn": {
+        "go back": "返回",
+        "back to home": "返回主页"
+      }
+    }
+  },
+  "auth": {
+    "sign up": "注册",
+    "login": "登录",
+    "log out": "登出",
+    "continue with google": "通过 Google 继续",
+    "create account": "创建账户",
+    "creating account": "创建账户中...",
+    "full name": "英文全名",
+    "english name only": "仅限英文名",
+    "phone": "电话号码",
+    "role": "角色",
+    "invalid role": "无效角色",
+    "faculty": "学院",
+    "search faculty": "搜索学院",
+    "none faculty": "学院不存在",
+    "profession": "职业",
+    "search profession": "搜索职业",
+    "none profession": "职业不存在",
+    "phone format": "电话号码格式: 0123456789",
+    "duplicate user": "用户已存在",
+    "pls login again": "请重新登录"
+  }
+}

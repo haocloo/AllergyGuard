@@ -1,0 +1,50 @@
+{
+  "LocaleSwitcher": {
+    "label": "Toggle Language",
+    "en": "English",
+    "zh": "中文 (简体)",
+    "toggle theme": "Toggle Theme"
+  },
+  "Language": {
+    "en": "English",
+    "zh": "Chinese"
+  },
+  "common": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "try again": "Try Again",
+    "actions": "Actions",
+    "toggle": "Toggle",
+    "toggle navigation menu": "Toggle navigation menu",
+    "no data": "No data",
+    "not found page": {
+      "title": "Something's missing",
+      "description": "Sorry, the page you are looking for doesn't exist or has been moved.",
+      "btn": {
+        "go back": "Go back",
+        "back to home": "Back to Home"
+      }
+    }
+  },
+  "auth": {
+    "sign up": "Sign Up",
+    "login": "Login",
+    "log out": "Log out",
+    "continue with google": "Continue with Google",
+    "create account": "Create Account",
+    "creating account": "Creating Account...",
+    "full name": "Full Name",
+    "english name only": "English name only",
+    "phone": "Phone Number",
+    "role": "Role",
+    "invalid role": "Invalid role",
+    "faculty": "Faculty",
+    "search faculty": "Search Faculty",
+    "none faculty": "Faculty not found",
+    "phone format": "Phone number format: 0123456789",
+    "duplicate user": "User already exists",
+    "pls login again": "Please login again"
+  }
+}

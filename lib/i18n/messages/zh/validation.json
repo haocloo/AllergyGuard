@@ -1,0 +1,32 @@
+{
+  "validation": {
+    "required": "{label} 是必须的",
+    "invalid": "{label} 是无效的",
+    "invalid option": "{label} 无效选项",
+    "nonNegative": "{label} 必须是非负的",
+    "min": "必须至少{min}个{label}",
+    "translation": {
+      "en": "英语版本是必须的",
+      "zh": "中文版本是必须的"
+    },
+    "file": {
+      "noFileSelected": "未选择任何照片",
+      "fileSizeExceedsLimit": "照片大小超过限制，最大允许 {limit}MB",
+      "fileMustBeImage": "上传的文件必须是图片格式",
+      "uploadFailed": "上传照片失败，请重试。如果问题持续，请联系技术支持",
+      "fileUrlNotFound": "照片URL未找到, 请重试。如果问题持续, 请联系技术支持"
+    },
+    "payment": {
+      "methodNotSupported": "支付方式无效"
+    },
+    "developer": "请联系技术支持",
+    "rateLimit": {
+      "title": "{feature}的速率限制已超出。",
+      "tryAgainLater": "请稍后再试。",
+      "features": {
+        "createMenu": "创建菜单",
+        "registerUser": "创建账户"
+      }
+    }
+  }
+}
