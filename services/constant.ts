@@ -1,24 +1,48 @@
-"use client"; // need this to solve the barrel optimization error
+'use client'; // need this to solve the barrel optimization error
 // This file is for Data only
 
 // ui
-import { User as UserIcon } from 'lucide-react';
+import { User as UserIcon, Utensils, Camera, Book, ChefHat, User } from 'lucide-react';
 
 // services
 import type { T_navItem } from '@/services/types';
 
 export const navList: T_navItem[] = [
   {
-    label: 'Platform',
+    label: 'Dashboard',
     children: [
       {
-        title: 'Student',
-        icon: UserIcon,
+        title: 'Profile Management',
         items: [
           {
-            title: 'Dashboard',
-            url: '/dashboard/student',
-            role: ['admin', 'student'],
+            title: 'Profile',
+            url: '/dashboard/profile-management',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: User,
+          },
+        ],
+      },
+      {
+        title: 'Meal Planning',
+        icon: Utensils,
+        items: [
+          {
+            title: 'Ingredient Scanner',
+            url: '/dashboard/meal-planning/scanner',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: Camera,
+          },
+          {
+            title: 'Meal Plans',
+            url: '/dashboard/meal-planning/plans',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: Book,
+          },
+          {
+            title: 'Recipe Suggestions',
+            url: '/dashboard/meal-planning/recipes',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: ChefHat,
           },
         ],
       },
