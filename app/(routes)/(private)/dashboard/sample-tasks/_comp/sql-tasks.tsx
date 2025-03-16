@@ -233,7 +233,7 @@ export function SQLTasks() {
   return (
     <div className="space-y-6">
       {/* Task Statistics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
@@ -279,7 +279,7 @@ export function SQLTasks() {
           </CardContent>
         </Card>
       </div>
-      <div className="flex justify-between">
+      <div className="flex flex-col xs:flex-row justify-between space-y-2 xs:space-y-0">
         {/* Filters */}
         <FilterBar
           categoryFilter={sqlFilters.category}
@@ -296,7 +296,7 @@ export function SQLTasks() {
       {filteredTasks.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredTasks.map((task) => (
             <TaskCard
               key={task.id}

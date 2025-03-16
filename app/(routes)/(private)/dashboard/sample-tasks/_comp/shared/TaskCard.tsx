@@ -168,10 +168,10 @@ export function TaskCard({
         </DropdownMenu>
       </div>
 
-      <CardHeader className="space-y-2 pb-4">
+      <CardHeader className="space-y-2 pb-2 sm:pb-4">
         <div className="space-y-1">
           <CardTitle className="text-lg font-semibold line-clamp-1">{task.name}</CardTitle>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs text-muted-foreground">
             <span>Created {format(new Date(task.createdAt), 'PPP')}</span>
             <span>•</span>
             <Badge variant={getCategoryBadgeVariant(task.category)} className="capitalize">
@@ -181,9 +181,9 @@ export function TaskCard({
         </div>
       </CardHeader>
 
-      {showImages && (
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+      {showImages && task.primaryImage && task.secondaryImage && (
+        <CardContent className="space-y-3 sm:space-y-4 pt-1 sm:pt-2">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div className="relative group/image overflow-hidden rounded-md bg-muted aspect-video">
               <img
                 src={task.primaryImage}

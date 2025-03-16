@@ -29,14 +29,14 @@ export function TasksClient({ initialTasks, initialFirestoreTasks }: Props) {
   }, [initialTasks, initialFirestoreTasks, setFirestoreTasks, setTasks]);
 
   return (
-    <div className="space-y-8">
-      {/* Header Section */}
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Header Section - Made responsive for small screens */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Tasks Management</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Tasks Management</h1>
           <p className="text-sm text-muted-foreground">Create and manage your tasks efficiently</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <EmailDialog />
           <TelegramDialog />
           <DebugLogger />

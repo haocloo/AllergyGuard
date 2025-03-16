@@ -17,7 +17,7 @@ export default async function TasksPage() {
   } catch (error) {
     console.error('Error loading tasks:', error);
   }
-  
+
   // Fetch Firestore admin tasks using the new server action based on Firebase Admin
   let initialFirestoreTasks: Task[] = [];
   try {
@@ -27,9 +27,9 @@ export default async function TasksPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-full overflow-hidden">
       <Breadcrumbs items={breadcrumbItems} />
-      <div className="flex-grow flex flex-col px-6 overflow-y-auto pt-1 pb-5">
+      <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 max-w-full">
         <TasksClient initialTasks={initialTasks} initialFirestoreTasks={initialFirestoreTasks} />
       </div>
     </div>

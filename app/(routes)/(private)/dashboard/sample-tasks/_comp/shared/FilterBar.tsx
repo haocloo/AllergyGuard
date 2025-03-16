@@ -15,12 +15,12 @@ interface FilterBarProps {
 
 export function FilterBar({ categoryFilter, statusFilter, onFilterChange }: FilterBarProps) {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col xs:flex-row gap-2">
       <Select
         value={categoryFilter ?? 'all'}
         onValueChange={(value) => onFilterChange('category', value === 'all' ? null : value)}
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-full xs:w-[130px] sm:w-[150px]">
           <SelectValue placeholder="All Categories" />
         </SelectTrigger>
         <SelectContent>
@@ -37,7 +37,7 @@ export function FilterBar({ categoryFilter, statusFilter, onFilterChange }: Filt
         value={statusFilter ?? 'all'}
         onValueChange={(value) => onFilterChange('status', value === 'all' ? null : value)}
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="w-full xs:w-[130px] sm:w-[150px]">
           <SelectValue placeholder="All Statuses" />
         </SelectTrigger>
         <SelectContent>
