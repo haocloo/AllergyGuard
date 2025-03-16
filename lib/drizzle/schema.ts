@@ -24,7 +24,7 @@ export const Translations = z.object({
   zh: z.string(),
 });
 
-export const roleEnum = ['student', 'employer', 'educator', 'admin'] as const;
+export const roleEnum = ['caretaker', 'parent', 'admin'] as const;
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
