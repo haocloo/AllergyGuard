@@ -13,7 +13,6 @@ import { z } from 'zod';
 // services
 import { emailSchema, telegramSchema } from '@/services/validation';
 
-
 // ##########################################
 //              COMMON TYPES
 // ##########################################
@@ -96,6 +95,7 @@ export type T_navItem = {
       title: string;
       url: string;
       role: T_role[];
+      icon?: LucideIcon;
     }[];
   }[];
 };

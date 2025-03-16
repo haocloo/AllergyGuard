@@ -2,7 +2,7 @@
 // This file is for Data only
 
 // ui
-import { User as UserIcon, Utensils, Camera, Book, ChefHat, User } from 'lucide-react';
+import { User as UserIcon, Utensils, Camera, Book, ChefHat, User, AlertCircle } from 'lucide-react';
 
 // services
 import type { T_navItem } from '@/services/types';
@@ -43,6 +43,18 @@ export const navList: T_navItem[] = [
             url: '/dashboard/meal-planning/recipes',
             role: ['admin', 'caretaker', 'parent'],
             icon: ChefHat,
+          },
+        ],
+      },
+      {
+        title: 'Emergency Support',
+        icon: AlertCircle,
+        items: [
+          {
+            title: 'Panic Mode',
+            url: '/dashboard/panic-mode',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: AlertCircle,
           },
         ],
       },
