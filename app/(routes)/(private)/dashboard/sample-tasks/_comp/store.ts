@@ -6,10 +6,12 @@ import { FormState } from '@/components/helpers/form-items';
 import type { Task, TaskCategory, TaskStatus } from './types';
 
 interface TaskStore {
+  // update this after server actoin success
   tasks: Task[];
   isLoading: boolean;
   isDialogOpen: boolean;
   isPending: boolean;
+  // for individual edit info
   formData: {
     name: string;
     category: TaskCategory;

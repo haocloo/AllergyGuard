@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
@@ -26,7 +26,7 @@ export const validateImageFile = (file: File): FileValidationResult => {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
   // Maximum file size (2MB)
-  const maxSize = 2 * 1024 * 1024;
+  const maxSize = 5 * 1024 * 1024;
 
   if (!allowedTypes.includes(file.type)) {
     return {
@@ -115,7 +115,7 @@ export function ImageUploadInput({
             variant="outline"
             className="flex-1 shrink-0"
             size="icon"
-            onClick={onPreview}
+            onClick={!!onPreview ? onPreview : () => setIsPreviewOpen(true)}
           >
             <Eye className="h-4 w-4" />
             View

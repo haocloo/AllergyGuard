@@ -48,15 +48,17 @@ export async function get_tasks() {
   try {
     const { user } = await lucia_get_user();
     if (!user) {
-      await utils_log_server_info('get_tasks', 'No user found, returning empty tasks array');
+      console.log('1');
+      await utils_log_server_info('get_tasks', 'Unauthenticated');
       return [];
     }
 
+    console.log('1');
     const result = await db.query.tasks.findMany({
       where: eq(tasks.userId, user.id),
       orderBy: (tasks, { desc }) => [desc(tasks.createdAt)],
     });
-
+    console.log(result);
     if (!result || result.length === 0) {
       await utils_log_server_info('get_tasks', 'No tasks found for user', { userId: user.id });
       return [];
@@ -71,8 +73,9 @@ export async function get_tasks() {
       secondaryImage: task.secondaryImage || '',
       createdAt: task.createdAt?.toISOString() || new Date().toISOString(),
     }));
-  } catch (error) {
-    await utils_log_server_error('get_tasks', error);
+  } catch (error: any) {
+    console.log(error);
+    await utils_log_server_error('get_tasks', error.message);
     return [];
   }
 }
@@ -459,7 +462,6 @@ export async function generate_educator_sample_logs(educatorId: string) {
 // #########################################################
 //                        FIRESTORE
 // #########################################################
-
 
 export async function getFirestoreTasks(): Promise<Task[]> {
   try {
