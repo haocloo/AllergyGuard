@@ -54,7 +54,7 @@ export const schema_create_user_basic = z.object({
   phone: z
     .string()
     .trim()
-    .regex(/^(01)[02-46-9][0-9]{7}$|^(01)[1][0-9]{8}$/, 'Phone format is invalid'),
+    .regex(/^(01)[02-46-9][0-9]{7}$|^(01)[1][0-9]{8}$/, 'Phone format is invalid. e.g. 0123456789'),
   email: z.string().email('Invalid email'),
   role: z.enum(roleEnum, {
     errorMap: () => ({ message: 'Invalid role' }),

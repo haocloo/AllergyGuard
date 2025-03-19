@@ -158,7 +158,7 @@ export async function getSymptomHistory(): Promise<SymptomHistory[]> {
   try {
     // Get the authenticated user
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_info('getSymptomHistory', 'Unauthenticated');
       return DUMMY_HISTORY; // Return dummy data for demonstration
     }
@@ -199,7 +199,7 @@ export async function getSymptomHistory(): Promise<SymptomHistory[]> {
 export async function analyze_symptoms(data: T_schema_analyze_symptoms): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_error('analyze_symptoms', 'Unauthorized access attempt');
       throw new Error('Unauthorized access');
     }
@@ -249,7 +249,7 @@ export async function analyze_symptoms(data: T_schema_analyze_symptoms): Promise
 export async function saveSymptomAnalysis(symptomResponse: SymptomResponse): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_error('saveSymptomAnalysis', 'Unauthorized access attempt');
       throw new Error('Unauthorized access');
     }

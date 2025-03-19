@@ -70,7 +70,7 @@ export default function SignUpForm({ name, phone, role }: SignUpFormProps) {
         router.push('/dashboard');
       } else {
         if (
-          res.message.startsWith(
+          String(res.message).startsWith(
             'DB_create_user: error: duplicate key value violates unique constraint'
           )
         ) {
@@ -145,28 +145,20 @@ export default function SignUpForm({ name, phone, role }: SignUpFormProps) {
           }}
         >
           <ToggleGroupItem
-            value="student"
-            aria-label="Student role"
+            value="caretaker"
+            aria-label="Caretaker role"
             className="flex gap-2 items-center data-[state=on]:bg-blue-600/90 data-[state=on]:text-white"
           >
             <User2 className="h-4 w-4" />
-            <span>Student</span>
+            <span>Caretaker</span>
           </ToggleGroupItem>
           <ToggleGroupItem
-            value="employer"
-            aria-label="Condo Manager role"
+            value="parent"
+            aria-label="Parent role"
             className="flex gap-2 items-center data-[state=on]:bg-blue-600/90 data-[state=on]:text-white"
           >
             <Briefcase className="h-4 w-4" />
-            <span>Employer</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="educator"
-            aria-label="Educator role"
-            className="flex gap-2 items-center data-[state=on]:bg-blue-600/90 data-[state=on]:text-white"
-          >
-            <School className="h-4 w-4" />
-            <span>Educator</span>
+            <span>Parent</span>
           </ToggleGroupItem>
         </ToggleGroup>
         {formState.fieldErrors.role && <FieldError formState={formState} name="role" />}

@@ -21,7 +21,7 @@ import { Allergen, FoodRecipe, Ingredient, MealPlan } from './store';
 export async function getMealPlans(): Promise<MealPlan[]> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       return [];
     }
 
@@ -80,7 +80,7 @@ export async function getMealPlans(): Promise<MealPlan[]> {
 export async function getChildAllergies(): Promise<Allergen[]> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       return [];
     }
 
@@ -126,7 +126,7 @@ export async function createMealPlan(
 ): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       return fromErrorToFormState('You must be logged in to create a meal plan');
     }
 
@@ -166,7 +166,7 @@ export async function createMealPlan(
 export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       return fromErrorToFormState('You must be logged in to update a meal plan');
     }
 
@@ -197,7 +197,7 @@ export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): P
 export async function deleteMealPlan(id: string): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       return fromErrorToFormState('You must be logged in to delete a meal plan');
     }
 

@@ -42,7 +42,7 @@ export function EmailDialog() {
         html: content,
       };
 
-      await sendEmail(emailData);
+      const res = await sendEmail(emailData);
 
       toast({
         title: 'Success',

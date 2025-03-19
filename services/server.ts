@@ -378,7 +378,7 @@ export async function get_r2_files() {
 export async function get_r2_upload_signed_url(key: string, fileType: string, fileSize: number) {
   const { user } = await lucia_get_user();
   try {
-    if (!user) {
+    if (!user?.id) {
       throw 'Unauthorized';
     }
 

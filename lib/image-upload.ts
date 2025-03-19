@@ -2,7 +2,7 @@ import { validateImageFile } from '@/components/helpers/image-upload-input';
 import { getSignedUrlForUpload } from '@/lib/r2';
 
 export interface ImageFile {
-  file?: File;
+  file?: File | null;
   preview: string;
 }
 

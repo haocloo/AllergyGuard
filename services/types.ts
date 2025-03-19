@@ -28,6 +28,11 @@ export type T_translation = {
   zh: string;
 };
 
+export type T_File = {
+  file?: File | null;
+  preview: string;
+};
+
 export type EmailSchema = z.infer<typeof emailSchema>;
 export type TelegramSchema = z.infer<typeof telegramSchema>;
 
@@ -48,19 +53,14 @@ export const T_roles: {
     icon: UserCog,
   },
   {
-    label: 'Student',
-    value: 'student',
+    label: 'Caretaker',
+    value: 'caretaker',
     icon: PersonStanding,
   },
   {
-    label: 'Employer',
-    value: 'employer',
+    label: 'Parent',
+    value: 'parent',
     icon: Store,
-  },
-  {
-    label: 'Educator',
-    value: 'educator',
-    icon: User2,
   },
 ];
 

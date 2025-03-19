@@ -15,14 +15,13 @@ import { ImageUploadManager } from '@/lib/image-upload';
 import { cn } from '@/lib/cn';
 import { useToast } from '@/hooks/use-toast';
 import { Task, TaskCategory, TaskStatus, TaskFormData, CATEGORIES } from '../types';
-import { useTaskStore } from '../store';
-import {
+import {  
   FormState,
   EMPTY_FORM_STATE,
   fromErrorToFormState,
   FieldError,
+  scrollToFirstError,
 } from '@/components/helpers/form-items';
-import { scrollToFirstError } from '@/components/helpers/scroll-to-error';
 
 const imageManager = new ImageUploadManager('tasks');
 

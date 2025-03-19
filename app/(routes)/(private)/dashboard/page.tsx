@@ -5,20 +5,17 @@ import Breadcrumbs from '@/components/layout/breadcrumb';
 export default async function Page() {
   const { user } = await lucia_get_user();
 
-  if (!user) {
+  if (!user?.id) {
     return redirect('/auth');
   }
 
-  if (user.role === 'student') {
+  if (user.role === 'caretaker') {
     return redirect('/dashboard/student');
-  } else if (user.role === 'employer') {
-    return redirect('/dashboard/employer');
-  } else if (user.role === 'educator') {
-    return redirect('/dashboard/educator');
+  } else if (user.role === 'parent') {
+    return redirect('/dashboard/parent');
   } else if (user.role === 'admin') {
-    return redirect('/dashboard/student');
+    return redirect('/dashboard/admin');
   }
-
 
   return (
     <>

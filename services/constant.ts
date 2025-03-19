@@ -13,6 +13,7 @@ export const navList: T_navItem[] = [
     children: [
       {
         title: 'Profile Management',
+        icon: User,
         items: [
           {
             title: 'Profile',

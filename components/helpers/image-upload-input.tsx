@@ -91,11 +91,11 @@ export function ImageUploadInput({
 
   return (
     <div className="flex gap-2 items-center w-full">
-      <div className="flex-1 flex gap-2 w-full">
+      <div className="flex-1 flex-wrap flex gap-2 w-full">
         <Button
           disabled={disabled}
           type="button"
-          variant="outline"
+          variant={isError ? 'destructive' : 'secondary'}
           className={cn('flex-1 relative', isError && 'border-red-500')}
         >
           <input

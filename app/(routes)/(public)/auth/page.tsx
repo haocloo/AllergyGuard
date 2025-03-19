@@ -22,7 +22,7 @@ export default async function Page({
   const { user } = await lucia_get_user();
 
   // existing users cannot acccess
-  if (user) {
+  if (!!user?.id) {
     return redirect('/dashboard');
   }
 

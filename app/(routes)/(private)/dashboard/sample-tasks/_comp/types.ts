@@ -6,7 +6,7 @@ export type TaskCategory = 'work' | 'personal' | 'shopping' | 'health' | 'others
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
 
 export type ImageUpload = {
-  file?: File;
+  file?: File | null;
   preview: string;
 };
 

@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { EMPTY_FORM_STATE } from '@/components/helpers/form-items';
-import { fromErrorToFormState } from '@/components/helpers/form-items';
-import { scrollToFirstError } from '@/components/helpers/scroll-to-error';
+import { fromErrorToFormState, scrollToFirstError } from '@/components/helpers/form-items';
 
 // pui
 import { ImageUploadManager } from '@/lib/image-upload';

@@ -12,13 +12,14 @@ import { adminFirestore } from '@/lib/firebaseAdmin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 // services
-import { lucia_get_user, utils_log_server_error, utils_log_server_info } from '@/services/server';
+import { lucia_get_user, utils_log_db_error, utils_log_server_error, utils_log_server_info } from '@/services/server';
 import { fromErrorToFormState } from '@/components/helpers/form-items';
 import { toFormState } from '@/components/helpers/form-items';
 import { FormState } from '@/components/helpers/form-items';
 import { T_schema_create_task, TaskCategory } from './types';
 import { schema_create_task } from './validation';
 import type { Task } from './types';
+import { DatabaseError } from 'pg';
 
 // Add type for database task
 type TaskStatus = 'pending' | 'in_progress' | 'completed';
@@ -47,7 +48,7 @@ interface UpdateTaskData {
 export async function get_tasks() {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       console.log('1');
       await utils_log_server_info('get_tasks', 'Unauthenticated');
       return [];
@@ -74,8 +75,11 @@ export async function get_tasks() {
       createdAt: task.createdAt?.toISOString() || new Date().toISOString(),
     }));
   } catch (error: any) {
-    console.log(error);
+  if (error instanceof DatabaseError) {
+    await utils_log_db_error('get_tasks', error);
+  } else {
     await utils_log_server_error('get_tasks', error.message);
+  }
     return [];
   }
 }
@@ -83,7 +87,7 @@ export async function get_tasks() {
 export async function AI_create_task(task: T_schema_create_task): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_error('AI_create_task', 'Unauthorized access attempt');
       throw new Error('Unauthorized access');
     }
@@ -109,8 +113,12 @@ export async function AI_create_task(task: T_schema_create_task): Promise<FormSt
 
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task created successfully');
-  } catch (error) {
-    await utils_log_server_error('AI_create_task', error);
+  } catch (error: any) {
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('AI_create_task', error);
+    } else {
+      await utils_log_server_error('AI_create_task', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -118,7 +126,7 @@ export async function AI_create_task(task: T_schema_create_task): Promise<FormSt
 export async function createTask(data: CreateTaskData): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       throw new Error('Unauthorized access');
     }
 
@@ -145,6 +153,11 @@ export async function createTask(data: CreateTaskData): Promise<FormState> {
 
     return toFormState('SUCCESS', 'Task created successfully');
   } catch (error: any) {
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('createTask', error);
+    } else {
+      await utils_log_server_error('createTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -152,7 +165,7 @@ export async function createTask(data: CreateTaskData): Promise<FormState> {
 export async function updateTask(taskId: string, data: UpdateTaskData): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       throw new Error('Unauthorized access');
     }
 
@@ -175,7 +188,11 @@ export async function updateTask(taskId: string, data: UpdateTaskData): Promise<
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task updated successfully');
   } catch (error: any) {
-    await utils_log_server_error('updateTask', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('updateTask', error);
+    } else {
+      await utils_log_server_error('updateTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -183,7 +200,7 @@ export async function updateTask(taskId: string, data: UpdateTaskData): Promise<
 export async function updateTaskStatus(taskId: string, status: TaskStatus): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       throw new Error('Unauthorized access');
     }
 
@@ -192,7 +209,11 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus): Prom
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task updated successfully');
   } catch (error: any) {
-    await utils_log_server_error('updateTask', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('updateTask', error);
+    } else {
+      await utils_log_server_error('updateTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -200,7 +221,7 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus): Prom
 export async function deleteTask(taskId: string): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_error('deleteTask', 'Unauthorized access attempt');
       throw new Error('Unauthorized access');
     }
@@ -215,7 +236,11 @@ export async function deleteTask(taskId: string): Promise<FormState> {
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task deleted successfully');
   } catch (error: any) {
-    await utils_log_server_error('deleteTask', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('deleteTask', error);
+    } else {
+      await utils_log_server_error('deleteTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -333,8 +358,12 @@ export async function generate_student_sample_logs(userId: string) {
     await Promise.all([roadmapLogs, skillLogs, resumeLogs, aiRoadmapLogs, careerLogs, errorLogs]);
 
     return { success: true, message: 'Generated student sample logs successfully' };
-  } catch (error) {
-    await utils_log_server_error('generate_sample_logs', error);
+  } catch (error: any) {
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('generate_sample_logs', error);
+    } else {
+      await utils_log_server_error('generate_sample_logs', error);
+    }
     return { success: false, message: 'Failed to generate student sample logs' };
   }
 }
@@ -453,8 +482,12 @@ export async function generate_educator_sample_logs(educatorId: string) {
     ]);
 
     return { success: true, message: 'Generated educator sample logs successfully' };
-  } catch (error) {
-    await utils_log_server_error('generate_sample_logs', error);
+  } catch (error: any) {
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('generate_sample_logs', error);
+    } else {
+      await utils_log_server_error('generate_sample_logs', error);
+    }
     return { success: false, message: 'Failed to generate educator sample logs' };
   }
 }
@@ -466,7 +499,7 @@ export async function generate_educator_sample_logs(educatorId: string) {
 export async function getFirestoreTasks(): Promise<Task[]> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_info(
         'getFirestoreTasks',
         'No user found, returning empty tasks array'
@@ -510,8 +543,12 @@ export async function getFirestoreTasks(): Promise<Task[]> {
     });
 
     return tasks;
-  } catch (error) {
-    await utils_log_server_error('getFirestoreTasks', error);
+  } catch (error: any) {
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('getFirestoreTasks', error);
+    } else {
+      await utils_log_server_error('getFirestoreTasks', error);
+    }
     return [];
   }
 }
@@ -522,7 +559,7 @@ export async function updateFirestoreTask(
 ): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       throw new Error('Unauthorized access');
     }
 
@@ -552,7 +589,11 @@ export async function updateFirestoreTask(
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task updated successfully');
   } catch (error: any) {
-    await utils_log_server_error('updateFirestoreTask', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('updateFirestoreTask', error);
+    } else {
+      await utils_log_server_error('updateFirestoreTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -560,7 +601,7 @@ export async function updateFirestoreTask(
 export async function deleteFirestoreTask(taskId: string): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       await utils_log_server_error('deleteFirestoreTask', 'Unauthorized access attempt');
       throw new Error('Unauthorized access');
     }
@@ -587,7 +628,11 @@ export async function deleteFirestoreTask(taskId: string): Promise<FormState> {
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task deleted successfully');
   } catch (error: any) {
-    await utils_log_server_error('deleteFirestoreTask', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('deleteFirestoreTask', error);
+    } else {
+      await utils_log_server_error('deleteFirestoreTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -595,7 +640,7 @@ export async function deleteFirestoreTask(taskId: string): Promise<FormState> {
 export async function createFirestoreTask(data: CreateTaskData): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       throw new Error('Unauthorized access');
     }
 
@@ -636,7 +681,11 @@ export async function createFirestoreTask(data: CreateTaskData): Promise<FormSta
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task created successfully');
   } catch (error: any) {
-    await utils_log_server_error('createFirestoreTask', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('createFirestoreTask', error);
+    } else {
+      await utils_log_server_error('createFirestoreTask', error);
+    }
     return fromErrorToFormState(error);
   }
 }
@@ -647,7 +696,7 @@ export async function updateFirestoreTaskStatus(
 ): Promise<FormState> {
   try {
     const { user } = await lucia_get_user();
-    if (!user) {
+    if (!user?.id) {
       throw new Error('Unauthorized access');
     }
 
@@ -669,7 +718,11 @@ export async function updateFirestoreTaskStatus(
     revalidatePath('/dashboard/sample-tasks');
     return toFormState('SUCCESS', 'Task updated successfully');
   } catch (error: any) {
-    await utils_log_server_error('updateFirestoreTaskStatus', error);
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('updateFirestoreTaskStatus', error);
+    } else {
+      await utils_log_server_error('updateFirestoreTaskStatus', error);
+    }
     return fromErrorToFormState(error);
   }
 }

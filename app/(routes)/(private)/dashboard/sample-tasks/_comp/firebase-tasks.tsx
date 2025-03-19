@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EMPTY_FORM_STATE } from '@/components/helpers/form-items';
 import { fromErrorToFormState } from '@/components/helpers/form-items';
-import { scrollToFirstError } from '@/components/helpers/scroll-to-error';
 import { Task, TaskFormData, TaskStatus } from './types';
 
 // pui
@@ -30,6 +29,7 @@ import {
   createFirestoreTask,
   updateFirestoreTaskStatus,
 } from './actions';
+import { scrollToFirstError } from '@/components/helpers/form-items';
 
 const imageManager = new ImageUploadManager('tasks');
 
@@ -144,7 +144,7 @@ export function FirebaseTasks() {
       scrollToFirstError(formState);
       toast({
         title: 'Error',
-        description: formState.message || 'Failed to create task',
+        description: formState.message,
         variant: 'destructive',
       });
     } finally {

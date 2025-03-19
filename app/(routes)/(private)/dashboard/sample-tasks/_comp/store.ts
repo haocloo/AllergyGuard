@@ -4,6 +4,7 @@ import { create } from 'zustand';
 // services
 import { FormState } from '@/components/helpers/form-items';
 import type { Task, TaskCategory, TaskStatus } from './types';
+import type { T_File } from '@/services/types';
 
 interface TaskStore {
   // update this after server actoin success
@@ -16,14 +17,8 @@ interface TaskStore {
     name: string;
     category: TaskCategory;
     image: {
-      primary: {
-        file?: File;
-        preview: string;
-      };
-      secondary: {
-        file?: File;
-        preview: string;
-      };
+      primary: T_File;
+      secondary: T_File;
     };
   };
   formState: FormState;
