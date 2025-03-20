@@ -14,6 +14,7 @@ import { toFormState, fromErrorToFormState } from '@/components/helpers/form-ite
 // For now using dummy data
 import { children, mealPlans as dummyMealPlans } from '@/services/dummy-data';
 import { Allergen, FoodRecipe, Ingredient, MealPlan } from './store';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * Get all meal plans for the current user
@@ -220,113 +221,98 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
  */
 export async function getFoodRecipes(): Promise<FoodRecipe[]> {
   try {
-    const { user } = await lucia_get_user();
-    if (!user?.id) {
-      return [];
-    }
-
-    // In production, we would fetch from an API or database
-    // For now, create dummy food recipes based on the mealPlans data
+    // In a real app, you would fetch these from a database
+    // For demo purposes, we're returning mock data
     
-    const foodRecipes: FoodRecipe[] = [
+    // Simulating a database query
+    const mockRecipes: FoodRecipe[] = [
       {
         id: '1',
-        name: 'Almond Cake',
-        description: 'A delicious gluten-free almond cake that everyone will love',
+        name: 'Quinoa Salad',
+        description: 'A refreshing salad with quinoa, vegetables, and a light dressing.',
         ingredients: [
-          { name: 'Almond flour, 2 cups', containsAllergens: ['nuts'] },
-          { name: 'Eggs, 4 large', containsAllergens: ['eggs'] },
-          { name: 'Sugar, 1 cup', containsAllergens: [] },
-          { name: 'Baking powder, 1 tsp', containsAllergens: [] },
-          { name: 'Vanilla extract, 1 tsp', containsAllergens: [] },
+          { name: 'Quinoa', containsAllergens: [] },
+          { name: 'Cucumber', containsAllergens: [] },
+          { name: 'Cherry Tomatoes', containsAllergens: [] },
+          { name: 'Red Onion', containsAllergens: [] },
+          { name: 'Olive Oil', containsAllergens: [] },
+          { name: 'Lemon Juice', containsAllergens: [] },
         ],
         instructions: [
-          'Preheat oven to 350°F (175°C)',
-          'Mix almond flour with baking powder',
-          'Beat eggs with sugar until fluffy',
-          'Fold in dry ingredients and vanilla',
-          'Bake for 30-35 minutes until golden'
+          'Cook quinoa according to package instructions and let it cool.',
+          'Dice cucumber, halve cherry tomatoes, and finely chop red onion.',
+          'Mix all ingredients in a large bowl.',
+          'Dress with olive oil and lemon juice, salt and pepper to taste.',
+          'Serve chilled or at room temperature.',
         ],
-        allergensFound: ['nuts', 'eggs'],
-        suggestions: ['Replace eggs with flax eggs for egg allergies'],
-        imageUrl: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=1000&auto=format&fit=crop',
+        allergensFound: [],
+        suggestions: [
+          'Add feta cheese for extra flavor (contains milk allergen).',
+          'Try adding nuts for crunch (tree nut allergen).',
+        ],
+        imageUrl: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80',
       },
       {
         id: '2',
-        name: 'Curry Ayam Mat Rempit',
-        description: 'Spicy Malaysian chicken curry with authentic flavors',
+        name: 'Gluten-Free Pancakes',
+        description: 'Fluffy pancakes made with gluten-free flour blend.',
         ingredients: [
-          { name: 'Chicken pieces, 1kg', containsAllergens: [] },
-          { name: 'Curry powder, 3 tbsp', containsAllergens: [] },
-          { name: 'Coconut milk, 1 cup', containsAllergens: ['tree nuts'] },
-          { name: 'Potatoes, 2 medium', containsAllergens: [] },
-          { name: 'Onion, 1 large', containsAllergens: [] },
+          { name: 'Gluten-Free Flour Blend', containsAllergens: [] },
+          { name: 'Eggs', containsAllergens: ['Egg'] },
+          { name: 'Milk', containsAllergens: ['Milk'] },
+          { name: 'Baking Powder', containsAllergens: [] },
+          { name: 'Vanilla Extract', containsAllergens: [] },
+          { name: 'Maple Syrup', containsAllergens: [] },
         ],
         instructions: [
-          'Marinate chicken with curry powder',
-          'Sauté onions until golden',
-          'Add chicken and cook until browned',
-          'Add potatoes and coconut milk',
-          'Simmer until chicken is tender and potatoes are cooked'
+          'Mix all dry ingredients in a bowl.',
+          'In a separate bowl, whisk eggs and milk together.',
+          'Combine wet and dry ingredients, add vanilla extract.',
+          'Heat a pan and cook pancakes until bubbles form and edges are set.',
+          'Flip and cook until golden.',
+          'Serve with maple syrup.',
         ],
-        allergensFound: ['tree nuts'],
-        suggestions: ['Use dairy-free yogurt instead of coconut milk for tree nut allergies'],
-        imageUrl: 'https://images.unsplash.com/photo-1604152135912-04a022e23696?q=80&w=1000&auto=format&fit=crop',
-      },
-      {
-        id: '3',
-        name: 'Healthy Salad Bowl',
-        description: 'A nutrient-packed salad bowl with fresh vegetables and protein',
-        ingredients: [
-          { name: 'Mixed greens, 2 cups', containsAllergens: [] },
-          { name: 'Grilled chicken, 1 cup', containsAllergens: [] },
-          { name: 'Avocado, 1/2', containsAllergens: [] },
-          { name: 'Cherry tomatoes, 1/2 cup', containsAllergens: [] },
-          { name: 'Walnuts, 2 tbsp', containsAllergens: ['tree nuts'] },
-          { name: 'Olive oil, 1 tbsp', containsAllergens: [] },
-          { name: 'Lemon juice, 1 tbsp', containsAllergens: [] },
+        allergensFound: ['Egg', 'Milk'],
+        suggestions: [
+          'Use plant-based milk for dairy-free option.',
+          'Substitute eggs with applesauce or banana for egg-free version.',
         ],
-        instructions: [
-          'Wash and dry mixed greens',
-          'Slice avocado and halve cherry tomatoes',
-          'Arrange greens, chicken, avocado, and tomatoes in a bowl',
-          'Sprinkle with walnuts',
-          'Drizzle with olive oil and lemon juice'
-        ],
-        allergensFound: ['tree nuts'],
-        suggestions: ['Omit walnuts or replace with seeds for nut allergies'],
-        imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1000&auto=format&fit=crop',
+        imageUrl: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&q=80',
       },
     ];
-
-    return foodRecipes;
+    
+    return mockRecipes;
+    
   } catch (error) {
-    utils_log_server_error('Error getting food recipes', error);
+    console.error('Error fetching food recipes:', error);
     return [];
   }
 }
 
 /**
- * Get a specific food recipe by ID
+ * Get a single food recipe by ID
  */
-export async function getFoodRecipeById(recipeId: string): Promise<FoodRecipe | null> {
+export async function getFoodRecipeById(id: string): Promise<FoodRecipe | null> {
   try {
-    const { user } = await lucia_get_user();
-    if (!user?.id) {
-      return null;
+    // First, get all server-side recipes
+    const allRecipes = await getFoodRecipes();
+    
+    // Check if the recipe exists in the server data
+    const recipe = allRecipes.find(recipe => recipe.id === id);
+    
+    if (recipe) {
+      return recipe;
     }
-
-    // In production, we would fetch from Firestore
-    // const doc = await adminFirestore.collection('foodRecipes').doc(recipeId).get();
-    // if (!doc.exists) return null;
-    // return { id: doc.id, ...doc.data() } as FoodRecipe;
-
-    // For now, use our dummy data
-    const recipes = await getFoodRecipes();
-    return recipes.find(recipe => recipe.id === recipeId) || null;
-
+    
+    // If not found, it might be a client-side saved recipe that's only in localStorage
+    // The client will need to check the food list store for this ID
+    
+    // In a real app, we would make a database query here
+    // For now, we'll just return null and let the client handle it
+    return null;
+    
   } catch (error) {
-    utils_log_server_error('Error getting food recipe by ID', error);
+    console.error(`Error fetching food recipe with ID ${id}:`, error);
     return null;
   }
 }

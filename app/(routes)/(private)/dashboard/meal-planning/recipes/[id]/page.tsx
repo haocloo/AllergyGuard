@@ -12,25 +12,24 @@ interface Props {
 export default async function RecipeDetailPage({ params }: Props) {
   const { id } = params;
   
-  // Fetch food recipe with error handling
-  const recipe = await getFoodRecipeById(id);
+  // Fetch food recipe from server data
+  const serverRecipe = await getFoodRecipeById(id);
   
-  if (!recipe) {
-    notFound();
-  }
-
+  // If not found in server, the client component will check localStorage
+  // We'll pass the ID even if the server recipe is not found
+  
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Meal Planning', href: '/dashboard/meal-planning' },
-    { label: 'Food List', href: '/dashboard/meal-planning' },
-    { label: recipe.name },
+    { label: 'Recipes', href: '/dashboard/meal-planning' },
+    { label: serverRecipe?.name || 'Recipe Details' },
   ];
 
   return (
     <div className="flex flex-col min-h-screen w-full overflow-hidden">
       <Breadcrumbs items={breadcrumbItems} />
       <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 max-w-full">
-        <RecipeDetailClient recipe={recipe} />
+        <RecipeDetailClient serverRecipe={serverRecipe} recipeId={id} />
       </div>
     </div>
   );

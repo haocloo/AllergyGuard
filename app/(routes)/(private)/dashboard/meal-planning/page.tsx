@@ -7,7 +7,7 @@ export default async function FoodListPage() {
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Meal Planning', href: '/dashboard/meal-planning' },
-    { label: 'Food List' },
+    { label: 'Recipes' },
   ];
 
   // Fetch food recipes with error handling
