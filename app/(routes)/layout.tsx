@@ -21,35 +21,40 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Apex',
+    title: 'AllergyGuard',
     description:
-      'All-in-one career platform featuring AI mock interviews, resume builder, job applications, and employer hiring tools. Practice with voice recognition, get AI feedback, and connect with employers.',
+      'AllergyGuard is a mobile web-based app that helps manage children’s food allergies. It centralizes allergy profiles, detects allergens in real time, plans safe meals, and supports emergency care using AI.',
     keywords: [
-      'resume builder',
-      'AI mock interview',
-      'job search',
-      'career platform',
-      'voice recognition interview',
-      'job applications',
-      'employer hiring',
-      'interview practice',
-      'career development',
-      'skill matching',
+      'allergy management',
+      'food allergies',
+      'children health',
+      'mobile web app',
+      'AI-powered',
+      'emergency support',
+      'safe meal planning',
+      'allergen detection',
+      'childcare safety',
+      'healthcare technology',
     ],
-    authors: [{ name: 'Apex Team' }],
+    authors: [
+      { name: 'Lim Ting Juin' },
+      { name: 'Loo Chi Hao' },
+      { name: 'Goh Jia Wei' },
+      { name: 'Lee Ying Shen' },
+    ],
     openGraph: {
-      title: 'Apex - AI-Powered Career Platform',
+      title: 'AllergyGuard - AI-Powered Allergy Management Platform',
       description:
-        'All-in-one career platform featuring AI mock interviews, resume builder, job applications, and employer hiring tools.',
+        'A mobile web app that centralizes allergy information, offers real-time allergen detection, and improves emergency response for children with food allergies.',
       type: 'website',
       locale: 'en_US',
-      siteName: 'Apex',
+      siteName: 'AllergyGuard',
     },
     twitter: {
       card: 'summary_large_image',
-      title: 'Apex - AI-Powered Career Platform',
+      title: 'AllergyGuard - AI-Powered Allergy Management Platform',
       description:
-        'All-in-one career platform featuring AI mock interviews, resume builder, job applications, and employer hiring tools.',
+        'Enhancing childcare safety with AI-powered allergy management, real-time allergen detection, and emergency support for children.',
     },
     viewport: {
       width: 'device-width',

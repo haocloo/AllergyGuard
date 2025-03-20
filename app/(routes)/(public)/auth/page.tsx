@@ -10,8 +10,8 @@ import { RATE_LIMITS } from '@/services/common';
 import { AuthClient } from './_comp/client';
 
 export const metadata: Metadata = {
-  title: 'Auth | Apex',
-  description: 'Authentication page for Apex.',
+  title: 'Auth | AllergyGuard',
+  description: 'Authentication page for AllergyGuard.',
 };
 
 export default async function Page({

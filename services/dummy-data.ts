@@ -10,7 +10,7 @@ const currentUserId = process.env.NEXT_PUBLIC_user_id || 'b806239e-8a3a-4712-986
 
 // ----- Classrooms Collection -----
 // Each classroom document stores a unique access code, list of children.
-const classrooms = [
+export const classrooms = [
   {
     id: uuidv4(),
     accessCode: 'ABC123',
@@ -39,7 +39,7 @@ const classrooms = [
 
 // ----- Children Collection -----
 // Each child document holds profile info, allergies, and a reference to the classroom.
-const children = [
+export const children = [
   {
     id: 'child_001', // Can be generated with uuidv4() if needed.
     name: 'Alice',
@@ -81,7 +81,7 @@ const children = [
 // 2. "foodPlan": Weekly meal plan prompt and daily menus.
 // 3. "event": Event planning with a prompt and ingredient list.
 // Each record has a history array to track changes.
-const mealPlans = [
+export const mealPlans = [
   // Scenario 1: Food Item - Photo scan of food item ingredients.
   {
     id: uuidv4(),
@@ -120,7 +120,7 @@ const mealPlans = [
 
 // ----- Emergency Contacts Collection -----
 // Stores nearby hospital contacts for emergencies, tailored for Penang, Malaysia.
-const emergencyContacts = [
+export const emergencyContacts = [
   {
     id: uuidv4(),
     hospitals: [
@@ -176,195 +176,208 @@ export const users = pgTable('users', {
 });
 */
 
-// The medical_data table for the RAG model remains as shown below.
-const medical_data = [
+export type TDiagnosis = {
+  id: number;
+  name: string;
+  symptoms: string[];
+  description: string;
+  recommendedActions: string[];
+  followUps: string[];
+  recommendedActionImage?: string;
+  createdAt?: string;
+};
+
+export const pediatricAllergies: TDiagnosis[] = [
   {
     id: 1,
-    disease_name: 'Peanut Allergy',
+    name: 'Peanut Allergy (Severe Anaphylactic)',
+    symptoms: ['Hives', 'Facial swelling', 'Difficulty breathing', 'Wheezing'],
+    description: 'Severe immune response to peanut proteins causing anaphylaxis',
+    recommendedActions: [
+      'Administer epinephrine immediately',
+      'Position child in recovery position',
+      'Call emergency services',
+      'Monitor vital signs continuously',
+    ],
+    followUps: [
+      'Allergy testing: Schedule with pediatric allergist within 1 week',
+      'Prescription renewal: Obtain backup epinephrine auto-injectors',
+    ],
+    recommendedActionImage: '/graphics/diagnosis/anaphylaxis-protocol.png',
+    createdAt: '2025-03-16T09:00:00Z',
+},
+  {
+    id: 2,
+    name: 'Dairy Protein Intolerance',
+    symptoms: ['Colic', 'Blood in stool', 'Chronic diarrhea', 'Failure to thrive'],
+    description: "Immune reaction to cow's milk proteins causing gastrointestinal distress",
+    recommendedActions: [
+      'Immediately stop dairy consumption',
+      'Administer hypoallergenic formula',
+      'Monitor for dehydration signs',
+      'Consult pediatric gastroenterologist',
+    ],
+    followUps: [
+      'Elimination diet: Maintain strict dairy-free diet for 4 weeks',
+      'Nutrition consult: Schedule within 3 business days',
+    ],
+    recommendedActionImage: '/graphics/diagnosis/anaphylaxis-protocol.png',
+    createdAt: '2025-03-16T09:05:00Z',
+  },
+  {
+    id: 3,
+    name: 'Egg Allergy',
+    symptoms: ['Oral itching', 'Vomiting', 'Skin redness', 'Runny nose'],
+    description: 'IgE-mediated hypersensitivity to egg albumen proteins',
+    recommendedActions: [
+      'Administer antihistamines',
+      'Use bronchodilator if wheezing',
+      'Prepare epinephrine if respiratory symptoms develop',
+    ],
+    followUps: ['Vaccine screening: Check influenza/yellow fever vaccine components'],
+    recommendedActionImage: '/graphics/diagnosis/anaphylaxis-protocol.png',
+    createdAt: '2025-03-16T09:10:00Z',
+  },
+  {
+    id: 4,
+    name: 'Insect Sting Hypersensitivity',
+    symptoms: ['Local swelling >10cm', 'Dizziness', 'Tachycardia', 'Urticaria'],
+    description: 'Systemic allergic reaction to hymenoptera venom',
+    recommendedActions: [
+      'Remove stinger if present',
+      'Apply topical corticosteroids',
+      'Administer intramuscular epinephrine',
+    ],
+    followUps: ['Venom immunotherapy: Refer to allergy clinic for evaluation'],
+    recommendedActionImage: '/graphics/diagnosis/anaphylaxis-protocol.png',
+    createdAt: '2025-03-16T09:15:00Z',
+  },
+  {
+    id: 5,
+    name: 'Atopic Dermatitis (Eczema)',
+    symptoms: ['Dry skin', 'Itching', 'Red patches', 'Skin cracking'],
+    description: 'Chronic inflammatory skin condition with defective skin barrier function',
+    recommendedActions: [
+      'Apply wet dressings with tubular bandages',
+      'Use prescribed topical steroids',
+      'Moisturize every 2-3 hours',
+      'Seek urgent care if infected (yellow crusting)',
+    ],
+    followUps: [
+      'Weekly bleach baths (150ml plain bleach in 10L water)',
+      'Use fragrance-free moisturizers (500g/week for children)',
+      'Avoid common triggers: wool, overheating',
+      'Follow 3-month review with dermatologist',
+    ],
+    // recommendedActionImage not provided
+  },
+  {
+    id: 6,
+    name: 'Allergic Rhinitis (Hay Fever)',
+    symptoms: ['Sneezing', 'Runny nose', 'Nasal congestion', 'Itchy eyes'],
+    description: 'IgE-mediated inflammation of nasal airways from environmental allergens',
+    recommendedActions: [
+      'Administer intranasal corticosteroids',
+      'Use antihistamine eye drops',
+      'Perform nasal saline rinses',
+      'Seek care if asthma symptoms develop',
+    ],
+    followUps: [
+      'Proper nasal spray technique: 45° angle away from septum',
+      'Allergen immunotherapy evaluation',
+      'Environmental control measures',
+      'Annual pulmonary function tests',
+    ],
+  },
+  {
+    id: 7,
+    name: 'Food-Induced Anaphylaxis',
+    symptoms: ['Throat tightness', 'Wheezing', 'Tachycardia', 'Dizziness'],
+    description: 'Severe systemic reaction to food allergens requiring immediate intervention',
+    recommendedActions: [
+      'Lay patient flat (or seated if breathing difficulty)',
+      'Administer adrenaline autoinjector (0.15mg <20kg, 0.3mg ≥20kg)',
+      'Call emergency services immediately',
+      'Prepare second dose if no improvement in 5 minutes',
+    ],
+    followUps: [
+      'Allergist referral within 1 week',
+      'Prescribe 2x adrenaline autoinjectors',
+      'Food challenge testing (6 weeks post-reaction)',
+      'Implement food allergy action plan',
+    ],
+  },
+  {
+    id: 8,
+    name: 'Insect Venom Allergy',
+    symptoms: ['Local swelling >10cm', 'Generalized urticaria', 'Nausea', 'Chest tightness'],
+    description: 'Hypersensitivity reaction to hymenoptera venom (bees, wasps, ants)',
+    recommendedActions: [
+      'Remove stinger by scraping (never squeeze)',
+      'Apply venom extractor if available',
+      'Administer intramuscular adrenaline',
+      'Monitor for delayed phase reaction (6-8 hours)',
+    ],
+    followUps: [
+      'Venom immunotherapy initiation',
+      'Carry medical alert bracelet',
+      'Avoid perfumes/scents outdoors',
+      'Annual IgE level monitoring',
+    ],
+  },
+  {
+    id: 9,
+    name: 'Drug Hypersensitivity',
+    symptoms: ['Morbilliform rash', 'Facial swelling', 'Fever', 'Joint pain'],
+    description: 'Adverse immune response to medication components',
+    recommendedActions: [
+      'Immediate cessation of suspect drug',
+      'Administer systemic corticosteroids',
+      'Monitor for DRESS syndrome signs',
+      'Document reaction in medical records',
+    ],
+    followUps: [
+      'Skin patch testing (6-8 weeks post-reaction)',
+      'Alternative medication list creation',
+      'Report to TGA Adverse Event Monitoring',
+      'Desensitization protocol evaluation',
+    ],
+  },
+  // Common Diseases Data (from medical_data)
+  {
+    id: 101,
+    name: 'Peanut Allergy',
     symptoms: ['hives', 'swelling', 'difficulty breathing'],
-    actions: [
+    description: 'Common allergic reaction to peanuts.',
+    recommendedActions: [
       'Sit the person down',
       'Administer epinephrine auto-injector',
       'Call emergency services',
     ],
-    created_at: '2025-03-16T09:00:00Z',
+    followUps: [],
+    createdAt: '2025-03-16T09:00:00Z',
   },
   {
-    id: 2,
-    disease_name: 'Dairy Allergy',
+    id: 102,
+    name: 'Dairy Allergy',
     symptoms: ['stomach cramps', 'vomiting', 'diarrhea'],
-    actions: ['Keep the person calm', 'Offer water', 'Monitor symptoms closely'],
-    created_at: '2025-03-16T09:05:00Z',
+    description: 'Common allergic reaction to dairy.',
+    recommendedActions: ['Keep the person calm', 'Offer water', 'Monitor symptoms closely'],
+    followUps: [],
+    createdAt: '2025-03-16T09:05:00Z',
   },
   {
-    id: 3,
-    disease_name: 'Egg Allergy',
+    id: 103,
+    name: 'Egg Allergy',
     symptoms: ['skin rash', 'swelling of lips', 'mild breathing issues'],
-    actions: [
+    description: 'Common allergic reaction to eggs.',
+    recommendedActions: [
       'Sit the person down',
       'Apply a cold compress',
       'Prepare to administer allergy medication',
     ],
-    created_at: '2025-03-16T09:10:00Z',
-  },
-];
-
-// PANIC MODE - SYMPTOM HISTORY
-export const dummySymptomHistory = [
-  {
-    id: 'hist-1',
-    userId: 'user-123',
-    symptomResponse: {
-      requestId: 'req-12345',
-      timestamp: '2023-06-15T14:30:00Z',
-      symptoms:
-        'My child has a persistent cough and runny nose, and low-grade fever for the last 2 days.',
-      possibleCauses: [
-        {
-          condition: 'Common Cold',
-          description:
-            'Viral infection of the upper respiratory tract causing cough, nasal congestion, and low-grade fever.',
-          urgencyLevel: 'low',
-        },
-        {
-          condition: 'Influenza',
-          description:
-            'Viral infection that can cause more severe symptoms including higher fever, body aches, and fatigue.',
-          urgencyLevel: 'medium',
-        },
-        {
-          condition: 'COVID-19',
-          description:
-            'Coronavirus that can cause respiratory symptoms similar to colds and flu but with potential for more serious complications.',
-          urgencyLevel: 'medium',
-        },
-      ],
-      recommendedActions: [
-        {
-          action: 'Provide comfort measures',
-          urgency: 'soon',
-          instructions:
-            'Ensure rest, adequate fluids, and age-appropriate fever reducers if needed. Use saline nasal drops and a cool-mist humidifier to ease congestion.',
-        },
-        {
-          action: 'Monitor symptoms',
-          urgency: 'soon',
-          instructions:
-            'Watch for worsening symptoms such as difficulty breathing, high fever (>102°F/39°C), or lethargy.',
-        },
-        {
-          action: 'Consider medical evaluation',
-          urgency: 'when convenient',
-          instructions:
-            'If symptoms persist beyond 3-5 days, worsen significantly, or if the child has underlying conditions, contact your healthcare provider.',
-        },
-      ],
-      allergyRelated: false,
-      additionalNotes:
-        'Keep child home from school to prevent spread of infection. Most upper respiratory infections resolve on their own within 7-10 days.',
-      sourceReferences: [
-        'CDC guidelines for pediatric respiratory infections',
-        'American Academy of Pediatrics recommendations',
-      ],
-      createdAt: '2023-06-15T14:30:00Z',
-    },
-  },
-  {
-    id: 'hist-2',
-    userId: 'user-123',
-    symptomResponse: {
-      requestId: 'req-67890',
-      timestamp: '2023-07-02T09:15:00Z',
-      symptoms:
-        'My child ate peanut butter and now has hives and swollen lips. No breathing problems.',
-      possibleCauses: [
-        {
-          condition: 'Mild to Moderate Allergic Reaction',
-          description:
-            'An immune system response to peanuts resulting in skin symptoms (hives) and mild swelling.',
-          urgencyLevel: 'medium',
-        },
-      ],
-      recommendedActions: [
-        {
-          action: 'Administer antihistamine',
-          urgency: 'immediate',
-          instructions:
-            'Give an age-appropriate dose of diphenhydramine (Benadryl) or similar antihistamine immediately.',
-        },
-        {
-          action: 'Monitor for severe symptoms',
-          urgency: 'immediate',
-          instructions:
-            'Watch closely for signs of breathing difficulty, severe swelling, vomiting, dizziness, or loss of consciousness for the next 1-2 hours.',
-        },
-        {
-          action: 'Seek medical attention',
-          urgency: 'soon',
-          instructions:
-            'Even for a mild reaction, consult with a healthcare provider, especially if this is the first allergic reaction.',
-        },
-      ],
-      allergyRelated: true,
-      additionalNotes:
-        'This appears to be a peanut allergy reaction. Future exposure to peanuts should be avoided. Consider allergy testing and discussion with a pediatric allergist.',
-      sourceReferences: [
-        'Food Allergy Research & Education (FARE) guidelines',
-        'American Academy of Allergy, Asthma & Immunology protocols',
-      ],
-      createdAt: '2023-07-02T09:15:00Z',
-    },
-  },
-  {
-    id: 'hist-3',
-    userId: 'user-123',
-    symptomResponse: {
-      requestId: 'req-24680',
-      timestamp: '2023-09-10T18:45:00Z',
-      symptoms:
-        'Child fell at playground, has swelling and bruising on wrist, crying when trying to move it.',
-      possibleCauses: [
-        {
-          condition: 'Wrist Sprain',
-          description: 'Stretching or tearing of ligaments in the wrist joint.',
-          urgencyLevel: 'medium',
-        },
-        {
-          condition: 'Wrist Fracture',
-          description:
-            'Broken bone in the wrist area, common in falls when children catch themselves with outstretched hands.',
-          urgencyLevel: 'high',
-        },
-      ],
-      recommendedActions: [
-        {
-          action: 'Apply RICE protocol',
-          urgency: 'immediate',
-          instructions:
-            'Rest the wrist, apply Ice (20 minutes on, 20 minutes off), Compress gently with an elastic bandage, and Elevate the wrist above heart level.',
-        },
-        {
-          action: 'Pain management',
-          urgency: 'soon',
-          instructions:
-            "Provide age-appropriate pain reliever such as children's acetaminophen or ibuprofen according to package directions.",
-        },
-        {
-          action: 'Seek medical evaluation',
-          urgency: 'soon',
-          instructions:
-            'Visit urgent care or emergency department for assessment and possible X-ray, especially if the child refuses to use the wrist or if there is significant swelling or deformity.',
-        },
-      ],
-      allergyRelated: false,
-      additionalNotes:
-        'Difficulty determining between sprain and fracture without imaging. When in doubt, have the injury evaluated by a healthcare professional.',
-      sourceReferences: [
-        'American Academy of Pediatrics injury guidelines',
-        'Pediatric Orthopedic Society recommendations',
-      ],
-      createdAt: '2023-09-10T18:45:00Z',
-    },
+    followUps: [],
+    createdAt: '2025-03-16T09:10:00Z',
   },
 ];
 
@@ -376,5 +389,3 @@ export const dummySymptomHistory = [
 // - Each document includes a history field to track updates, tying the changes to the user and related document IDs.
 // - Data is tailored for Malaysia, specifically Penang.
 // - In production, replace the fallback currentUserId with the result of lucia_get_user().
-
-export { classrooms, children, mealPlans, emergencyContacts, medical_data };
