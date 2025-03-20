@@ -51,6 +51,12 @@ export const navList: T_navItem[] = [
             role: ['admin', 'caretaker', 'parent'],
             icon: ChefHat,
           },
+          {
+            title: 'Recipe Analysis',
+            url: '/dashboard/meal-planning/recipes/new/analysis',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: AlertCircle,
+          },
         ],
       },
       {
