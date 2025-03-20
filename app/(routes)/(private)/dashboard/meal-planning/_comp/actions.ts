@@ -214,3 +214,119 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
     return fromErrorToFormState('Failed to delete meal plan');
   }
 }
+
+/**
+ * Get food recipes for the food list
+ */
+export async function getFoodRecipes(): Promise<FoodRecipe[]> {
+  try {
+    const { user } = await lucia_get_user();
+    if (!user?.id) {
+      return [];
+    }
+
+    // In production, we would fetch from an API or database
+    // For now, create dummy food recipes based on the mealPlans data
+    
+    const foodRecipes: FoodRecipe[] = [
+      {
+        id: '1',
+        name: 'Almond Cake',
+        description: 'A delicious gluten-free almond cake that everyone will love',
+        ingredients: [
+          { name: 'Almond flour, 2 cups', containsAllergens: ['nuts'] },
+          { name: 'Eggs, 4 large', containsAllergens: ['eggs'] },
+          { name: 'Sugar, 1 cup', containsAllergens: [] },
+          { name: 'Baking powder, 1 tsp', containsAllergens: [] },
+          { name: 'Vanilla extract, 1 tsp', containsAllergens: [] },
+        ],
+        instructions: [
+          'Preheat oven to 350°F (175°C)',
+          'Mix almond flour with baking powder',
+          'Beat eggs with sugar until fluffy',
+          'Fold in dry ingredients and vanilla',
+          'Bake for 30-35 minutes until golden'
+        ],
+        allergensFound: ['nuts', 'eggs'],
+        suggestions: ['Replace eggs with flax eggs for egg allergies'],
+        imageUrl: 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=1000&auto=format&fit=crop',
+      },
+      {
+        id: '2',
+        name: 'Curry Ayam Mat Rempit',
+        description: 'Spicy Malaysian chicken curry with authentic flavors',
+        ingredients: [
+          { name: 'Chicken pieces, 1kg', containsAllergens: [] },
+          { name: 'Curry powder, 3 tbsp', containsAllergens: [] },
+          { name: 'Coconut milk, 1 cup', containsAllergens: ['tree nuts'] },
+          { name: 'Potatoes, 2 medium', containsAllergens: [] },
+          { name: 'Onion, 1 large', containsAllergens: [] },
+        ],
+        instructions: [
+          'Marinate chicken with curry powder',
+          'Sauté onions until golden',
+          'Add chicken and cook until browned',
+          'Add potatoes and coconut milk',
+          'Simmer until chicken is tender and potatoes are cooked'
+        ],
+        allergensFound: ['tree nuts'],
+        suggestions: ['Use dairy-free yogurt instead of coconut milk for tree nut allergies'],
+        imageUrl: 'https://images.unsplash.com/photo-1604152135912-04a022e23696?q=80&w=1000&auto=format&fit=crop',
+      },
+      {
+        id: '3',
+        name: 'Healthy Salad Bowl',
+        description: 'A nutrient-packed salad bowl with fresh vegetables and protein',
+        ingredients: [
+          { name: 'Mixed greens, 2 cups', containsAllergens: [] },
+          { name: 'Grilled chicken, 1 cup', containsAllergens: [] },
+          { name: 'Avocado, 1/2', containsAllergens: [] },
+          { name: 'Cherry tomatoes, 1/2 cup', containsAllergens: [] },
+          { name: 'Walnuts, 2 tbsp', containsAllergens: ['tree nuts'] },
+          { name: 'Olive oil, 1 tbsp', containsAllergens: [] },
+          { name: 'Lemon juice, 1 tbsp', containsAllergens: [] },
+        ],
+        instructions: [
+          'Wash and dry mixed greens',
+          'Slice avocado and halve cherry tomatoes',
+          'Arrange greens, chicken, avocado, and tomatoes in a bowl',
+          'Sprinkle with walnuts',
+          'Drizzle with olive oil and lemon juice'
+        ],
+        allergensFound: ['tree nuts'],
+        suggestions: ['Omit walnuts or replace with seeds for nut allergies'],
+        imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1000&auto=format&fit=crop',
+      },
+    ];
+
+    return foodRecipes;
+  } catch (error) {
+    utils_log_server_error('Error getting food recipes', error);
+    return [];
+  }
+}
+
+/**
+ * Get a specific food recipe by ID
+ */
+export async function getFoodRecipeById(recipeId: string): Promise<FoodRecipe | null> {
+  try {
+    const { user } = await lucia_get_user();
+    if (!user?.id) {
+      return null;
+    }
+
+    // In production, we would fetch from Firestore
+    // const doc = await adminFirestore.collection('foodRecipes').doc(recipeId).get();
+    // if (!doc.exists) return null;
+    // return { id: doc.id, ...doc.data() } as FoodRecipe;
+
+    // For now, use our dummy data
+    const recipes = await getFoodRecipes();
+    return recipes.find(recipe => recipe.id === recipeId) || null;
+
+  } catch (error) {
+    utils_log_server_error('Error getting food recipe by ID', error);
+    return null;
+  }
+}

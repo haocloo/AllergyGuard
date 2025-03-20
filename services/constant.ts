@@ -2,7 +2,7 @@
 // This file is for Data only
 
 // ui
-import { User as UserIcon, Utensils, Camera, Book, ChefHat, User, AlertCircle } from 'lucide-react';
+import { User as UserIcon, Utensils, Camera, Book, ChefHat, User, AlertCircle, List } from 'lucide-react';
 
 // services
 import type { T_navItem } from '@/services/types';
@@ -27,6 +27,12 @@ export const navList: T_navItem[] = [
         title: 'Meal Planning',
         icon: Utensils,
         items: [
+          {
+            title: 'Food List',
+            url: '/dashboard/meal-planning',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: List,
+          },
           {
             title: 'Ingredient Scanner',
             url: '/dashboard/meal-planning/scanner',
