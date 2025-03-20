@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, User, Check, AlertTriangle } from 'lucide-react';
+import { Plus, X, User, Check, AlertTriangle, FileText, Import } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // ui
@@ -19,6 +19,9 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/cn';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 // Store for allergens (in a real app, we would fetch these from the API)
 const commonAllergens = [
@@ -47,6 +50,11 @@ export function MealPrepFormClient() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // New state for recipe import dialog
+  const [recipeImportOpen, setRecipeImportOpen] = useState(false);
+  const [recipeText, setRecipeText] = useState('');
+  const [activeImportTab, setActiveImportTab] = useState('paste');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -176,12 +184,121 @@ export function MealPrepFormClient() {
       router.push('/dashboard/meal-planning/recipes/new/ingredients');
     }, 1500);
   };
+  
+  // Handle recipe import button click
+  const handleRecipeImport = () => {
+    setRecipeImportOpen(true);
+  };
+  
+  // Handle recipe text parsing
+  const parseRecipeText = () => {
+    // In a real app, this would use an AI service like Gemini
+    // For now, we'll mock the extraction using the provided peanut cake example
+    
+    // Mock extraction - check if the text contains keywords from the peanut cake
+    const hasPeanutCake = recipeText.toLowerCase().includes('peanut') && 
+                          recipeText.toLowerCase().includes('cake');
+    
+    if (recipeText.trim().length < 50) {
+      toast.error("Please paste a complete recipe with ingredients and instructions");
+      return;
+    }
+    
+    // Set recipe idea based on the pasted text
+    setFormData(prev => ({
+      ...prev,
+      mealIdea: "Peanut Cake - A delicious cake made with ground peanuts, perfect for dessert or special occasions."
+    }));
+    
+    // If it's similar to our peanut cake example, mock the results
+    if (hasPeanutCake) {
+      // Update allergen detection
+      if (!formData.additionalAllergies.includes('Peanut')) {
+        setFormData(prev => ({
+          ...prev,
+          additionalAllergies: [...prev.additionalAllergies, 'Peanut', 'Egg', 'Milk', 'Wheat']
+        }));
+      }
+      
+      // Update ingredient preview for the peanut cake
+      setPreviewIngredients([
+        { name: 'peanuts', allergic: true },
+        { name: 'sugar', allergic: false },
+        { name: 'eggs', allergic: true },
+        { name: 'butter', allergic: false },
+        { name: 'flour', allergic: true },
+        { name: 'milk', allergic: true },
+        { name: 'milk powder', allergic: true },
+      ]);
+      
+      // Close the dialog
+      setRecipeImportOpen(false);
+      
+      // Show success notification
+      toast.success("Recipe imported successfully! Allergens were detected.");
+    } else {
+      // Generic extraction for any other recipe
+      // This would typically use a more sophisticated NLP approach
+      const lines = recipeText.split('\n');
+      const extractedIngredients: Array<{name: string, allergic: boolean}> = [];
+      
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.match(/^[\d¼½¾\s\/\.\,]+\s*(?:cup|tbsp|tsp|g|kg|oz|lb|teaspoon|tablespoon)/i)) {
+          const ingredientName = trimmedLine.replace(/^[\d¼½¾\s\/\.\,]+\s*(?:cup|tbsp|tsp|g|kg|oz|lb|teaspoon|tablespoon|ml|liter|pound|ounce)s?\s+(?:of)?\s*/i, '');
+          
+          // Check if this ingredient contains common allergens
+          const isAllergic = commonAllergens.some(allergen => 
+            ingredientName.toLowerCase().includes(allergen.toLowerCase())
+          );
+          
+          extractedIngredients.push({
+            name: ingredientName,
+            allergic: isAllergic
+          });
+          
+          // Add detected allergens to the form
+          if (isAllergic) {
+            const detectedAllergen = commonAllergens.find(allergen => 
+              ingredientName.toLowerCase().includes(allergen.toLowerCase())
+            );
+            
+            if (detectedAllergen && !formData.additionalAllergies.includes(detectedAllergen)) {
+              setFormData(prev => ({
+                ...prev,
+                additionalAllergies: [...prev.additionalAllergies, detectedAllergen]
+              }));
+            }
+          }
+        }
+      });
+      
+      if (extractedIngredients.length > 0) {
+        setPreviewIngredients(extractedIngredients);
+        setRecipeImportOpen(false);
+        toast.success(`Recipe imported with ${extractedIngredients.length} ingredients detected`);
+      } else {
+        toast.error("No ingredients could be detected. Please check the format and try again.");
+      }
+    }
+  };
 
   return (
     <div className="space-y-6 max-w-md mx-auto">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Meal Preparation</h1>
-        <p className="text-sm text-muted-foreground">Tell us what you're planning to cook</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Meal Preparation</h1>
+          <p className="text-sm text-muted-foreground">Tell us what you're planning to cook</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="h-9 gap-2 border-dashed border-gray-300 mt-2 sm:mt-0"
+          onClick={handleRecipeImport}
+        >
+          <FileText className="h-4 w-4" />
+          <span>Paste Recipe</span>
+        </Button>
       </div>
       
       <Card className="overflow-hidden border-2">
@@ -458,6 +575,100 @@ export function MealPrepFormClient() {
           </form>
         </CardContent>
       </Card>
+      
+      {/* Recipe Import Dialog */}
+      <Dialog open={recipeImportOpen} onOpenChange={setRecipeImportOpen}>
+        <DialogContent className="sm:max-w-[575px]">
+          <DialogHeader>
+            <DialogTitle>Import Recipe</DialogTitle>
+            <DialogDescription>
+              Paste your recipe text and we'll extract the ingredients and other details for you.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Tabs defaultValue="paste" value={activeImportTab} onValueChange={setActiveImportTab} className="mt-2">
+            <TabsList className="grid grid-cols-2">
+              <TabsTrigger value="paste">Paste Recipe</TabsTrigger>
+              <TabsTrigger value="example">Use Example</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="paste" className="mt-4">
+              <Textarea 
+                placeholder="Paste your complete recipe here, including ingredients and instructions..."
+                className="min-h-[200px] resize-none"
+                value={recipeText}
+                onChange={(e) => setRecipeText(e.target.value)}
+              />
+            </TabsContent>
+            
+            <TabsContent value="example" className="mt-4">
+              <div className="border rounded-md p-3 bg-muted">
+                <h3 className="font-medium mb-2">Peanut Cake Example</h3>
+                <pre className="text-xs whitespace-pre-wrap bg-background p-2 rounded-sm max-h-[200px] overflow-y-auto">
+                  {`Ingredients
+  
+2 cups peanuts
+1/2 cups + 1 tbsp sugar
+2 whole eggs
+1/2 cup softened butter
+1 1/2 cups All purpose flour
+1 1/2 tsp baking powder
+1/2 tsp bicarbonate of soda
+1/2 cup milk
+2 tbsp milk powder optional
+Instructions
+ 
+Preheat the oven to 180ºc
+Add the peanuts to a grinder and grind (don't worry if there are a few big pieces left)
+Cream the butter and sugar until pale
+Add one egg at a time and mix until smooth
+Next add the flour, baking powder and bicarb and mix well until there are no lumps left
+Fold in the crushed peanuts and transfer the batter into a greased cake tin
+Bake at 180ºc for 20-40 min or until cake is golden brown`}
+                </pre>
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => {
+                    setRecipeText(`Ingredients
+  
+2 cups peanuts
+1/2 cups + 1 tbsp sugar
+2 whole eggs
+1/2 cup softened butter
+1 1/2 cups All purpose flour
+1 1/2 tsp baking powder
+1/2 tsp bicarbonate of soda
+1/2 cup milk
+2 tbsp milk powder optional
+Instructions
+ 
+Preheat the oven to 180ºc
+Add the peanuts to a grinder and grind (don't worry if there are a few big pieces left)
+Cream the butter and sugar until pale
+Add one egg at a time and mix until smooth
+Next add the flour, baking powder and bicarb and mix well until there are no lumps left
+Fold in the crushed peanuts and transfer the batter into a greased cake tin
+Bake at 180ºc for 20-40 min or until cake is golden brown`);
+                    setActiveImportTab('paste');
+                  }}
+                >
+                  Use This Example
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setRecipeImportOpen(false)}>Cancel</Button>
+            <Button onClick={parseRecipeText} className="gap-2">
+              <Import className="h-4 w-4" />
+              <span>Parse Recipe</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 } 
