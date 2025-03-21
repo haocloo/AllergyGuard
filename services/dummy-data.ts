@@ -83,7 +83,7 @@ export interface Caretaker {
   phone: string;
   notes?: string;
   createdAt: string;
-}
+};
 
 export interface RawAllergy {
   allergen: string;
