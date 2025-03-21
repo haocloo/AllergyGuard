@@ -40,7 +40,7 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Profile Selection and Game Controls */}
         <div className="lg:col-span-1 space-y-4">
-          <ProfileSelector 
+          <ProfileSelector
             onSelectProfile={(childId) => {
               setSelectedChildId(childId);
               setGameActive(false);
@@ -56,18 +56,26 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
               </button>
             </div>
           )}
-          {selectedChildId && (
-            <Badges childId={selectedChildId} />
-          )}
+          {selectedChildId && <Badges childId={selectedChildId} />}
         </div>
 
         {/* Center Column - Game or Instructions */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 place-items-center">
           {selectedChildId && gameActive ? (
-            <GameComponent 
-              childId={selectedChildId} 
-              onGameEnd={() => setGameActive(false)}
-            />
+            <div className="w-[640px] h-[480px] scale-[83%] relative overflow-hidden ">
+              <iframe
+                src="/fruit-ninja/index.html"
+                className="overflow-hidden absolute w-[1280px] h-[1200px] -top-[325px] -left-[325px]"
+                title="Fruit Ninja Game"
+                loading="lazy"
+                scrolling="no"
+                sandbox="allow-scripts allow-same-origin"
+                // <GameComponent
+                //   childId={selectedChildId}
+                //   onGameEnd={() => setGameActive(false)}
+                // />
+              />
+            </div>
           ) : (
             <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-6 h-96 flex flex-col justify-center items-center text-center">
               <h2 className="text-lg font-semibold mb-4">How to Play</h2>
@@ -89,4 +97,4 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
       <Leaderboard />
     </div>
   );
-} 
+}
