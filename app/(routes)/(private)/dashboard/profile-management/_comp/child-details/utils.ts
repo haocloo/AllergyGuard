@@ -1,5 +1,6 @@
 // utils.ts - For shared utilities
 import { z } from 'zod';
+import type { CaretakerFormData, TempCaretaker } from './types';
 
 // Validation schema for caretaker form
 export const caretakerSchema = z.object({
@@ -8,15 +9,14 @@ export const caretakerSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   email: z.string().email('Invalid email address').optional(),
   role: z.string().optional(),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits').optional(),
+  phone: z.string().optional(),
   noteToCaretaker: z.string().optional(),
 });
 
 // Helper functions for caretaker management
-export const validateCaretakerForm = (formData: any, setFormErrors: (errors: any) => void) => {
+export const validateCaretakerForm = (data: CaretakerFormData) => {
   try {
-    caretakerSchema.parse(formData);
-    setFormErrors({});
+    caretakerSchema.parse(data);
     return true;
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -26,12 +26,21 @@ export const validateCaretakerForm = (formData: any, setFormErrors: (errors: any
           errors[err.path[0]] = err.message;
         }
       });
-      setFormErrors(errors);
+      return errors;
     }
     return false;
   }
 };
 
 export const createTempCaretaker = (data: CaretakerFormData): TempCaretaker => {
-  // Creation logic
+  return {
+    id: `temp_${Date.now()}`,
+    type: data.type,
+    name: data.name,
+    email: data.email,
+    role: data.role,
+    phone: data.phone,
+    notes: data.noteToCaretaker,
+    createdAt: new Date().toISOString(),
+  };
 };

@@ -74,18 +74,52 @@ export const classrooms: Classroom[] = [
 
 // ----- Children Collection -----
 // Each child document holds profile info, allergies, and a reference to the classroom.
-export type Caretaker = {
+export interface Caretaker {
   id: string;
-  userId: string;
   type: 'personal' | 'center';
   name: string;
   email: string;
+  role: string;
   phone: string;
-  notes: string;
-  noteToCaretaker?: string;
-  status: 'active' | 'pending' | 'inactive';
+  notes?: string;
   createdAt: string;
-};
+}
+
+export interface RawAllergy {
+  allergen: string;
+  severity: 'Low' | 'Medium' | 'High';
+  notes?: string;
+  symptoms?: { name: string }[];
+  actionPlan?: {
+    immediateAction?: string;
+    medications?: { name: string; dosage: string }[];
+  };
+  isCustomAllergen?: boolean;
+}
+
+export interface RawChild {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  dob: string;
+  gender?: string;
+  photoUrl?: string;
+  parentId: string;
+  classroomId: string;
+  createdAt: string;
+  createdBy: string;
+  allergies: RawAllergy[];
+  symptoms?: { name: string; severity: string }[];
+  emergencyContacts?: {
+    name: string;
+    relationship: string;
+    phone: string;
+    email: string;
+    isMainContact: boolean;
+  }[];
+  caretakers?: Caretaker[];
+}
 
 export const children = [
   {
@@ -557,6 +591,28 @@ export const users = [
     phone: '97890123',
   },
 ];
+
+// Update the caretakers data to include the role field
+export const caretakers = [
+  {
+    id: 'caretaker_1',
+    type: 'personal',
+    name: 'Sarah Johnson',
+    email: 'sarah.j@example.com',
+    role: 'Nanny',
+    phone: '91234567',
+    createdAt: '2024-01-15T08:00:00Z',
+  },
+  {
+    id: 'caretaker_2',
+    type: 'center',
+    name: 'Little Stars Daycare',
+    email: 'contact@littlestars.com',
+    role: 'Daycare Center',
+    phone: '97890123',
+    createdAt: '2024-01-20T10:30:00Z',
+  },
+] as const;
 
 // ----------------------------------------------
 // Usage Notes:

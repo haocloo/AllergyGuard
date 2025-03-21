@@ -3,23 +3,30 @@ import { schema_create_child } from './validation';
 
 export type T_schema_create_child = z.infer<typeof schema_create_child>;
 
-export interface Allergy {
-  allergen: string;
-  notes: string;
-  symptoms: AllergySymptom[];
-  actionPlan: ActionPlan;
-}
+export type SymptomSeverity = 'Mild' | 'Moderate' | 'Severe';
 
-export interface AllergySymptom {
+export interface Symptom {
   name: string;
+  severity: SymptomSeverity;
 }
 
-export interface ActionPlan {
-  immediateAction: string;
-  medications: {
-    name: string;
-    dosage: string;
-  }[];
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+  email: string;
+  isMainContact: boolean;
+}
+
+export interface Caretaker {
+  id: string;
+  type: 'personal' | 'center';
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  notes?: string;
+  createdAt: string;
 }
 
 export interface Child {
@@ -40,30 +47,41 @@ export interface Child {
   caretakers: Caretaker[];
 }
 
+export interface AllergySymptom {
+  name: string;
+  isCustom?: boolean;
+}
+
+export interface Allergy {
+  allergen: string;
+  notes: string;
+  severity: 'Low' | 'Medium' | 'High';
+  symptoms: AllergySymptom[];
+  actionPlan: ActionPlan;
+  isCustomAllergen?: boolean;
+}
+
+export interface ActionPlan {
+  immediateAction: string;
+  medications: {
+    name: string;
+    dosage: string;
+  }[];
+}
+
 export interface ChildFormData {
   firstName: string;
   lastName: string;
+  name: string;
   dob: string;
   gender: 'male' | 'female';
   photoUrl?: string;
   allergies: Allergy[];
   symptoms: Symptom[];
   emergencyContacts: EmergencyContact[];
-}
-
-export type SymptomSeverity = 'Mild' | 'Moderate' | 'Severe';
-
-export interface Symptom {
-  name: string;
-  severity: SymptomSeverity;
-}
-
-export interface EmergencyContact {
-  name: string;
-  relationship: string;
-  phone: string;
-  email: string;
-  isMainContact: boolean;
+  parentId?: string;
+  classroomId?: string;
+  createdBy?: string;
 }
 
 // Common options

@@ -8,6 +8,8 @@ interface ProfileStore {
   isPending: boolean;
   formData: ChildFormData;
   formState: FormState;
+  isCreateDialogOpen: boolean;
+  setIsCreateDialogOpen: (open: boolean) => void;
   setChildren: (children: Child[]) => void;
   setIsLoading: (loading: boolean) => void;
   setIsPending: (pending: boolean) => void;
@@ -24,12 +26,16 @@ interface ProfileStore {
 const defaultFormData: ChildFormData = {
   firstName: '',
   lastName: '',
+  name: '',
   dob: '',
   gender: 'male',
   photoUrl: '',
   allergies: [],
   symptoms: [],
   emergencyContacts: [],
+  parentId: '',
+  classroomId: '',
+  createdBy: '',
 };
 
 export const useProfileStore = create<ProfileStore>((set) => ({
@@ -37,6 +43,7 @@ export const useProfileStore = create<ProfileStore>((set) => ({
   isLoading: true,
   isPending: false,
   formData: defaultFormData,
+  isCreateDialogOpen: false,
   formState: {
     status: 'UNSET',
     message: '',
@@ -44,6 +51,7 @@ export const useProfileStore = create<ProfileStore>((set) => ({
     timestamp: Date.now(),
     redirect: '',
   },
+  setIsCreateDialogOpen: (open) => set({ isCreateDialogOpen: open }),
   setChildren: (children) => set({ children, isLoading: false }),
   setIsLoading: (isLoading) => set({ isLoading }),
   setIsPending: (isPending) => set({ isPending }),

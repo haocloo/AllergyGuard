@@ -1,16 +1,6 @@
 // types.ts - For all shared types
-import type { Child, Symptom } from '../../types';
+import type { Child, Symptom } from '../types';
 import type { Classroom, Teacher } from '@/services/dummy-data';
-
-export interface ExtendedChild extends Child {
-  firstName?: string;
-  lastName?: string;
-  gender?: string;
-  photoUrl?: string;
-  symptoms?: Symptom[];
-  emergencyContacts?: EmergencyContact[];
-  caretakers?: Caretaker[];
-}
 
 export interface EmergencyContact {
   name: string;
@@ -34,11 +24,10 @@ export interface Caretaker {
 
 export interface CaretakerFormData {
   type: 'personal' | 'center';
-  userId?: string;
   name: string;
   email: string;
-  role: string;
   phone: string;
+  role: string;
   noteToCaretaker?: string;
 }
 
@@ -46,6 +35,8 @@ export interface SearchUser {
   id: string;
   name: string;
   email: string;
+  phone: string;
+  role?: string;
 }
 
 export interface TempCaretaker {

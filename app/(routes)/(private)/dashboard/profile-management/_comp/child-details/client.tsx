@@ -216,12 +216,16 @@ export function ChildDetailsClient({ initialChild }: Props) {
       initializeEditForm({
         firstName: initialChild.firstName,
         lastName: initialChild.lastName,
+        name: initialChild.name,
         dob: initialChild.dob,
         gender: initialChild.gender,
         photoUrl: initialChild.photoUrl,
         allergies: initialChild.allergies,
         symptoms: initialChild.symptoms,
         emergencyContacts: initialChild.emergencyContacts,
+        parentId: initialChild.parentId,
+        classroomId: initialChild.classroomId,
+        createdBy: initialChild.createdBy,
       });
     }
   }, [editingSection, initialChild, initializeEditForm]);
