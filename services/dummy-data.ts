@@ -8,45 +8,146 @@ import { v4 as uuidv4 } from 'uuid';
 // In production, use lucia_get_user() to obtain the user id.
 const currentUserId = process.env.NEXT_PUBLIC_user_id || 'b806239e-8a3a-4712-9862-1ccd9b821981';
 
-// ----- Classrooms Collection -----
-// Each classroom document stores a unique access code, list of children.
-const classrooms = [
+// Add or update these interfaces
+interface Teacher {
+  id: string;
+  name: string;
+  photoUrl?: string;
+  phone: string;
+  email: string;
+}
+
+interface Classroom {
+  id: string;
+  code: string;
+  name: string;
+  centerName: string;
+  address: string;
+  teacher: Teacher;
+}
+
+// Update the classroom data
+const classrooms: Classroom[] = [
   {
-    id: uuidv4(),
-    accessCode: 'ABC123',
-    name: 'Sunshine Class',
-    children: ['child_001', 'child_002'],
-    createdAt: new Date().toISOString(),
-    createdBy: currentUserId,
+    id: 'cls-001',
+    code: 'CC001-K1A',
+    name: 'Kindergarten 1A',
+    centerName: 'Sunshine Childcare Center',
+    address: '123 Sunshine Road, #01-234, Singapore 123456',
+    teacher: {
+      id: 'tchr-001',
+      name: 'Ms. Sarah Lee',
+      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
+      phone: '91234567',
+      email: 'sarah.lee@sunshine.edu.sg',
+    },
   },
   {
-    id: uuidv4(),
-    accessCode: 'DEF456',
-    name: 'Rainbow Class',
-    children: ['child_003'],
-    createdAt: new Date().toISOString(),
-    createdBy: currentUserId,
+    id: 'cls-002',
+    code: 'CC002-N2B',
+    name: 'Nursery 2B',
+    centerName: 'Little Stars Preschool',
+    address: '456 Star Avenue, #02-345, Singapore 234567',
+    teacher: {
+      id: 'tchr-002',
+      name: 'Ms. Emily Wong',
+      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
+      phone: '92345678',
+      email: 'emily.wong@littlestars.edu.sg',
+    },
   },
   {
-    id: uuidv4(),
-    accessCode: 'GHI789',
-    name: 'Star Class',
-    children: ['child_004'],
-    createdAt: new Date().toISOString(),
-    createdBy: currentUserId,
+    id: 'cls-003',
+    code: 'CC003-K2C',
+    name: 'Kindergarten 2C',
+    centerName: 'Rainbow Kids Academy',
+    address: '789 Rainbow Road, #03-456, Singapore 345678',
+    teacher: {
+      id: 'tchr-003',
+      name: 'Mr. John Tan',
+      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john',
+      phone: '93456789',
+      email: 'john.tan@rainbowkids.edu.sg',
+    },
   },
 ];
 
 // ----- Children Collection -----
 // Each child document holds profile info, allergies, and a reference to the classroom.
+interface Caretaker {
+  id: string;
+  userId: string;
+  type: 'personal' | 'center';
+  name: string;
+  email: string;
+  phone: string;
+  notes: string;
+  noteToCaretaker?: string;
+  status: 'active' | 'pending' | 'inactive';
+  createdAt: string;
+}
+
 const children = [
   {
-    id: 'child_001', // Can be generated with uuidv4() if needed.
-    name: 'Alice',
+    id: 'child_001',
+    firstName: 'Alice',
+    lastName: 'Smith',
+    name: 'Alice Smith',
     dob: '2015-06-20',
+    gender: 'female',
+    photoUrl: '',
     allergies: [
-      { allergen: 'Peanuts', severity: 'High', notes: 'Carries epinephrine auto-injector' },
-      { allergen: 'Dairy', severity: 'Medium', notes: 'Mild reactions' },
+      {
+        allergen: 'Peanuts',
+        notes: 'Severe allergy - carries EpiPen',
+        symptoms: [{ name: 'Difficulty Breathing' }, { name: 'Swelling' }, { name: 'Hives' }],
+        actionPlan: {
+          immediateAction: 'Use EpiPen immediately if exposed to peanuts. Call emergency services.',
+          medications: [
+            { name: 'EpiPen Jr', dosage: '0.15mg' },
+            { name: 'Benadryl', dosage: '12.5mg/5ml' },
+          ],
+        },
+      },
+      {
+        allergen: 'Dairy',
+        notes: 'Moderate lactose intolerance',
+        symptoms: [{ name: 'Stomach Pain' }, { name: 'Nausea' }],
+        actionPlan: {
+          immediateAction: 'Remove from exposure, provide lactase enzyme supplement if available',
+          medications: [{ name: 'Lactaid', dosage: '1 tablet before meals' }],
+        },
+      },
+    ],
+    symptoms: [
+      { name: 'Difficulty Breathing', severity: 'Severe' },
+      { name: 'Swelling', severity: 'Severe' },
+      { name: 'Hives', severity: 'Moderate' },
+      { name: 'Stomach Pain', severity: 'Moderate' },
+      { name: 'Nausea', severity: 'Mild' },
+    ],
+    emergencyContacts: [
+      {
+        name: 'John Smith',
+        relationship: 'Father',
+        phone: '0123456789',
+        email: 'john.smith@example.com',
+        isMainContact: true,
+      },
+      {
+        name: 'Mary Smith',
+        relationship: 'Mother',
+        phone: '0123456788',
+        email: 'mary.smith@example.com',
+        isMainContact: false,
+      },
+      {
+        name: 'Sarah Johnson',
+        relationship: 'Aunt',
+        phone: '0123456787',
+        email: 'sarah.j@example.com',
+        isMainContact: false,
+      },
     ],
     parentId: currentUserId,
     classroomId: classrooms[0].id,
@@ -55,9 +156,36 @@ const children = [
   },
   {
     id: 'child_002',
-    name: 'Bob',
+    firstName: 'Bob',
+    lastName: 'Johnson',
+    name: 'Bob Johnson',
     dob: '2016-08-15',
-    allergies: [{ allergen: 'Eggs', severity: 'Low', notes: 'Mild rash sometimes' }],
+    gender: 'male',
+    photoUrl: '',
+    allergies: [
+      {
+        allergen: 'Eggs',
+        notes: 'Mild rash sometimes',
+        symptoms: [{ name: 'Rash' }, { name: 'Itching' }],
+        actionPlan: {
+          immediateAction: 'Apply antihistamine cream and monitor',
+          medications: [{ name: 'Benadryl Cream', dosage: 'Apply thin layer' }],
+        },
+      },
+    ],
+    symptoms: [
+      { name: 'Rash', severity: 'Mild' },
+      { name: 'Itching', severity: 'Mild' },
+    ],
+    emergencyContacts: [
+      {
+        name: 'Sarah Johnson',
+        relationship: 'Mother',
+        phone: '0123456787',
+        email: 'sarah.johnson@example.com',
+        isMainContact: true,
+      },
+    ],
     parentId: currentUserId,
     classroomId: classrooms[0].id,
     createdAt: new Date().toISOString(),
@@ -368,6 +496,38 @@ export const dummySymptomHistory = [
   },
 ];
 
+// Add dummy users for search feature
+const users = [
+  {
+    id: 'user_001',
+    name: 'Sarah Wilson',
+    email: 'sarah.wilson@example.com',
+    role: 'caretaker',
+    phone: '0123456789',
+  },
+  {
+    id: 'user_002',
+    name: 'James Thompson',
+    email: 'james.t@example.com',
+    role: 'caretaker',
+    phone: '0123456790',
+  },
+  {
+    id: 'user_003',
+    name: 'Maria Garcia',
+    email: 'maria.g@example.com',
+    role: 'caretaker',
+    phone: '0123456791',
+  },
+  {
+    id: 'user_004',
+    name: 'Sunshine Daycare Center',
+    email: 'contact@sunshine-daycare.com',
+    role: 'center',
+    phone: '0123456792',
+  },
+];
+
 // ----------------------------------------------
 // Usage Notes:
 // - When creating a new document, generate a new UUID via uuidv4().
@@ -377,4 +537,5 @@ export const dummySymptomHistory = [
 // - Data is tailored for Malaysia, specifically Penang.
 // - In production, replace the fallback currentUserId with the result of lucia_get_user().
 
-export { classrooms, children, mealPlans, emergencyContacts, medical_data };
+// Single export statement for all data
+export { classrooms, children, mealPlans, emergencyContacts, medical_data, users };
