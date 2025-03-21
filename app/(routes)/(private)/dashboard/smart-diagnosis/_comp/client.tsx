@@ -1,18 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
+
+// Components
 import { Phone, Loader2, Search, Brain, AlertTriangle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { TDiagnosis } from '@/services/dummy-data';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/cn';
-import Image from 'next/image';
-import { useVoiceRecognitionStore, useInterviewSessionSpeechStore } from '@/services/store';
+import { useToast } from '@/components/ui/use-toast';
 import { LoadingSteps } from './loading-steps';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/cn';
+
+// Services
+import type { TDiagnosis } from '@/services/dummy-data';
+import { useVoiceRecognitionStore, useInterviewSessionSpeechStore } from '@/services/store';
 import { useDiagnosisStore } from './store';
+import { get_diagnosis } from './action';
 
 interface SmartDiagnosisClientProps {
   initialDiagnoses: TDiagnosis[];
@@ -22,6 +28,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
   const [input, setInput] = useState('');
   const { text, isListening, resetTranscript } = useVoiceRecognitionStore();
   const { handleRecording, permissionState } = useInterviewSessionSpeechStore();
+  const { toast } = useToast();
 
   const {
     selectedDiagnosis,
@@ -39,37 +46,34 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
     setInput(text);
   }, [text]);
 
-  // Search and filter diagnoses
-  const handleSearch = async (searchText: string = input) => {
-    if (!searchText.trim()) return;
-
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
-    setHasSearched(true);
-    setSelectedDiagnosis(null);
+    try {
+      // validation
+      const searchText = input;
+      if (!searchText.trim()) return;
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+      setHasSearched(true);
+      setSelectedDiagnosis(null);
 
-    // For demo purposes, just return first 3 diagnoses
-    // In real implementation, this would be an API call
-    const demoResults = initialDiagnoses.slice(0, 3).map((diagnosis) => ({
-      ...diagnosis,
-      // Add some fake relevance score
-      relevanceScore: Math.random(),
-    }));
+      const result = await get_diagnosis();
 
-    setFilteredDiagnoses(demoResults);
-    setIsLoading(false);
-  };
+      const filteredResults = initialDiagnoses.filter((diagnosis) => result.includes(diagnosis.id));
 
-  // Handle diagnosis selection
-  const handleDiagnosisSelect = (diagnosis: TDiagnosis) => {
-    setSelectedDiagnosis(diagnosis);
-  };
-
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+      setFilteredDiagnoses(filteredResults);
+      setIsLoading(false);
+    } catch (error) {
+      toast({
+        title: 'Error searching for diagnoses',
+        description: 'Please try again later',
+        variant: 'destructive',
+        duration: 3000,
+      });
+      console.error('Error searching for diagnoses:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Reset to start over
@@ -108,11 +112,11 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
             Describe Symptoms
           </h2>
         </div>
-        <div className="p-4 space-y-4">
+        <form onSubmit={handleSearch} className="p-4 space-y-4">
           <Textarea
             placeholder="Describe the symptoms in detail (e.g., 'Severe facial swelling, difficulty breathing, rash after eating peanuts')..."
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             className="min-h-32 text-base"
           />
 
@@ -165,7 +169,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
             <Button
               variant="default"
               className="flex items-center gap-2 px-4 h-12 rounded-full bg-green-500 hover:bg-green-600 text-white"
-              onClick={() => handleSearch()}
+              type="submit"
               disabled={!input.trim() || isLoading}
             >
               {isLoading ? (
@@ -176,7 +180,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
               Diagnose
             </Button>
           </div>
-        </div>
+        </form>
       </Card>
 
       {/* Loading Indicator with Animated Thinking Steps */}
@@ -228,7 +232,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                       className={`p-3 cursor-pointer hover:border-primary transition-all ${
                         selectedDiagnosis?.id === diagnosis.id ? 'border-primary bg-primary/5' : ''
                       }`}
-                      onClick={() => handleDiagnosisSelect(diagnosis)}
+                      onClick={() => setSelectedDiagnosis(diagnosis)}
                     >
                       <h3 className="font-medium">{diagnosis.name}</h3>
                       <div className="flex flex-wrap gap-1 mt-2">
@@ -349,11 +353,9 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                   <h4 className="font-medium mb-2">What to say:</h4>
                   <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                     <li>There is a person having {selectedDiagnosis.name}</li>
-                    <li>
-                      They are experiencing symptoms such as {selectedDiagnosis.symptoms.join(', ')}
-                    </li>
+                    <li>They are experiencing symptoms such as _______</li>
                     <li>They are allergic to [allergens if known]</li>
-                    <li>Our location is at 123 Emergency Street, Medical District</li>
+                    <li>Our location is at Klinik Kesihatan KKM Pulau Pinang</li>
                   </ul>
                 </div>
               </div>
