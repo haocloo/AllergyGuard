@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,18 +11,38 @@ import { useRouter } from 'next/navigation';
 import { getCurrentUserInfo } from '../../services/user';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/cn';
+import type { EmergencyContact } from '../../types';
 
 interface Props {
-  onBack: () => void;
+  isEditing?: boolean;
+  initialData?: EmergencyContact[];
+  onSave?: () => void;
+  onCancel?: () => void;
+  onNext?: () => void;
+  onBack?: () => void;
 }
 
-export function EmergencyContactForm({ onBack }: Props) {
+export function EmergencyContactForm({
+  isEditing,
+  initialData,
+  onSave,
+  onCancel,
+  onNext,
+  onBack,
+}: Props) {
   const { formData, setField } = useProfileStore();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Initialize with initial data if in edit mode
+  useEffect(() => {
+    if (isEditing && initialData) {
+      setField('emergencyContacts', initialData);
+    }
+  }, [isEditing, initialData, setField]);
 
   const handleAddContact = () => {
     setField('emergencyContacts', [
@@ -93,23 +113,23 @@ export function EmergencyContactForm({ onBack }: Props) {
   };
 
   const handleSubmit = async () => {
+    if (isEditing) {
+      onSave?.();
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
+      // Simulate API call for creation flow
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Show success state
       setIsSuccess(true);
-
       toast({
         title: 'Success!',
         description: "Child's profile has been created successfully!",
         variant: 'default',
         duration: 3000,
       });
-
-      // Wait longer to show the success state
       await new Promise((resolve) => setTimeout(resolve, 2000));
       router.push('/dashboard/profile-management');
     } catch (error) {
@@ -215,28 +235,42 @@ export function EmergencyContactForm({ onBack }: Props) {
       </div>
 
       <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={onBack} disabled={isSubmitting || isSuccess}>
-          Previous Step
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={isSubmitting || isSuccess}
-          className={cn('min-w-[140px] relative', isSuccess && 'bg-green-500 hover:bg-green-500')}
-        >
-          {isSuccess ? (
-            <div className="flex items-center gap-2 animate-fade-in">
-              <Check className="h-4 w-4" />
-              <span className="animate-fade-in">Created Successfully!</span>
-            </div>
-          ) : isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Creating...
-            </>
-          ) : (
-            'Complete Profile'
-          )}
-        </Button>
+        {isEditing ? (
+          <>
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSave}>Save Changes</Button>
+          </>
+        ) : (
+          <>
+            <Button variant="outline" onClick={onBack} disabled={isSubmitting || isSuccess}>
+              Previous Step
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting || isSuccess}
+              className={cn(
+                'min-w-[140px] relative',
+                isSuccess && 'bg-green-500 hover:bg-green-500'
+              )}
+            >
+              {isSuccess ? (
+                <div className="flex items-center gap-2 animate-fade-in">
+                  <Check className="h-4 w-4" />
+                  <span className="animate-fade-in">Created Successfully!</span>
+                </div>
+              ) : isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                'Complete Profile'
+              )}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

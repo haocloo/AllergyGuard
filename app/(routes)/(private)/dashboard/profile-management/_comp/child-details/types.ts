@@ -42,8 +42,29 @@ export interface CaretakerFormData {
   noteToCaretaker?: string;
 }
 
-export interface TempCaretaker extends Caretaker {
-  status: 'pending';
+export interface SearchUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface TempCaretaker {
+  id: string;
+  type: 'personal' | 'center';
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface EditCaretakerDialogProps {
+  caretaker: TempCaretaker;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (updatedCaretaker: TempCaretaker) => void;
+  onDelete: () => void;
 }
 
 // ... other types ...
