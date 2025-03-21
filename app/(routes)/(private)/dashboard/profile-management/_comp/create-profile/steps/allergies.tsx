@@ -26,8 +26,12 @@ import { COMMON_ALLERGENS, COMMON_SYMPTOMS } from '../../types';
 import type { Allergy, AllergySymptom, ActionPlan } from '../../types';
 
 interface Props {
-  onNext: () => void;
-  onBack: () => void;
+  isEditing?: boolean;
+  initialData?: Allergy[];
+  onSave?: () => void;
+  onCancel?: () => void;
+  onNext?: () => void;
+  onBack?: () => void;
 }
 
 interface ExtendedAllergy extends Allergy {
@@ -35,7 +39,7 @@ interface ExtendedAllergy extends Allergy {
   symptoms: (AllergySymptom & { isCustom?: boolean })[];
 }
 
-export function AllergiesForm({ onNext, onBack }: Props) {
+export function AllergiesForm({ isEditing, initialData, onSave, onCancel, onNext, onBack }: Props) {
   const { formData, setField } = useProfileStore();
   const [customAllergen, setCustomAllergen] = useState('');
   const [customSymptom, setCustomSymptom] = useState('');
@@ -387,10 +391,21 @@ export function AllergiesForm({ onNext, onBack }: Props) {
       </div>
 
       <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={onBack}>
-          Previous Step
-        </Button>
-        <Button onClick={onNext}>Next Step</Button>
+        {isEditing ? (
+          <>
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSave}>Save Changes</Button>
+          </>
+        ) : (
+          <>
+            <Button variant="outline" onClick={onBack}>
+              Previous Step
+            </Button>
+            <Button onClick={onNext}>Next Step</Button>
+          </>
+        )}
       </div>
     </div>
   );

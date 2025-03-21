@@ -21,6 +21,7 @@ import {
   Phone,
   MoreVertical,
   Trash,
+  ChevronLeft,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import type { Child, Symptom, SymptomSeverity } from '../types';
@@ -55,26 +56,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Classroom } from '@/services/dummy-data';
+import { CaretakerTab } from './caretaker-tab';
 
 interface Props {
   initialChild: Child;
-}
-
-// Create an extended child interface for the component's needs
-interface ExtendedChild extends Child {
-  firstName?: string;
-  lastName?: string;
-  gender?: string;
-  photoUrl?: string;
-  symptoms?: Symptom[];
-  emergencyContacts?: Array<{
-    name: string;
-    relationship: string;
-    phone: string;
-    email: string;
-    isMainContact: boolean;
-  }>;
-  caretakers?: Array<any>;
 }
 
 interface EditableFieldProps {
@@ -171,7 +156,6 @@ interface TempCaretaker {
   role: string;
   phone: string;
   notes?: string;
-  status: 'pending';
   createdAt: string;
 }
 
@@ -197,7 +181,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
   const [editingSection, setEditingSection] = useState<
     'allergies' | 'symptoms' | 'contacts' | null
   >(null);
-  const { initializeEditForm, resetForm } = useProfileStore();
+  const { initializeEditForm, resetForm, formData } = useProfileStore();
   const [showCaretakerDialog, setShowCaretakerDialog] = useState(false);
   const [caretakerType, setCaretakerType] = useState<'personal' | 'center' | null>(null);
   const [searchResults, setSearchResults] = useState<typeof users>([]);
@@ -211,7 +195,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [filteredUsers, setFilteredUsers] = useState<typeof users>([]);
   const [tempCaretakers, setTempCaretakers] = useState<TempCaretaker[]>([]);
   const [editingCaretaker, setEditingCaretaker] = useState<TempCaretaker | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -221,56 +205,42 @@ export function ChildDetailsClient({ initialChild }: Props) {
   const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(null);
   const [classroomFormErrors, setClassroomFormErrors] = useState<Record<string, string>>({});
 
-  // Create an extended child object with the additional properties needed
-  const extendedChild: ExtendedChild = {
-    ...initialChild,
-    firstName: initialChild.name.split(' ')[0] || '',
-    lastName: initialChild.name.split(' ').slice(1).join(' ') || '',
-    gender: 'Not specified', // Default value
-    photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${initialChild.id}`, // Use avatar as fallback
-    symptoms: [], // Empty array with correct type
-    emergencyContacts: [], // Default empty array
-    caretakers: [], // Default empty array
-  };
-
-  // Move the classroom search handler inside the component
-  const handleClassroomSearch = (value: string) => {
-    setClassroomSearchQuery(value);
-    setSelectedClassroom(null);
-
-    const classroom = classrooms.find((c) => c.code.toLowerCase() === value.toLowerCase());
-
-    if (classroom) {
-      setSelectedClassroom(classroom);
-    }
-  };
+  // Add a new state for dialog steps
+  const [personalCaretakerStep, setPersonalCaretakerStep] = useState<'search' | 'details'>(
+    'search'
+  );
 
   // Initialize form data when editing section changes
   useEffect(() => {
     if (editingSection) {
       initializeEditForm({
-        firstName: extendedChild.firstName || '',
-        lastName: extendedChild.lastName || '',
-        dob: extendedChild.dob,
-        gender: (extendedChild.gender as 'male' | 'female') || 'female',
-        photoUrl: extendedChild.photoUrl,
-        allergies: extendedChild.allergies,
-        symptoms: extendedChild.symptoms || [],
-        emergencyContacts: extendedChild.emergencyContacts || [],
+        firstName: initialChild.firstName,
+        lastName: initialChild.lastName,
+        dob: initialChild.dob,
+        gender: initialChild.gender,
+        photoUrl: initialChild.photoUrl,
+        allergies: initialChild.allergies,
+        symptoms: initialChild.symptoms,
+        emergencyContacts: initialChild.emergencyContacts,
       });
     }
-    // Don't reset the form here, as this will cause an infinite loop
-    // resetForm should only be called on user actions, not in effects
-  }, [editingSection, extendedChild, initializeEditForm]);
+  }, [editingSection, initialChild, initializeEditForm]);
 
-  const handleSectionSave = async (section: string) => {
+  const handleSectionSave = async (section: 'allergies' | 'symptoms' | 'contacts' | 'basic') => {
     try {
       // Here you would save the section data to your backend
-      console.log('Saving section:', section);
-
-      // Reset form and close dialog
-      resetForm();
-      setEditingSection(null);
+      const updatedData = {
+        ...initialChild,
+        ...(section === 'allergies' && { allergies: formData.allergies }),
+        ...(section === 'symptoms' && { symptoms: formData.symptoms }),
+        ...(section === 'contacts' && { emergencyContacts: formData.emergencyContacts }),
+        ...(section === 'basic' && {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          dob: formData.dob,
+          gender: formData.gender,
+        }),
+      };
 
       // Show success message
       toast({
@@ -278,6 +248,10 @@ export function ChildDetailsClient({ initialChild }: Props) {
         description: 'Changes saved successfully',
         variant: 'default',
       });
+
+      // Reset form and close dialog after successful save
+      resetForm();
+      setEditingSection(null);
     } catch (error) {
       toast({
         title: 'Error',
@@ -287,15 +261,18 @@ export function ChildDetailsClient({ initialChild }: Props) {
     }
   };
 
-  // Simplified search handler
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  // Update the search handler
+  const handleSearch = (value: string) => {
     setSearchQuery(value);
-
+    if (!value.trim()) {
+      setFilteredUsers([]);
+      return;
+    }
+    // Filter users based on search query
     const filtered = users.filter(
       (user) =>
-        user.name.toLowerCase().includes(value.toLowerCase()) ||
-        user.email.toLowerCase().includes(value.toLowerCase())
+        user.email.toLowerCase().includes(value.toLowerCase()) ||
+        user.name.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredUsers(filtered);
   };
@@ -319,61 +296,64 @@ export function ChildDetailsClient({ initialChild }: Props) {
     }
   };
 
-  const handleSaveCaretaker = () => {
-    if (caretakerType === 'center') {
-      if (!selectedClassroom) {
-        setClassroomFormErrors({
-          code: 'Please select a valid classroom first',
+  const handleSaveCaretaker = async () => {
+    try {
+      if (caretakerType === 'personal' && selectedUser) {
+        const newCaretaker: TempCaretaker = {
+          id: `temp_${Date.now()}`,
+          type: 'personal',
+          name: selectedUser.name,
+          email: selectedUser.email,
+          role: caretakerForm.role,
+          phone: caretakerForm.phone,
+          notes: caretakerForm.noteToCaretaker,
+          createdAt: new Date().toISOString(),
+        };
+
+        setTempCaretakers((prev) => [...prev, newCaretaker]);
+
+        // Reset form and close dialog
+        setCaretakerType(null);
+        setSelectedUser(null);
+        setSearchQuery('');
+        setFilteredUsers([]);
+        setCaretakerForm({
+          type: 'personal',
+          name: '',
+          email: '',
+          phone: '',
+          role: '',
         });
-        return;
+        setShowCaretakerDialog(false);
+        setPersonalCaretakerStep('search');
+
+        // Show success message
+        toast({
+          title: 'Success',
+          description: 'Personal caretaker added successfully',
+          variant: 'default',
+        });
+      } else if (caretakerType === 'center' && selectedClassroom) {
+        // Existing childcare center logic...
       }
-      // Skip regular form validation for centers
-    } else {
-      if (!validateForm()) return;
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add caretaker',
+        variant: 'destructive',
+      });
     }
-
-    const newCaretaker: TempCaretaker = {
-      id: `temp-${Date.now()}`,
-      type: caretakerType || 'personal', // Provide fallback
-      name: caretakerType === 'center' ? selectedClassroom!.centerName : caretakerForm.name,
-      email: caretakerType === 'center' ? selectedClassroom!.teacher.email : caretakerForm.email,
-      role: caretakerType === 'center' ? 'Childcare Center' : caretakerForm.role,
-      phone: caretakerType === 'center' ? selectedClassroom!.teacher.phone : caretakerForm.phone,
-      notes: caretakerForm.noteToCaretaker,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    };
-
-    setTempCaretakers((prev) => [...prev, newCaretaker]);
-
-    toast({
-      title: 'Success',
-      description: `${
-        caretakerType === 'center' ? 'Childcare center' : 'Caretaker'
-      } added successfully`,
-    });
-
-    // Reset all states
-    setCaretakerType(null);
-    setSelectedUser(null);
-    setSelectedClassroom(null);
-    setClassroomSearchQuery('');
-    setCaretakerForm({
-      type: 'personal',
-      name: '',
-      email: '',
-      phone: '',
-      role: '',
-    });
-    setShowCaretakerDialog(false);
   };
 
   // Update the dialog close handler
   const handleDialogClose = (open: boolean) => {
     if (!open) {
-      // Reset all states when dialog is closed
       setCaretakerType(null);
       setSelectedUser(null);
+      setSelectedClassroom(null);
+      setClassroomSearchQuery('');
+      setSearchQuery('');
+      setFilteredUsers([]);
       setCaretakerForm({
         type: 'personal',
         name: '',
@@ -381,35 +361,56 @@ export function ChildDetailsClient({ initialChild }: Props) {
         phone: '',
         role: '',
       });
-      setSearchQuery('');
-      setFilteredUsers(users);
+      setFormErrors({});
+      setClassroomFormErrors({});
+      setPersonalCaretakerStep('search'); // Reset to first step
     }
     setShowCaretakerDialog(open);
   };
 
   // Add these functions
   const handleEditCaretaker = (updatedCaretaker: TempCaretaker) => {
-    setTempCaretakers((prev) =>
-      prev.map((c) => (c.id === updatedCaretaker.id ? updatedCaretaker : c))
-    );
-    setShowEditDialog(false);
-    setEditingCaretaker(null);
+    try {
+      // Update in temporary caretakers
+      setTempCaretakers((prev) =>
+        prev.map((c) => (c.id === updatedCaretaker.id ? updatedCaretaker : c))
+      );
 
-    toast({
-      title: 'Success',
-      description: 'Caretaker updated successfully',
-    });
+      // Reset states
+      setEditingCaretaker(null);
+      setShowEditDialog(false);
+
+      toast({
+        title: 'Success',
+        description: 'Caretaker updated successfully',
+        variant: 'default',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update caretaker',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleDeleteCaretaker = (caretakerId: string) => {
-    setTempCaretakers((prev) => prev.filter((c) => c.id !== caretakerId));
-    setShowEditDialog(false);
-    setEditingCaretaker(null);
+    try {
+      // Remove from temporary caretakers
+      setTempCaretakers((prev) => prev.filter((c) => c.id !== caretakerId));
 
-    toast({
-      title: 'Success',
-      description: 'Caretaker removed successfully',
-    });
+      toast({
+        title: 'Success',
+        description: 'Caretaker removed successfully',
+        variant: 'default',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove caretaker',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Update handleSearchSubmit to set the form type
@@ -437,7 +438,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{extendedChild.name}'s Profile</h1>
+        <h1 className="text-2xl font-semibold">{initialChild.name}'s Profile</h1>
         <Button variant="outline" onClick={() => router.back()}>
           Back
         </Button>
@@ -448,22 +449,22 @@ export function ChildDetailsClient({ initialChild }: Props) {
         <div className="relative h-48 bg-muted">
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
           <div className="w-full h-full">
-            {extendedChild.photoUrl ? (
+            {initialChild.photoUrl ? (
               <img
-                src={extendedChild.photoUrl}
-                alt={extendedChild.name}
+                src={initialChild.photoUrl}
+                alt={initialChild.name}
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
                 <Avatar className="h-32 w-32">
                   <AvatarImage
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${extendedChild.id}`}
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${initialChild.id}`}
                     className="bg-background"
                   />
                   <AvatarFallback>
-                    {extendedChild.firstName?.[0]}
-                    {extendedChild.lastName?.[0]}
+                    {initialChild.firstName?.[0]}
+                    {initialChild.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -478,23 +479,23 @@ export function ChildDetailsClient({ initialChild }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <EditableField
                 label="First Name"
-                value={extendedChild.firstName || ''}
-                onSave={(value) => handleSectionSave('firstName')}
+                value={initialChild.firstName}
+                onSave={(value) => handleSectionSave('basic')}
               />
               <EditableField
                 label="Last Name"
-                value={extendedChild.lastName || ''}
-                onSave={(value) => handleSectionSave('lastName')}
+                value={initialChild.lastName}
+                onSave={(value) => handleSectionSave('basic')}
               />
               <EditableField
                 label="Date of Birth"
-                value={format(new Date(extendedChild.dob), 'PPP')}
-                onSave={(value) => handleSectionSave('dob')}
+                value={format(new Date(initialChild.dob), 'PPP')}
+                onSave={(value) => handleSectionSave('basic')}
               />
               <EditableField
                 label="Gender"
-                value={extendedChild.gender || 'Not specified'}
-                onSave={(value) => handleSectionSave('gender')}
+                value={initialChild.gender || 'Not specified'}
+                onSave={(value) => handleSectionSave('basic')}
               />
             </div>
           </section>
@@ -526,7 +527,13 @@ export function ChildDetailsClient({ initialChild }: Props) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingSection('allergies')}
+                        onClick={() => {
+                          setEditingSection('allergies');
+                          initializeEditForm({
+                            ...formData,
+                            allergies: initialChild.allergies,
+                          });
+                        }}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Allergies
@@ -537,14 +544,16 @@ export function ChildDetailsClient({ initialChild }: Props) {
                         <DialogTitle>Edit Allergies</DialogTitle>
                       </DialogHeader>
                       <AllergiesForm
-                        onNext={() => handleSectionSave('allergies')}
-                        onBack={() => setEditingSection(null)}
+                        isEditing
+                        initialData={initialChild.allergies}
+                        onSave={() => handleSectionSave('allergies')}
+                        onCancel={() => setEditingSection(null)}
                       />
                     </DialogContent>
                   </Dialog>
                 </div>
                 <div className="space-y-6">
-                  {extendedChild.allergies.map((allergy, index) => (
+                  {initialChild.allergies.map((allergy, index) => (
                     <div key={index} className="border rounded-lg p-4 space-y-4">
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium">{allergy.allergen}</h3>
@@ -599,7 +608,13 @@ export function ChildDetailsClient({ initialChild }: Props) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingSection('symptoms')}
+                        onClick={() => {
+                          setEditingSection('symptoms');
+                          initializeEditForm({
+                            ...formData,
+                            symptoms: initialChild.symptoms,
+                          });
+                        }}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Symptoms
@@ -610,15 +625,17 @@ export function ChildDetailsClient({ initialChild }: Props) {
                         <DialogTitle>Edit Symptoms</DialogTitle>
                       </DialogHeader>
                       <SymptomSeverityForm
-                        onNext={() => handleSectionSave('symptoms')}
-                        onBack={() => setEditingSection(null)}
+                        isEditing
+                        initialData={initialChild.symptoms}
+                        onSave={() => handleSectionSave('symptoms')}
+                        onCancel={() => setEditingSection(null)}
                       />
                     </DialogContent>
                   </Dialog>
                 </div>
-                {extendedChild.symptoms && extendedChild.symptoms.length > 0 && (
+                {initialChild.symptoms && initialChild.symptoms.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {extendedChild.symptoms.map((symptom, index) => (
+                    {initialChild.symptoms.map((symptom, index) => (
                       <Badge
                         key={index}
                         variant="outline"
@@ -650,7 +667,13 @@ export function ChildDetailsClient({ initialChild }: Props) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingSection('contacts')}
+                        onClick={() => {
+                          setEditingSection('contacts');
+                          initializeEditForm({
+                            ...formData,
+                            emergencyContacts: initialChild.emergencyContacts,
+                          });
+                        }}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Contacts
@@ -661,16 +684,17 @@ export function ChildDetailsClient({ initialChild }: Props) {
                         <DialogTitle>Edit Emergency Contacts</DialogTitle>
                       </DialogHeader>
                       <EmergencyContactForm
-                        onNext={() => handleSectionSave('contacts')}
-                        onBack={() => setEditingSection(null)}
-                        {...({} as any)} // Type assertion to satisfy the component props
+                        isEditing
+                        initialData={initialChild.emergencyContacts}
+                        onSave={() => handleSectionSave('contacts')}
+                        onCancel={() => setEditingSection(null)}
                       />
                     </DialogContent>
                   </Dialog>
                 </div>
-                {extendedChild.emergencyContacts && extendedChild.emergencyContacts.length > 0 && (
+                {initialChild.emergencyContacts && initialChild.emergencyContacts.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {extendedChild.emergencyContacts.map((contact, index) => (
+                    {initialChild.emergencyContacts.map((contact, index) => (
                       <div key={index} className="border rounded-lg p-4 space-y-2">
                         <div className="flex items-center justify-between">
                           <h3 className="font-medium">{contact.name}</h3>
@@ -688,250 +712,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
 
             {/* Caretakers Tab */}
             <TabsContent value="caretakers" className="space-y-6 pt-4">
-              <section className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium">Caretakers</h2>
-                  <Dialog open={showCaretakerDialog} onOpenChange={handleDialogClose}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Caretaker
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
-                      <DialogHeader className="pb-4">
-                        <DialogTitle>Add Caretaker</DialogTitle>
-                      </DialogHeader>
-
-                      {/* Update the childcare center form section */}
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="bg-muted/50 rounded-lg p-3">
-                          <div className="flex items-start gap-2 text-muted-foreground">
-                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                            <p className="text-sm">
-                              Please obtain the classroom code from your childcare center before
-                              proceeding.
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Classroom Code</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              value={classroomSearchQuery}
-                              onChange={(e) => {
-                                setClassroomSearchQuery(e.target.value);
-                                setClassroomFormErrors({});
-                              }}
-                              placeholder="e.g., CC001-K1A"
-                              className={classroomFormErrors.code ? 'border-destructive' : ''}
-                            />
-                            <Button
-                              variant="secondary"
-                              onClick={handleSearchSubmit}
-                              className="flex-shrink-0"
-                            >
-                              <Search className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          {classroomFormErrors.code && (
-                            <p className="text-sm text-destructive">{classroomFormErrors.code}</p>
-                          )}
-                        </div>
-
-                        {selectedClassroom && (
-                          <div className="space-y-3 sm:space-y-4 border rounded-lg p-3 sm:p-4">
-                            <div className="space-y-1">
-                              <h3 className="font-medium">{selectedClassroom.centerName}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {selectedClassroom.address}
-                              </p>
-                            </div>
-
-                            <div className="border-t pt-3">
-                              <h4 className="text-sm font-medium mb-1">Class Information</h4>
-                              <p className="text-sm">{selectedClassroom.name}</p>
-                            </div>
-
-                            <div className="border-t pt-3">
-                              <h4 className="text-sm font-medium mb-2">Teacher Information</h4>
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-12 w-12">
-                                  <AvatarImage src={selectedClassroom.teacher.photoUrl} />
-                                  <AvatarFallback>
-                                    {selectedClassroom.teacher.name
-                                      .split(' ')
-                                      .map((n: string) => n[0])
-                                      .join('')}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-medium truncate">
-                                    {selectedClassroom.teacher.name}
-                                  </p>
-                                  <div className="flex flex-col space-y-1 text-sm">
-                                    <p className="text-muted-foreground truncate">
-                                      {selectedClassroom.teacher.email}
-                                    </p>
-                                    <Button
-                                      variant="ghost"
-                                      className="flex items-center gap-2 w-fit h-auto p-0 text-emerald-600 hover:text-emerald-700"
-                                      asChild
-                                    >
-                                      <a
-                                        href={`tel:${selectedClassroom.teacher.phone}`}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <div className="bg-emerald-100 p-1 rounded-full">
-                                          <Phone className="h-4 w-4" />
-                                        </div>
-                                        <span>{selectedClassroom.teacher.phone}</span>
-                                      </a>
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="border-t pt-3">
-                              <Label className="text-sm">Note to Childcare Center (Optional)</Label>
-                              <Textarea
-                                value={caretakerForm.noteToCaretaker || ''}
-                                onChange={(e) =>
-                                  setCaretakerForm((prev) => ({
-                                    ...prev,
-                                    noteToCaretaker: e.target.value,
-                                  }))
-                                }
-                                placeholder="Add any special notes or requests..."
-                                className="mt-1.5"
-                              />
-                            </div>
-
-                            <div className="flex justify-end gap-2 pt-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setCaretakerType(null);
-                                  setSelectedClassroom(null);
-                                  setClassroomSearchQuery('');
-                                  setCaretakerForm({
-                                    type: 'personal',
-                                    name: '',
-                                    email: '',
-                                    phone: '',
-                                    role: '',
-                                  });
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button onClick={handleSaveCaretaker}>Add Childcare Center</Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[...(extendedChild.caretakers || []), ...tempCaretakers].map((caretaker) => (
-                    <div key={caretaker.id} className="border rounded-lg p-4 space-y-4">
-                      <div className="flex gap-4">
-                        <div className="flex-shrink-0">
-                          <Avatar className="h-16 w-16">
-                            <AvatarImage
-                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${caretaker.email}`}
-                              className="bg-background"
-                            />
-                            <AvatarFallback>
-                              {caretaker.name
-                                .split(' ')
-                                .map((n: string) => n[0])
-                                .join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                        </div>
-
-                        <div className="flex-grow">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-medium text-lg">{caretaker.name}</h3>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                {caretaker.type === 'personal' ? (
-                                  <PersonStanding className="h-4 w-4" />
-                                ) : (
-                                  <Building2 className="h-4 w-4" />
-                                )}
-                                <span>
-                                  {caretaker.type === 'personal'
-                                    ? 'Personal Caretaker'
-                                    : 'Childcare Center'}
-                                </span>
-                              </div>
-                              <p className="text-sm font-medium text-primary">{caretaker.role}</p>
-                            </div>
-
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => {
-                                    setEditingCaretaker(caretaker);
-                                    setShowEditDialog(true);
-                                  }}
-                                >
-                                  <Pencil className="h-4 w-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive"
-                                  onClick={() => handleDeleteCaretaker(caretaker.id)}
-                                >
-                                  <Trash className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-
-                          <div className="flex flex-col space-y-1 text-sm mt-2">
-                            <p className="text-muted-foreground">{caretaker.email}</p>
-                            <Button
-                              variant="ghost"
-                              className="flex items-center gap-2 w-fit h-auto p-0 text-emerald-600 hover:text-emerald-700"
-                              asChild
-                            >
-                              <a
-                                href={`tel:${caretaker.phone}`}
-                                className="flex items-center gap-2"
-                              >
-                                <div className="bg-emerald-100 p-1 rounded-full">
-                                  <Phone className="h-4 w-4" />
-                                </div>
-                                <span>{caretaker.phone}</span>
-                              </a>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {caretaker.notes && (
-                        <div className="bg-primary/5 border border-primary/10 rounded-lg p-3">
-                          <p className="text-sm font-medium text-primary mb-1">Note:</p>
-                          <p className="text-sm text-muted-foreground">{caretaker.notes}</p>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <CaretakerTab initialChild={initialChild} />
             </TabsContent>
           </Tabs>
         </div>

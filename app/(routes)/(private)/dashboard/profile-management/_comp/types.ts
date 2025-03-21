@@ -25,12 +25,19 @@ export interface ActionPlan {
 export interface Child {
   id: string;
   name: string;
+  firstName: string;
+  lastName: string;
   dob: string;
-  allergies: Allergy[];
+  gender: 'male' | 'female';
+  photoUrl?: string;
   parentId: string;
   classroomId: string;
   createdAt: string;
   createdBy: string;
+  allergies: Allergy[];
+  symptoms: Symptom[];
+  emergencyContacts: EmergencyContact[];
+  caretakers: Caretaker[];
 }
 
 export interface ChildFormData {
