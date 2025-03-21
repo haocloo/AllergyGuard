@@ -7,12 +7,8 @@ import { lucia_get_user, utils_log_server_error, utils_log_server_info } from '@
 import { FormState } from '@/components/helpers/form-items';
 import { toFormState, fromErrorToFormState } from '@/components/helpers/form-items';
 
-// Firestore would be used in production
-// import { adminFirestore } from '@/lib/firebaseAdmin';
-// import { FieldValue } from 'firebase-admin/firestore';
-
-// For now using dummy data
-import { children, mealPlans as dummyMealPlans } from '@/services/dummy-data';
+// Import mock data from our local file instead of the global one
+import { mockMealPlans, childAllergies, getMockRecipes, getMockRecipeById } from './mock-data';
 import { Allergen, FoodRecipe, Ingredient, MealPlan } from './store';
 
 /**
@@ -36,38 +32,8 @@ export async function getMealPlans(): Promise<MealPlan[]> {
     //   ...doc.data()
     // }) as MealPlan);
 
-    // For now, convert dummy data to match our store format
-    const storedMealPlans = dummyMealPlans
-      .filter((plan) => plan.scenario === 'foodPlan' && plan.createdBy === user.id)
-      .map((plan) => {
-        // Extract ingredients from the plan
-        const ingredients: Ingredient[] = [];
-
-        // Type casting to handle any issues with dailyPlans structure
-        const dailyPlans = plan.dailyPlans as Record<string, string[]>;
-
-        for (const day in dailyPlans) {
-          dailyPlans[day].forEach((meal) => {
-            ingredients.push({
-              name: meal,
-              containsAllergens: [],
-            });
-          });
-        }
-
-        return {
-          id: plan.id,
-          name: `Meal Plan for ${new Date(plan.createdAt).toLocaleDateString()}`,
-          description: plan.prompt || 'Weekly meal plan',
-          ingredients,
-          allergensFound: [],
-          suggestions: [],
-          createdAt: plan.createdAt,
-          imageUrl: undefined,
-        };
-      });
-
-    return storedMealPlans;
+    // Use our mock data from the local file
+    return mockMealPlans.filter((plan) => plan.id !== '0'); // Just a simple filter to demonstrate
   } catch (error) {
     utils_log_server_error('Error fetching meal plans:', error);
     return [];
@@ -95,23 +61,8 @@ export async function getChildAllergies(): Promise<Allergen[]> {
     //   ...doc.data()
     // }));
 
-    // For now, using dummy data
-    const userChildren = children.filter((child) => child.parentId === user.id);
-
-    // Extract allergies from all children
-    const childAllergies = userChildren.flatMap((child) =>
-      child.allergies.map((allergy) => ({
-        name: allergy.allergen,
-        severity: allergy.severity as 'High' | 'Medium' | 'Low',
-      }))
-    );
-
-    // Remove duplicates (if multiple children have the same allergy)
-    const uniqueAllergies = childAllergies.filter(
-      (allergy, index, self) => index === self.findIndex((a) => a.name === allergy.name)
-    );
-
-    return uniqueAllergies;
+    // Use our mock data from the local file
+    return childAllergies;
   } catch (error) {
     utils_log_server_error('Error fetching child allergies:', error);
     return [];
@@ -144,16 +95,17 @@ export async function createMealPlan(
     //   id: docRef.id,
     // });
 
-    // For demonstration purposes
-    utils_log_server_info('Meal plan would be created:', {
+    // For demonstration purposes - using string-only form to avoid linter errors
+    const newPlan = {
       ...mealPlan,
       id: crypto.randomUUID(),
       createdBy: user.id,
       createdAt: new Date().toISOString(),
-    });
+    };
+    console.log('Meal plan would be created:', newPlan);
 
     revalidatePath('/meal-planning/plans');
-    return toFormState({ message: 'Meal plan created successfully' });
+    return toFormState('SUCCESS', 'Meal plan created successfully');
   } catch (error) {
     utils_log_server_error('Error creating meal plan:', error);
     return fromErrorToFormState('Failed to create meal plan');
@@ -176,15 +128,16 @@ export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): P
     //   updatedAt: FieldValue.serverTimestamp(),
     // });
 
-    // For demonstration purposes
-    utils_log_server_info('Meal plan would be updated:', {
+    // For demonstration purposes - using string-only form to avoid linter errors
+    const updatedPlan = {
       id,
       ...mealPlan,
       updatedAt: new Date().toISOString(),
-    });
+    };
+    console.log('Meal plan would be updated:', updatedPlan);
 
     revalidatePath('/meal-planning/plans');
-    return toFormState({ message: 'Meal plan updated successfully' });
+    return toFormState('SUCCESS', 'Meal plan updated successfully');
   } catch (error) {
     utils_log_server_error('Error updating meal plan:', error);
     return fromErrorToFormState('Failed to update meal plan');
@@ -204,13 +157,39 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
     // In production, we would delete from Firestore
     // await adminFirestore.collection('mealPlans').doc(id).delete();
 
-    // For demonstration purposes
-    utils_log_server_info('Meal plan would be deleted:', { id });
+    // For demonstration purposes - using string-only form to avoid linter errors
+    console.log('Meal plan would be deleted:', { id });
 
     revalidatePath('/meal-planning/plans');
-    return toFormState({ message: 'Meal plan deleted successfully' });
+    return toFormState('SUCCESS', 'Meal plan deleted successfully');
   } catch (error) {
     utils_log_server_error('Error deleting meal plan:', error);
     return fromErrorToFormState('Failed to delete meal plan');
+  }
+}
+
+/**
+ * Get food recipes for the food list
+ */
+export async function getFoodRecipes(): Promise<FoodRecipe[]> {
+  try {
+    // Use our mock data from the local file
+    return getMockRecipes();
+  } catch (error) {
+    console.error('Error fetching food recipes:', error);
+    return [];
+  }
+}
+
+/**
+ * Get a single food recipe by ID
+ */
+export async function getFoodRecipeById(id: string): Promise<FoodRecipe | null> {
+  try {
+    // Use our mock data from the local file
+    return getMockRecipeById(id);
+  } catch (error) {
+    console.error(`Error fetching food recipe with ID ${id}:`, error);
+    return null;
   }
 }
