@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Baby,
   List,
+  Gamepad2,
 } from 'lucide-react';
 
 
@@ -80,6 +81,18 @@ export const navList: T_navItem[] = [
             url: '/dashboard/smart-diagnosis',
             role: ['admin', 'caretaker', 'parent'],
             icon: AlertCircle,
+          },
+        ],
+      },
+      {
+        title: 'Fun & Learning',
+        icon: Gamepad2,
+        items: [
+          {
+            title: 'Allergy Ninja Game',
+            url: '/dashboard/allergy-ninja',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: Gamepad2,
           },
         ],
       },
