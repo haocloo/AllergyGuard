@@ -48,12 +48,12 @@ export const navList: T_navItem[] = [
         ],
       },
       {
-        title: 'Emergency Support',
+        title: 'Smart Diagnosis',
         icon: AlertCircle,
         items: [
           {
-            title: 'Panic Mode',
-            url: '/dashboard/panic-mode',
+            title: 'Smart Diagnosis',
+            url: '/dashboard/smart-diagnosis',
             role: ['admin', 'caretaker', 'parent'],
             icon: AlertCircle,
           },
