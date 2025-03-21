@@ -150,7 +150,7 @@ export function BasicInfoForm({ onNext }: Props) {
           <Label>Gender</Label>
           <RadioGroup
             defaultValue={formData.gender}
-            onValueChange={(value) => setField('gender', value)}
+            onValueChange={(value) => setField('gender', value as 'female' | 'male')}
             className="grid grid-cols-2 gap-4 pt-2"
           >
             <div className="flex items-center space-x-2">

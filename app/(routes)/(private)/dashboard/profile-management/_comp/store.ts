@@ -72,6 +72,6 @@ export const useProfileStore = create<ProfileStore>((set) => ({
         redirect: '',
       },
     }),
-  resetForm: () => set({ formData: defaultFormData }),
-  initializeEditForm: (data) => set({ formData: data }),
+  resetForm: () => set({ formData: { ...defaultFormData } }),
+  initializeEditForm: (data) => set({ formData: { ...data } }),
 }));

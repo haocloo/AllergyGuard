@@ -85,7 +85,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
     const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
     if (!allergy.actionPlan) {
       allergy.actionPlan = {
-        immediateActions: [],
+        immediateAction: '',
         medications: [],
       };
     }
@@ -95,8 +95,10 @@ export function AllergiesForm({ onNext, onBack }: Props) {
         ...(allergy.actionPlan.medications || []),
         { name: '', dosage: '' },
       ];
-    } else {
-      allergy.actionPlan[field] = [...(allergy.actionPlan[field] || []), ''];
+    } else if (field === 'immediateAction') {
+      if (!allergy.actionPlan.immediateAction) {
+        allergy.actionPlan.immediateAction = '';
+      }
     }
 
     setField('allergies', newAllergies);
@@ -131,7 +133,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
 
   const handleAllergenSelect = (index: number, value: string) => {
     const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[index];
+    const allergy = newAllergies[index] as ExtendedAllergy;
 
     if (value === 'Other') {
       allergy.isCustomAllergen = true;
@@ -177,188 +179,211 @@ export function AllergiesForm({ onNext, onBack }: Props) {
       </div>
 
       <div className="space-y-6">
-        {(formData.allergies || []).map((allergy, index) => (
-          <div key={index} className="border rounded-lg p-4 space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 space-y-4">
-                {/* Allergen Selection */}
-                <div className="space-y-2">
-                  <Label>Allergen</Label>
+        {(formData.allergies || []).map((rawAllergy, index) => {
+          const allergy = rawAllergy as ExtendedAllergy;
+          return (
+            <div key={index} className="border rounded-lg p-4 space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-4">
+                  {/* Allergen Selection */}
                   <div className="space-y-2">
-                    <Select
-                      value={allergy.isCustomAllergen ? 'Other' : allergy.allergen}
-                      onValueChange={(value) => handleAllergenSelect(index, value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select allergen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Common Allergens</SelectLabel>
-                          {COMMON_ALLERGENS.map((item) => (
-                            <SelectItem key={item} value={item}>
-                              {item}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    {allergy.isCustomAllergen && (
-                      <Input
-                        placeholder="Enter custom allergen"
-                        value={allergy.allergen}
-                        onChange={(e) => handleAllergyChange(index, 'allergen', e.target.value)}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* Symptoms Section */}
-                <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="symptoms">
-                    <AccordionTrigger className="text-sm font-medium">Symptoms</AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4 pt-4 px-4">
-                        {(allergy.symptoms || []).map((symptom, symptomIndex) => (
-                          <div key={symptomIndex} className="flex items-center gap-2">
-                            <div className="flex-1 space-y-2">
-                              <Select
-                                value={symptom.isCustom ? 'Other' : symptom.name}
-                                onValueChange={(value) =>
-                                  handleSymptomSelect(index, symptomIndex, value)
-                                }
-                              >
-                                <SelectTrigger className="w-full">
-                                  <SelectValue placeholder="Select symptom" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
-                                    <SelectLabel>Common Symptoms</SelectLabel>
-                                    {COMMON_SYMPTOMS.map((item) => (
-                                      <SelectItem key={item} value={item}>
-                                        {item}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectGroup>
-                                </SelectContent>
-                              </Select>
-                              {symptom.isCustom && (
-                                <Input
-                                  placeholder="Enter custom symptom"
-                                  value={symptom.name}
-                                  onChange={(e) =>
-                                    handleSymptomCustomChange(index, symptomIndex, e.target.value)
-                                  }
-                                />
-                              )}
-                            </div>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleSymptomRemove(index, symptomIndex)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                        <div className="pt-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleSymptomAdd(index)}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Symptom
-                          </Button>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  {/* Action Plan Section */}
-                  <AccordionItem value="action-plan">
-                    <AccordionTrigger className="text-sm font-medium">Action Plan</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                      {/* Immediate Action */}
-                      <div className="space-y-2">
-                        <Label>Immediate Action</Label>
-                        <Textarea
-                          value={(allergy as ExtendedAllergy).actionPlan?.immediateAction}
-                          onChange={(e) =>
-                            handleAllergyChange(index, 'actionPlan.immediateAction', e.target.value)
-                          }
-                          placeholder="Describe the immediate action to take..."
+                    <Label>Allergen</Label>
+                    <div className="space-y-2">
+                      <Select
+                        value={
+                          (allergy as ExtendedAllergy).isCustomAllergen ? 'Other' : allergy.allergen
+                        }
+                        onValueChange={(value) => handleAllergenSelect(index, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select allergen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectLabel>Common Allergens</SelectLabel>
+                            {COMMON_ALLERGENS.map((item) => (
+                              <SelectItem key={item} value={item}>
+                                {item}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                      {(allergy as ExtendedAllergy).isCustomAllergen && (
+                        <Input
+                          placeholder="Enter custom allergen"
+                          value={allergy.allergen}
+                          onChange={(e) => handleAllergyChange(index, 'allergen', e.target.value)}
                         />
-                      </div>
+                      )}
+                    </div>
+                  </div>
 
-                      {/* Medications */}
-                      <div className="space-y-2 mt-4">
-                        <Label>Medications</Label>
-                        {(allergy as ExtendedAllergy).actionPlan?.medications.map(
-                          (medication, medIndex) => (
-                            <div key={medIndex} className="grid grid-cols-3 gap-2 mb-2">
-                              <div className="col-span-2">
-                                <Input
-                                  value={medication.name}
-                                  onChange={(e) =>
-                                    handleMedicationChange(index, medIndex, 'name', e.target.value)
-                                  }
-                                  placeholder="Medication name"
-                                />
-                              </div>
-                              <div className="flex gap-2">
-                                <Input
-                                  value={medication.dosage}
-                                  onChange={(e) =>
-                                    handleMedicationChange(
-                                      index,
-                                      medIndex,
-                                      'dosage',
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder="Dosage"
-                                />
+                  {/* Symptoms Section */}
+                  <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="symptoms">
+                      <AccordionTrigger className="text-sm font-medium">Symptoms</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="space-y-4 pt-4 px-4">
+                          {(allergy.symptoms || []).map((rawSymptom, symptomIndex) => {
+                            const symptom = rawSymptom as AllergySymptom & { isCustom?: boolean };
+                            return (
+                              <div key={symptomIndex} className="flex items-center gap-2">
+                                <div className="flex-1 space-y-2">
+                                  <Select
+                                    value={symptom.isCustom ? 'Other' : symptom.name}
+                                    onValueChange={(value) =>
+                                      handleSymptomSelect(index, symptomIndex, value)
+                                    }
+                                  >
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue placeholder="Select symptom" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectGroup>
+                                        <SelectLabel>Common Symptoms</SelectLabel>
+                                        {COMMON_SYMPTOMS.map((item) => (
+                                          <SelectItem key={item} value={item}>
+                                            {item}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectGroup>
+                                    </SelectContent>
+                                  </Select>
+                                  {symptom.isCustom && (
+                                    <Input
+                                      placeholder="Enter custom symptom"
+                                      value={symptom.name}
+                                      onChange={(e) =>
+                                        handleSymptomCustomChange(
+                                          index,
+                                          symptomIndex,
+                                          e.target.value
+                                        )
+                                      }
+                                    />
+                                  )}
+                                </div>
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="icon"
-                                  onClick={() => handleMedicationRemove(index, medIndex)}
+                                  onClick={() => handleSymptomRemove(index, symptomIndex)}
                                 >
                                   <X className="h-4 w-4" />
                                 </Button>
                               </div>
-                            </div>
-                          )
-                        )}
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleActionAdd(index, 'medications')}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add Medication
-                        </Button>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
+                            );
+                          })}
+                          <div className="pt-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleSymptomAdd(index)}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Symptom
+                            </Button>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemoveAllergy(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+                    {/* Action Plan Section */}
+                    <AccordionItem value="action-plan">
+                      <AccordionTrigger className="text-sm font-medium">
+                        Action Plan
+                      </AccordionTrigger>
+                      <AccordionContent className="space-y-4 pt-4">
+                        {/* Immediate Action */}
+                        <div className="space-y-2">
+                          <Label>Immediate Action</Label>
+                          <Textarea
+                            value={(allergy as ExtendedAllergy).actionPlan?.immediateAction}
+                            onChange={(e) =>
+                              handleAllergyChange(
+                                index,
+                                'actionPlan.immediateAction',
+                                e.target.value
+                              )
+                            }
+                            placeholder="Describe the immediate action to take..."
+                          />
+                        </div>
+
+                        {/* Medications */}
+                        <div className="space-y-2 mt-4">
+                          <Label>Medications</Label>
+                          {(allergy as ExtendedAllergy).actionPlan?.medications.map(
+                            (medication, medIndex) => (
+                              <div key={medIndex} className="grid grid-cols-3 gap-2 mb-2">
+                                <div className="col-span-2">
+                                  <Input
+                                    value={medication.name}
+                                    onChange={(e) =>
+                                      handleMedicationChange(
+                                        index,
+                                        medIndex,
+                                        'name',
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="Medication name"
+                                  />
+                                </div>
+                                <div className="flex gap-2">
+                                  <Input
+                                    value={medication.dosage}
+                                    onChange={(e) =>
+                                      handleMedicationChange(
+                                        index,
+                                        medIndex,
+                                        'dosage',
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="Dosage"
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleMedicationRemove(index, medIndex)}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )
+                          )}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleActionAdd(index, 'medications')}
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Medication
+                          </Button>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemoveAllergy(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex justify-between pt-4">

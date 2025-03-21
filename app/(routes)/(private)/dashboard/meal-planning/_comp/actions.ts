@@ -14,7 +14,6 @@ import { toFormState, fromErrorToFormState } from '@/components/helpers/form-ite
 // For now using dummy data
 import { children, mealPlans as dummyMealPlans } from '@/services/dummy-data';
 import { Allergen, FoodRecipe, Ingredient, MealPlan } from './store';
-import { createClient } from '@/lib/supabase/server';
 
 /**
  * Get all meal plans for the current user
@@ -103,7 +102,8 @@ export async function getChildAllergies(): Promise<Allergen[]> {
     const childAllergies = userChildren.flatMap((child) =>
       child.allergies.map((allergy) => ({
         name: allergy.allergen,
-        severity: allergy.severity as 'High' | 'Medium' | 'Low',
+        severity:
+          'severity' in allergy ? (allergy.severity as 'High' | 'Medium' | 'Low') : 'Medium',
       }))
     );
 
@@ -146,15 +146,17 @@ export async function createMealPlan(
     // });
 
     // For demonstration purposes
-    utils_log_server_info('Meal plan would be created:', {
-      ...mealPlan,
-      id: crypto.randomUUID(),
-      createdBy: user.id,
-      createdAt: new Date().toISOString(),
+    utils_log_server_info('create_meal_plan', 'Meal plan would be created', {
+      mealPlanData: {
+        ...mealPlan,
+        id: crypto.randomUUID(),
+        createdBy: user.id,
+        createdAt: new Date().toISOString(),
+      },
     });
 
     revalidatePath('/meal-planning/plans');
-    return toFormState({ message: 'Meal plan created successfully' });
+    return toFormState('SUCCESS', 'Meal plan created successfully');
   } catch (error) {
     utils_log_server_error('Error creating meal plan:', error);
     return fromErrorToFormState('Failed to create meal plan');
@@ -178,14 +180,16 @@ export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): P
     // });
 
     // For demonstration purposes
-    utils_log_server_info('Meal plan would be updated:', {
+    utils_log_server_info('update_meal_plan', 'Meal plan would be updated', {
       id,
-      ...mealPlan,
-      updatedAt: new Date().toISOString(),
+      mealPlanData: {
+        ...mealPlan,
+        updatedAt: new Date().toISOString(),
+      },
     });
 
     revalidatePath('/meal-planning/plans');
-    return toFormState({ message: 'Meal plan updated successfully' });
+    return toFormState('SUCCESS', 'Meal plan updated successfully');
   } catch (error) {
     utils_log_server_error('Error updating meal plan:', error);
     return fromErrorToFormState('Failed to update meal plan');
@@ -206,10 +210,12 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
     // await adminFirestore.collection('mealPlans').doc(id).delete();
 
     // For demonstration purposes
-    utils_log_server_info('Meal plan would be deleted:', { id });
+    utils_log_server_info('delete_meal_plan', 'Meal plan would be deleted', {
+      id,
+    });
 
     revalidatePath('/meal-planning/plans');
-    return toFormState({ message: 'Meal plan deleted successfully' });
+    return toFormState('SUCCESS', 'Meal plan deleted successfully');
   } catch (error) {
     utils_log_server_error('Error deleting meal plan:', error);
     return fromErrorToFormState('Failed to delete meal plan');
@@ -223,7 +229,7 @@ export async function getFoodRecipes(): Promise<FoodRecipe[]> {
   try {
     // In a real app, you would fetch these from a database
     // For demo purposes, we're returning mock data
-    
+
     // Simulating a database query
     const mockRecipes: FoodRecipe[] = [
       {
@@ -250,7 +256,8 @@ export async function getFoodRecipes(): Promise<FoodRecipe[]> {
           'Add feta cheese for extra flavor (contains milk allergen).',
           'Try adding nuts for crunch (tree nut allergen).',
         ],
-        imageUrl: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80',
       },
       {
         id: '2',
@@ -277,12 +284,12 @@ export async function getFoodRecipes(): Promise<FoodRecipe[]> {
           'Use plant-based milk for dairy-free option.',
           'Substitute eggs with applesauce or banana for egg-free version.',
         ],
-        imageUrl: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&q=80',
+        imageUrl:
+          'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&q=80',
       },
     ];
-    
+
     return mockRecipes;
-    
   } catch (error) {
     console.error('Error fetching food recipes:', error);
     return [];
@@ -296,21 +303,20 @@ export async function getFoodRecipeById(id: string): Promise<FoodRecipe | null> 
   try {
     // First, get all server-side recipes
     const allRecipes = await getFoodRecipes();
-    
+
     // Check if the recipe exists in the server data
-    const recipe = allRecipes.find(recipe => recipe.id === id);
-    
+    const recipe = allRecipes.find((recipe) => recipe.id === id);
+
     if (recipe) {
       return recipe;
     }
-    
+
     // If not found, it might be a client-side saved recipe that's only in localStorage
     // The client will need to check the food list store for this ID
-    
+
     // In a real app, we would make a database query here
     // For now, we'll just return null and let the client handle it
     return null;
-    
   } catch (error) {
     console.error(`Error fetching food recipe with ID ${id}:`, error);
     return null;

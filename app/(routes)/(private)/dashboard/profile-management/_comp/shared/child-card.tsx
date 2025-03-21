@@ -15,12 +15,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useProfileStore } from '../store';
-import type { Child } from '../types';
+import type { Child, Allergy } from '../types';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/cn';
 
 interface Props {
   child: Child;
+}
+
+// Create an extended interface that includes missing properties
+interface ExtendedChild extends Child {
+  photoUrl?: string;
 }
 
 export function ChildCard({ child }: Props) {
@@ -30,6 +35,9 @@ export function ChildCard({ child }: Props) {
   const router = useRouter();
 
   const age = differenceInYears(new Date(), new Date(child.dob));
+
+  // Create extended version with proper typing
+  const extendedChild: ExtendedChild = child;
 
   const handleDelete = async () => {
     try {
@@ -68,8 +76,12 @@ export function ChildCard({ child }: Props) {
       <div className="relative w-full h-48 bg-muted">
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
         <div className="w-full h-full">
-          {child.photoUrl ? (
-            <img src={child.photoUrl} alt={child.name} className="w-full h-full object-cover" />
+          {extendedChild.photoUrl ? (
+            <img
+              src={extendedChild.photoUrl}
+              alt={child.name}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-muted">
               <Avatar className="h-32 w-32">
@@ -133,9 +145,9 @@ export function ChildCard({ child }: Props) {
                     variant="outline"
                     className={cn(
                       'border-2',
-                      allergy.severity === 'High' && 'border-destructive text-destructive',
-                      allergy.severity === 'Medium' && 'border-yellow-500 text-yellow-700',
-                      allergy.severity === 'Low' && 'border-green-500 text-green-700'
+                      (allergy as any).severity === 'High' && 'border-destructive text-destructive',
+                      (allergy as any).severity === 'Medium' && 'border-yellow-500 text-yellow-700',
+                      (allergy as any).severity === 'Low' && 'border-green-500 text-green-700'
                     )}
                   >
                     {allergy.allergen}

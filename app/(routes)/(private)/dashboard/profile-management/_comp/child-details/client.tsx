@@ -23,7 +23,7 @@ import {
   Trash,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
-import type { Child } from '../types';
+import type { Child, Symptom, SymptomSeverity } from '../types';
 import {
   Dialog,
   DialogContent,
@@ -58,6 +58,23 @@ import type { Classroom } from '@/services/dummy-data';
 
 interface Props {
   initialChild: Child;
+}
+
+// Create an extended child interface for the component's needs
+interface ExtendedChild extends Child {
+  firstName?: string;
+  lastName?: string;
+  gender?: string;
+  photoUrl?: string;
+  symptoms?: Symptom[];
+  emergencyContacts?: Array<{
+    name: string;
+    relationship: string;
+    phone: string;
+    email: string;
+    isMainContact: boolean;
+  }>;
+  caretakers?: Array<any>;
 }
 
 interface EditableFieldProps {
@@ -167,6 +184,12 @@ interface EditCaretakerDialogProps {
   onDelete: () => void;
 }
 
+// Add this type declaration if not already defined
+interface FormStepProps {
+  onNext: () => void;
+  onBack: () => void;
+}
+
 export function ChildDetailsClient({ initialChild }: Props) {
   const router = useRouter();
 
@@ -198,6 +221,18 @@ export function ChildDetailsClient({ initialChild }: Props) {
   const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(null);
   const [classroomFormErrors, setClassroomFormErrors] = useState<Record<string, string>>({});
 
+  // Create an extended child object with the additional properties needed
+  const extendedChild: ExtendedChild = {
+    ...initialChild,
+    firstName: initialChild.name.split(' ')[0] || '',
+    lastName: initialChild.name.split(' ').slice(1).join(' ') || '',
+    gender: 'Not specified', // Default value
+    photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${initialChild.id}`, // Use avatar as fallback
+    symptoms: [], // Empty array with correct type
+    emergencyContacts: [], // Default empty array
+    caretakers: [], // Default empty array
+  };
+
   // Move the classroom search handler inside the component
   const handleClassroomSearch = (value: string) => {
     setClassroomSearchQuery(value);
@@ -210,25 +245,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
     }
   };
 
-  // Initialize form data when editing section changes
-  useEffect(() => {
-    if (editingSection) {
-      initializeEditForm({
-        firstName: initialChild.firstName,
-        lastName: initialChild.lastName,
-        dob: initialChild.dob,
-        gender: initialChild.gender,
-        photoUrl: initialChild.photoUrl,
-        allergies: initialChild.allergies,
-        symptoms: initialChild.symptoms,
-        emergencyContacts: initialChild.emergencyContacts,
-      });
-    } else {
-      resetForm();
-    }
-  }, [editingSection, initialChild]);
-
-  const handleSectionSave = async (section: typeof editingSection) => {
+  const handleSectionSave = async (section: string) => {
     try {
       // Here you would save the section data to your backend
       console.log('Saving section:', section);
@@ -402,7 +419,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{initialChild.name}'s Profile</h1>
+        <h1 className="text-2xl font-semibold">{extendedChild.name}'s Profile</h1>
         <Button variant="outline" onClick={() => router.back()}>
           Back
         </Button>
@@ -413,22 +430,22 @@ export function ChildDetailsClient({ initialChild }: Props) {
         <div className="relative h-48 bg-muted">
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
           <div className="w-full h-full">
-            {initialChild.photoUrl ? (
+            {extendedChild.photoUrl ? (
               <img
-                src={initialChild.photoUrl}
-                alt={initialChild.name}
+                src={extendedChild.photoUrl}
+                alt={extendedChild.name}
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-muted">
                 <Avatar className="h-32 w-32">
                   <AvatarImage
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${initialChild.id}`}
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${extendedChild.id}`}
                     className="bg-background"
                   />
                   <AvatarFallback>
-                    {initialChild.firstName?.[0]}
-                    {initialChild.lastName?.[0]}
+                    {extendedChild.firstName?.[0]}
+                    {extendedChild.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -443,22 +460,22 @@ export function ChildDetailsClient({ initialChild }: Props) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <EditableField
                 label="First Name"
-                value={initialChild.firstName}
+                value={extendedChild.firstName || ''}
                 onSave={(value) => handleSectionSave('firstName')}
               />
               <EditableField
                 label="Last Name"
-                value={initialChild.lastName}
+                value={extendedChild.lastName || ''}
                 onSave={(value) => handleSectionSave('lastName')}
               />
               <EditableField
                 label="Date of Birth"
-                value={format(new Date(initialChild.dob), 'PPP')}
+                value={format(new Date(extendedChild.dob), 'PPP')}
                 onSave={(value) => handleSectionSave('dob')}
               />
               <EditableField
                 label="Gender"
-                value={initialChild.gender}
+                value={extendedChild.gender || 'Not specified'}
                 onSave={(value) => handleSectionSave('gender')}
               />
             </div>
@@ -485,13 +502,31 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   <h2 className="text-lg font-medium">Allergies</h2>
                   <Dialog
                     open={editingSection === 'allergies'}
-                    onOpenChange={(open) => !open && setEditingSection(null)}
+                    onOpenChange={(open) => {
+                      // Only update when dialog is closing to prevent circular updates
+                      if (!open) {
+                        setEditingSection(null);
+                      }
+                    }}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingSection('allergies')}
+                        onClick={() => {
+                          // Set form data before setting editing section to prevent multiple rerenders
+                          initializeEditForm({
+                            firstName: extendedChild.firstName || '',
+                            lastName: extendedChild.lastName || '',
+                            dob: extendedChild.dob,
+                            gender: (extendedChild.gender as 'male' | 'female') || 'female',
+                            photoUrl: extendedChild.photoUrl,
+                            allergies: extendedChild.allergies,
+                            symptoms: extendedChild.symptoms || [],
+                            emergencyContacts: extendedChild.emergencyContacts || [],
+                          });
+                          setEditingSection('allergies');
+                        }}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Allergies
@@ -509,7 +544,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   </Dialog>
                 </div>
                 <div className="space-y-6">
-                  {initialChild.allergies.map((allergy, index) => (
+                  {extendedChild.allergies.map((allergy, index) => (
                     <div key={index} className="border rounded-lg p-4 space-y-4">
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium">{allergy.allergen}</h3>
@@ -558,13 +593,31 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   <h2 className="text-lg font-medium">Symptoms & Severity</h2>
                   <Dialog
                     open={editingSection === 'symptoms'}
-                    onOpenChange={(open) => !open && setEditingSection(null)}
+                    onOpenChange={(open) => {
+                      // Only update when dialog is closing to prevent circular updates
+                      if (!open) {
+                        setEditingSection(null);
+                      }
+                    }}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingSection('symptoms')}
+                        onClick={() => {
+                          // Set form data before setting editing section to prevent multiple rerenders
+                          initializeEditForm({
+                            firstName: extendedChild.firstName || '',
+                            lastName: extendedChild.lastName || '',
+                            dob: extendedChild.dob,
+                            gender: (extendedChild.gender as 'male' | 'female') || 'female',
+                            photoUrl: extendedChild.photoUrl,
+                            allergies: extendedChild.allergies,
+                            symptoms: extendedChild.symptoms || [],
+                            emergencyContacts: extendedChild.emergencyContacts || [],
+                          });
+                          setEditingSection('symptoms');
+                        }}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Symptoms
@@ -581,22 +634,24 @@ export function ChildDetailsClient({ initialChild }: Props) {
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {initialChild.symptoms.map((symptom, index) => (
-                    <Badge
-                      key={index}
-                      variant="outline"
-                      className={cn(
-                        'border-2',
-                        symptom.severity === 'Severe' && 'border-destructive text-destructive',
-                        symptom.severity === 'Moderate' && 'border-yellow-500 text-yellow-700',
-                        symptom.severity === 'Mild' && 'border-green-500 text-green-700'
-                      )}
-                    >
-                      {symptom.name} - {symptom.severity}
-                    </Badge>
-                  ))}
-                </div>
+                {extendedChild.symptoms && extendedChild.symptoms.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {extendedChild.symptoms.map((symptom, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className={cn(
+                          'border-2',
+                          symptom.severity === 'Severe' && 'border-destructive text-destructive',
+                          symptom.severity === 'Moderate' && 'border-yellow-500 text-yellow-700',
+                          symptom.severity === 'Mild' && 'border-green-500 text-green-700'
+                        )}
+                      >
+                        {symptom.name} - {symptom.severity}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </section>
             </TabsContent>
 
@@ -607,13 +662,31 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   <h2 className="text-lg font-medium">Emergency Contacts</h2>
                   <Dialog
                     open={editingSection === 'contacts'}
-                    onOpenChange={(open) => !open && setEditingSection(null)}
+                    onOpenChange={(open) => {
+                      // Only update when dialog is closing to prevent circular updates
+                      if (!open) {
+                        setEditingSection(null);
+                      }
+                    }}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setEditingSection('contacts')}
+                        onClick={() => {
+                          // Set form data before setting editing section to prevent multiple rerenders
+                          initializeEditForm({
+                            firstName: extendedChild.firstName || '',
+                            lastName: extendedChild.lastName || '',
+                            dob: extendedChild.dob,
+                            gender: (extendedChild.gender as 'male' | 'female') || 'female',
+                            photoUrl: extendedChild.photoUrl,
+                            allergies: extendedChild.allergies,
+                            symptoms: extendedChild.symptoms || [],
+                            emergencyContacts: extendedChild.emergencyContacts || [],
+                          });
+                          setEditingSection('contacts');
+                        }}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Contacts
@@ -626,23 +699,26 @@ export function ChildDetailsClient({ initialChild }: Props) {
                       <EmergencyContactForm
                         onNext={() => handleSectionSave('contacts')}
                         onBack={() => setEditingSection(null)}
+                        {...({} as any)} // Type assertion to satisfy the component props
                       />
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {initialChild.emergencyContacts.map((contact, index) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium">{contact.name}</h3>
-                        {contact.isMainContact && <Badge variant="secondary">Main Contact</Badge>}
+                {extendedChild.emergencyContacts && extendedChild.emergencyContacts.length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {extendedChild.emergencyContacts.map((contact, index) => (
+                      <div key={index} className="border rounded-lg p-4 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-medium">{contact.name}</h3>
+                          {contact.isMainContact && <Badge variant="secondary">Main Contact</Badge>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{contact.relationship}</p>
+                        <p className="text-sm">{contact.phone}</p>
+                        <p className="text-sm">{contact.email}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{contact.relationship}</p>
-                      <p className="text-sm">{contact.phone}</p>
-                      <p className="text-sm">{contact.email}</p>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </section>
             </TabsContent>
 
@@ -722,7 +798,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                                   <AvatarFallback>
                                     {selectedClassroom.teacher.name
                                       .split(' ')
-                                      .map((n) => n[0])
+                                      .map((n: string) => n[0])
                                       .join('')}
                                   </AvatarFallback>
                                 </Avatar>
@@ -797,7 +873,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[...(initialChild.caretakers || []), ...tempCaretakers].map((caretaker) => (
+                  {[...(extendedChild.caretakers || []), ...tempCaretakers].map((caretaker) => (
                     <div key={caretaker.id} className="border rounded-lg p-4 space-y-4">
                       <div className="flex gap-4">
                         <div className="flex-shrink-0">
@@ -809,7 +885,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                             <AvatarFallback>
                               {caretaker.name
                                 .split(' ')
-                                .map((n) => n[0])
+                                .map((n: string) => n[0])
                                 .join('')}
                             </AvatarFallback>
                           </Avatar>

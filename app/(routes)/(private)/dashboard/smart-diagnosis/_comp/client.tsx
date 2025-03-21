@@ -342,7 +342,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
             <Card className="border-destructive/20 overflow-hidden">
               <div className="bg-destructive/5 px-4 py-3 border-b border-destructive/10">
                 <h3 className="text-lg font-medium text-destructive">Emergency Contact</h3>
-              </div>
+            </div>
               <div className="p-4 space-y-4">
                 <Button variant="destructive" className="gap-2 w-full sm:w-auto">
                   <Phone className="h-4 w-4" />

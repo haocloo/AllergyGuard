@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 const currentUserId = process.env.NEXT_PUBLIC_user_id || 'b806239e-8a3a-4712-9862-1ccd9b821981';
 
 // Add or update these interfaces
-interface Teacher {
+export type Teacher = {
   id: string;
   name: string;
   photoUrl?: string;
@@ -17,7 +17,7 @@ interface Teacher {
   email: string;
 }
 
-interface Classroom {
+export type Classroom = {
   id: string;
   code: string;
   name: string;
@@ -74,7 +74,7 @@ export const classrooms: Classroom[] = [
 
 // ----- Children Collection -----
 // Each child document holds profile info, allergies, and a reference to the classroom.
-interface Caretaker {
+export type Caretaker = {
   id: string;
   userId: string;
   type: 'personal' | 'center';
