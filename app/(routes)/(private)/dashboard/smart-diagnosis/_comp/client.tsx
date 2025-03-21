@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 // Components
-import { Phone, Loader2, Search, Brain, AlertTriangle, X, Zap, Sparkles } from 'lucide-react';
+import {
+  Phone,
+  Loader2,
+  Search,
+  Brain,
+  AlertTriangle,
+  X,
+  Zap,
+  Sparkles,
+  Globe,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -13,10 +23,21 @@ import { useToast } from '@/components/ui/use-toast';
 import { LoadingSteps } from './loading-steps';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/cn';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // Services
 import type { TDiagnosis } from '@/services/dummy-data';
-import { useVoiceRecognitionStore, useInterviewSessionSpeechStore } from '@/services/store';
+import {
+  useVoiceRecognitionStore,
+  useInterviewSessionSpeechStore,
+  SPEECH_RECOGNITION_LANGUAGES,
+} from '@/services/store';
 import { useDiagnosisStore, EnhancedDiagnosis } from './store';
 import { get_diagnosis, DiagnosisResult } from './action';
 
@@ -31,9 +52,27 @@ const getMatchColor = (percentage: number) => {
   return 'bg-orange-100 text-orange-800';
 };
 
+// Helper function to get language emoji based on language code
+const getLanguageEmoji = (languageCode: string): string => {
+  switch (languageCode) {
+    case 'en-US':
+      return '🇺🇸';
+    case 'zh-CN':
+      return '🇨🇳';
+    case 'ms-MY':
+      return '🇲🇾';
+    case 'ta-IN':
+      return '🇮🇳';
+    default:
+      return '🌐';
+  }
+};
+
 export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientProps) {
   const [input, setInput] = useState('');
-  const { text, isListening, resetTranscript } = useVoiceRecognitionStore();
+  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
+  const { text, isListening, resetTranscript, selectedLanguage, setSelectedLanguage } =
+    useVoiceRecognitionStore();
   const { handleRecording, permissionState } = useInterviewSessionSpeechStore();
   const { toast } = useToast();
 
@@ -97,11 +136,118 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
 
   // Reset to start over
   const handleReset = () => {
+    // Stop listening if active
+    if (isListening) {
+      const recognition = (window as any).__recognition;
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.error('Error stopping recognition:', e);
+        }
+        delete (window as any).__recognition;
+      }
+      useVoiceRecognitionStore.getState().setIsListening(false);
+    }
+
+    // Clear the input and text, but keep the selected language
     setInput('');
-    resetTranscript();
+    useVoiceRecognitionStore.getState().setText('');
+    useVoiceRecognitionStore.getState().setTempText('');
+
+    // Reset diagnosis state
     setSelectedDiagnosis(null);
     setFilteredDiagnoses(initialDiagnoses.slice(0, 3));
     setHasSearched(false);
+
+    toast({
+      title: 'Input cleared',
+      description: 'Ready for new symptoms description',
+      duration: 2000,
+    });
+  };
+
+  // Handle language change
+  const handleLanguageChange = (value: string) => {
+    // Don't do anything if the language is already selected
+    if (value === selectedLanguage) return;
+
+    // Stop listening if currently active but preserve the text
+    if (isListening) {
+      const recognition = (window as any).__recognition;
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.error('Error stopping recognition during language change:', e);
+        }
+        delete (window as any).__recognition;
+      }
+      // Only update the listening state, don't clear text
+      useVoiceRecognitionStore.getState().setIsListening(false);
+    }
+
+    // Set changing language state to show indicator
+    setIsChangingLanguage(true);
+
+    // Set the new language
+    setSelectedLanguage(value);
+
+    // Show toast notification
+    const languageName = SPEECH_RECOGNITION_LANGUAGES.find((lang) => lang.code === value)?.name;
+    toast({
+      title: `Language changed to ${languageName}`,
+      description: 'Voice recognition will now detect this language',
+      duration: 3000,
+    });
+
+    // Clear changing language state after a delay
+    setTimeout(() => {
+      setIsChangingLanguage(false);
+    }, 1000);
+  };
+
+  const handleRecordingBtn = () => {
+    try {
+      // If already listening, just stop
+      if (isListening) {
+        const recognition = (window as any).__recognition;
+        if (recognition) {
+          try {
+            recognition.stop();
+          } catch (e) {
+            console.error('Error stopping recognition:', e);
+          }
+          delete (window as any).__recognition;
+        }
+        useVoiceRecognitionStore.getState().setIsListening(false);
+
+        // No need for a toast notification for stopping - the color change is enough
+      } else {
+        // Start listening
+        handleRecording({});
+
+        // No need for a toast notification for starting - the color change is enough
+      }
+    } catch (error) {
+      console.error('Error in recording toggle:', error);
+      // Force reset the recognition state
+      const recognition = (window as any).__recognition;
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {}
+        delete (window as any).__recognition;
+      }
+      useVoiceRecognitionStore.getState().setIsListening(false);
+
+      toast({
+        title: 'Recording error',
+        description: 'There was an error with the speech recognition. Please try again.',
+        variant: 'destructive',
+        duration: 3000,
+      });
+    }
   };
 
   return (
@@ -151,38 +297,85 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
               </button>
             )}
 
-            {/* Voice button */}
-            <button
-              type="button"
-              onClick={() => handleRecording({})}
-              disabled={permissionState === 'denied' || isLoading}
-              className={cn(
-                'relative w-12 h-12 rounded-full flex items-center justify-center transition-colors',
-                isListening ? 'bg-blue-500 dark:bg-blue-700' : 'bg-gray-50 dark:bg-gray-700'
-              )}
-            >
-              {isListening ? (
-                <div className="relative size-full rounded-full overflow-hidden">
-                  <Image
-                    src="/voice-assistant/voice-animation-start.gif"
-                    width={100}
-                    height={100}
-                    alt="Voice recording Start"
-                    className="w-full h-full object-cover rounded-full"
-                    priority
-                  />
-                </div>
-              ) : (
-                <Image
-                  src="/voice-assistant/voice-animation-stop.png"
-                  width={100}
-                  height={100}
-                  alt="Voice recording Stop"
-                  className="w-full h-full object-cover rounded-full"
-                  priority
-                />
-              )}
-            </button>
+            {/* Voice recognition control - redesigned */}
+            <div className="flex">
+              {/* Recording button */}
+              <button
+                type="button"
+                onClick={handleRecordingBtn}
+                aria-label={isListening ? 'Stop recording' : 'Start recording'}
+                disabled={permissionState === 'denied' || isLoading}
+                className={cn(
+                  'relative z-10 h-12 px-4 flex items-center justify-center rounded-l-full border transition-colors',
+                  isListening
+                    ? 'bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-200'
+                    : 'bg-gray-50 hover:bg-gray-100 border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700'
+                )}
+              >
+                {isListening ? (
+                  <div className="relative  size-8 rounded-full overflow-hidden">
+                    <Image
+                      src="/voice-assistant/voice-animation-start.gif"
+                      width={24}
+                      height={24}
+                      alt="Voice recording Start"
+                      className="w-full h-full object-cover rounded-full"
+                      priority
+                    />
+                  </div>
+                ) : (
+                  <div className="relative size-8 rounded-full overflow-hidden">
+                    <Image
+                      src="/voice-assistant/voice-animation-stop.png"
+                      width={24}
+                      height={24}
+                      alt="Voice recording Stop"
+                      className="w-full h-full  object-cover rounded-full"
+                      priority
+                    />
+                  </div>
+                )}
+              </button>
+
+              {/* Language dropdown */}
+              <Select
+                value={selectedLanguage}
+                onValueChange={handleLanguageChange}
+                disabled={isLoading}
+              >
+                <SelectTrigger
+                  className={cn(
+                    'relative z-10 h-12 min-w-28 rounded-r-full border border-l-0 transition-colors',
+                    isChangingLanguage ? 'bg-blue-50' : '',
+                    'bg-gray-50 hover:bg-gray-100 border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700'
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-base">{getLanguageEmoji(selectedLanguage)}</span>
+                    <span className="text-sm font-medium hidden sm:inline">
+                      {
+                        SPEECH_RECOGNITION_LANGUAGES.find((lang) => lang.code === selectedLanguage)
+                          ?.name
+                      }
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent align="end">
+                  {SPEECH_RECOGNITION_LANGUAGES.map((language) => (
+                    <SelectItem
+                      key={language.code}
+                      value={language.code}
+                      className={selectedLanguage === language.code ? 'bg-primary/10' : ''}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{getLanguageEmoji(language.code)}</span>
+                        <span>{language.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Submit button */}
             <Button
