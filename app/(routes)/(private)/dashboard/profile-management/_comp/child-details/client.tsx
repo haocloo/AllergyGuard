@@ -211,7 +211,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState(users);
+  const [filteredUsers, setFilteredUsers] = useState<typeof users>(users);
   const [tempCaretakers, setTempCaretakers] = useState<TempCaretaker[]>([]);
   const [editingCaretaker, setEditingCaretaker] = useState<TempCaretaker | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -287,16 +287,16 @@ export function ChildDetailsClient({ initialChild }: Props) {
     }
   };
 
-  // Simplified search handler
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+  // Update the search handler to handle undefined case
+  const handleSearch = (value: string) => {
     setSearchQuery(value);
-
-    const filtered = users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(value.toLowerCase()) ||
-        user.email.toLowerCase().includes(value.toLowerCase())
-    );
+    // Filter users based on search query, ensure users exists
+    const filtered =
+      users?.filter(
+        (user) =>
+          user.email.toLowerCase().includes(value.toLowerCase()) ||
+          user.name.toLowerCase().includes(value.toLowerCase())
+      ) || [];
     setFilteredUsers(filtered);
   };
 
@@ -374,6 +374,10 @@ export function ChildDetailsClient({ initialChild }: Props) {
       // Reset all states when dialog is closed
       setCaretakerType(null);
       setSelectedUser(null);
+      setSelectedClassroom(null);
+      setClassroomSearchQuery('');
+      setSearchQuery('');
+      setFilteredUsers(users); // Reset to all users instead of empty array
       setCaretakerForm({
         type: 'personal',
         name: '',
@@ -381,8 +385,8 @@ export function ChildDetailsClient({ initialChild }: Props) {
         phone: '',
         role: '',
       });
-      setSearchQuery('');
-      setFilteredUsers(users);
+      setFormErrors({});
+      setClassroomFormErrors({});
     }
     setShowCaretakerDialog(open);
   };
@@ -703,135 +707,334 @@ export function ChildDetailsClient({ initialChild }: Props) {
                         <DialogTitle>Add Caretaker</DialogTitle>
                       </DialogHeader>
 
-                      {/* Update the childcare center form section */}
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="bg-muted/50 rounded-lg p-3">
-                          <div className="flex items-start gap-2 text-muted-foreground">
-                            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                            <p className="text-sm">
-                              Please obtain the classroom code from your childcare center before
-                              proceeding.
+                      {!caretakerType ? (
+                        // Initial selection screen with colored buttons
+                        <div className="grid grid-cols-2 gap-4 pt-4">
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              'h-auto min-h-[8rem] flex flex-col items-center justify-center gap-2 border-2',
+                              'hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50/50',
+                              'transition-colors duration-200 p-4'
+                            )}
+                            onClick={() => setCaretakerType('personal')}
+                          >
+                            <div className="p-2 rounded-full bg-blue-100">
+                              <PersonStanding className="h-8 w-8 text-blue-500" />
+                            </div>
+                            <span className="font-medium text-center">Personal Caretaker</span>
+                            <p className="text-xs text-muted-foreground text-center max-w-[150px] whitespace-normal">
+                              Family or individual caretakers
                             </p>
-                          </div>
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              'h-auto min-h-[8rem] flex flex-col items-center justify-center gap-2 border-2',
+                              'hover:border-purple-500 hover:text-purple-500 hover:bg-purple-50/50',
+                              'transition-colors duration-200 p-4'
+                            )}
+                            onClick={() => setCaretakerType('center')}
+                          >
+                            <div className="p-2 rounded-full bg-purple-100">
+                              <Building2 className="h-8 w-8 text-purple-500" />
+                            </div>
+                            <span className="font-medium text-center">Childcare Center</span>
+                            <p className="text-xs text-muted-foreground text-center max-w-[150px] whitespace-normal">
+                              Daycare institutions
+                            </p>
+                          </Button>
                         </div>
-
-                        <div className="space-y-2">
-                          <Label>Classroom Code</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              value={classroomSearchQuery}
-                              onChange={(e) => {
-                                setClassroomSearchQuery(e.target.value);
-                                setClassroomFormErrors({});
-                              }}
-                              placeholder="e.g., CC001-K1A"
-                              className={classroomFormErrors.code ? 'border-destructive' : ''}
-                            />
-                            <Button
-                              variant="secondary"
-                              onClick={handleSearchSubmit}
-                              className="flex-shrink-0"
-                            >
-                              <Search className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          {classroomFormErrors.code && (
-                            <p className="text-sm text-destructive">{classroomFormErrors.code}</p>
-                          )}
-                        </div>
-
-                        {selectedClassroom && (
-                          <div className="space-y-3 sm:space-y-4 border rounded-lg p-3 sm:p-4">
-                            <div className="space-y-1">
-                              <h3 className="font-medium">{selectedClassroom.centerName}</h3>
-                              <p className="text-sm text-muted-foreground">
-                                {selectedClassroom.address}
+                      ) : caretakerType === 'center' ? (
+                        // Childcare center form
+                        <div className="space-y-3 sm:space-y-4">
+                          <div className="bg-muted/50 rounded-lg p-3">
+                            <div className="flex items-start gap-2 text-muted-foreground">
+                              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                              <p className="text-sm">
+                                Please obtain the classroom code from your childcare center before
+                                proceeding.
                               </p>
                             </div>
+                          </div>
 
-                            <div className="border-t pt-3">
-                              <h4 className="text-sm font-medium mb-1">Class Information</h4>
-                              <p className="text-sm">{selectedClassroom.name}</p>
+                          <div className="space-y-2">
+                            <Label>Classroom Code</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                value={classroomSearchQuery}
+                                onChange={(e) => {
+                                  setClassroomSearchQuery(e.target.value);
+                                  setClassroomFormErrors({});
+                                }}
+                                placeholder="e.g., CC001-K1A"
+                                className={classroomFormErrors.code ? 'border-destructive' : ''}
+                              />
+                              <Button
+                                variant="secondary"
+                                onClick={handleSearchSubmit}
+                                className="flex-shrink-0"
+                              >
+                                <Search className="h-4 w-4" />
+                              </Button>
                             </div>
+                            {classroomFormErrors.code && (
+                              <p className="text-sm text-destructive">{classroomFormErrors.code}</p>
+                            )}
+                          </div>
 
-                            <div className="border-t pt-3">
-                              <h4 className="text-sm font-medium mb-2">Teacher Information</h4>
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-12 w-12">
-                                  <AvatarImage src={selectedClassroom.teacher.photoUrl} />
-                                  <AvatarFallback>
-                                    {selectedClassroom.teacher.name
-                                      .split(' ')
-                                      .map((n: string) => n[0])
-                                      .join('')}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-medium truncate">
-                                    {selectedClassroom.teacher.name}
-                                  </p>
-                                  <div className="flex flex-col space-y-1 text-sm">
-                                    <p className="text-muted-foreground truncate">
-                                      {selectedClassroom.teacher.email}
+                          {selectedClassroom && (
+                            <div className="space-y-3 sm:space-y-4 border rounded-lg p-3 sm:p-4">
+                              <div className="space-y-1">
+                                <h3 className="font-medium">{selectedClassroom.centerName}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {selectedClassroom.address}
+                                </p>
+                              </div>
+
+                              <div className="border-t pt-3">
+                                <h4 className="text-sm font-medium mb-1">Class Information</h4>
+                                <p className="text-sm">{selectedClassroom.name}</p>
+                              </div>
+
+                              <div className="border-t pt-3">
+                                <h4 className="text-sm font-medium mb-2">Teacher Information</h4>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-12 w-12">
+                                    <AvatarImage src={selectedClassroom.teacher.photoUrl} />
+                                    <AvatarFallback>
+                                      {selectedClassroom.teacher.name
+                                        .split(' ')
+                                        .map((n: string) => n[0])
+                                        .join('')}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-medium truncate">
+                                      {selectedClassroom.teacher.name}
                                     </p>
-                                    <Button
-                                      variant="ghost"
-                                      className="flex items-center gap-2 w-fit h-auto p-0 text-emerald-600 hover:text-emerald-700"
-                                      asChild
-                                    >
-                                      <a
-                                        href={`tel:${selectedClassroom.teacher.phone}`}
-                                        className="flex items-center gap-2"
+                                    <div className="flex flex-col space-y-1 text-sm">
+                                      <p className="text-muted-foreground truncate">
+                                        {selectedClassroom.teacher.email}
+                                      </p>
+                                      <Button
+                                        variant="ghost"
+                                        className="flex items-center gap-2 w-fit h-auto p-0 text-emerald-600 hover:text-emerald-700"
+                                        asChild
                                       >
-                                        <div className="bg-emerald-100 p-1 rounded-full">
-                                          <Phone className="h-4 w-4" />
-                                        </div>
-                                        <span>{selectedClassroom.teacher.phone}</span>
-                                      </a>
-                                    </Button>
+                                        <a
+                                          href={`tel:${selectedClassroom.teacher.phone}`}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <div className="bg-emerald-100 p-1 rounded-full">
+                                            <Phone className="h-4 w-4" />
+                                          </div>
+                                          <span>{selectedClassroom.teacher.phone}</span>
+                                        </a>
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="border-t pt-3">
-                              <Label className="text-sm">Note to Childcare Center (Optional)</Label>
-                              <Textarea
-                                value={caretakerForm.noteToCaretaker || ''}
-                                onChange={(e) =>
-                                  setCaretakerForm((prev) => ({
-                                    ...prev,
-                                    noteToCaretaker: e.target.value,
-                                  }))
-                                }
-                                placeholder="Add any special notes or requests..."
-                                className="mt-1.5"
-                              />
-                            </div>
+                              <div className="border-t pt-3">
+                                <Label className="text-sm">
+                                  Note to Childcare Center (Optional)
+                                </Label>
+                                <Textarea
+                                  value={caretakerForm.noteToCaretaker || ''}
+                                  onChange={(e) =>
+                                    setCaretakerForm((prev) => ({
+                                      ...prev,
+                                      noteToCaretaker: e.target.value,
+                                    }))
+                                  }
+                                  placeholder="Add any special notes or requests..."
+                                  className="mt-1.5"
+                                />
+                              </div>
 
-                            <div className="flex justify-end gap-2 pt-2">
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setCaretakerType(null);
-                                  setSelectedClassroom(null);
-                                  setClassroomSearchQuery('');
-                                  setCaretakerForm({
-                                    type: 'personal',
-                                    name: '',
-                                    email: '',
-                                    phone: '',
-                                    role: '',
-                                  });
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button onClick={handleSaveCaretaker}>Add Childcare Center</Button>
+                              <div className="flex justify-end gap-2 pt-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setCaretakerType(null);
+                                    setSelectedClassroom(null);
+                                    setClassroomSearchQuery('');
+                                    setCaretakerForm({
+                                      type: 'personal',
+                                      name: '',
+                                      email: '',
+                                      phone: '',
+                                      role: '',
+                                    });
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button onClick={handleSaveCaretaker}>Add Childcare Center</Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // Personal caretaker form
+                        <div className="space-y-4">
+                          <div className="bg-muted/50 rounded-lg p-3">
+                            <div className="flex items-start gap-2 text-muted-foreground">
+                              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                              <p className="text-sm">
+                                Please ensure that the caretaker has registered for an account
+                                before adding them. You can search by their email or username.
+                              </p>
                             </div>
                           </div>
-                        )}
-                      </div>
+
+                          {/* Search Section */}
+                          <div className="space-y-2">
+                            <Label>Search Caretaker</Label>
+                            <div className="flex gap-2">
+                              <Command className="border rounded-lg">
+                                <CommandInput
+                                  placeholder="Search by email or username..."
+                                  value={searchQuery}
+                                  onValueChange={(value) => {
+                                    setSearchQuery(value);
+                                    // Filter from the original users array
+                                    const filtered = users.filter(
+                                      (user) =>
+                                        user.name.toLowerCase().includes(value.toLowerCase()) ||
+                                        user.email.toLowerCase().includes(value.toLowerCase())
+                                    );
+                                    setFilteredUsers(filtered);
+                                  }}
+                                />
+                                <CommandEmpty>No caretaker found.</CommandEmpty>
+                                <CommandGroup>
+                                  {filteredUsers.map((user) => (
+                                    <CommandItem
+                                      key={user.id}
+                                      value={user.id}
+                                      onSelect={() => {
+                                        setSelectedUser(user);
+                                        setCaretakerForm((prev) => ({
+                                          ...prev,
+                                          type: 'personal',
+                                          name: user.name,
+                                          email: user.email,
+                                          phone: user.phone || '',
+                                        }));
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <Avatar className="h-8 w-8">
+                                          <AvatarImage
+                                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}
+                                          />
+                                          <AvatarFallback>{user.name[0]}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex flex-col">
+                                          <span className="font-medium">{user.name}</span>
+                                          <span className="text-xs text-muted-foreground">
+                                            {user.email}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </Command>
+                            </div>
+                          </div>
+
+                          {/* Selected User Form */}
+                          {selectedUser && (
+                            <div className="space-y-4 border rounded-lg p-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-12 w-12">
+                                  <AvatarImage
+                                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.email}`}
+                                  />
+                                  <AvatarFallback>{selectedUser.name[0]}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <h3 className="font-medium">{selectedUser.name}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {selectedUser.email}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <div className="space-y-2">
+                                  <Label>Caretaker Role</Label>
+                                  <Input
+                                    value={caretakerForm.role}
+                                    onChange={(e) =>
+                                      setCaretakerForm((prev) => ({
+                                        ...prev,
+                                        role: e.target.value,
+                                      }))
+                                    }
+                                    placeholder="e.g., Nanny, Babysitter, Grandparent"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label>Phone Number</Label>
+                                  <Input
+                                    value={caretakerForm.phone}
+                                    onChange={(e) =>
+                                      setCaretakerForm((prev) => ({
+                                        ...prev,
+                                        phone: e.target.value,
+                                      }))
+                                    }
+                                    placeholder="Enter phone number"
+                                  />
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label>Note to Caretaker (Optional)</Label>
+                                  <Textarea
+                                    value={caretakerForm.noteToCaretaker || ''}
+                                    onChange={(e) =>
+                                      setCaretakerForm((prev) => ({
+                                        ...prev,
+                                        noteToCaretaker: e.target.value,
+                                      }))
+                                    }
+                                    placeholder="Add any special notes or requests..."
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end gap-2 pt-2">
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setCaretakerType(null);
+                                    setSelectedUser(null);
+                                    setSearchQuery('');
+                                    setFilteredUsers(users);
+                                    setCaretakerForm({
+                                      type: 'personal',
+                                      name: '',
+                                      email: '',
+                                      phone: '',
+                                      role: '',
+                                    });
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button onClick={handleSaveCaretaker}>Add Caretaker</Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </DialogContent>
                   </Dialog>
                 </div>
