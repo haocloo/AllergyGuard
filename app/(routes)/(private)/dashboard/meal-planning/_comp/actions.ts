@@ -33,7 +33,7 @@ export async function getMealPlans(): Promise<MealPlan[]> {
     // }) as MealPlan);
 
     // Use our mock data from the local file
-    return mockMealPlans.filter(plan => plan.id !== '0'); // Just a simple filter to demonstrate
+    return mockMealPlans.filter((plan) => plan.id !== '0'); // Just a simple filter to demonstrate
   } catch (error) {
     utils_log_server_error('Error fetching meal plans:', error);
     return [];
@@ -95,7 +95,6 @@ export async function createMealPlan(
     //   id: docRef.id,
     // });
 
-
     // For demonstration purposes - using string-only form to avoid linter errors
     const newPlan = {
       ...mealPlan,
@@ -106,8 +105,7 @@ export async function createMealPlan(
     console.log('Meal plan would be created:', newPlan);
 
     revalidatePath('/meal-planning/plans');
-    return { success: true, message: 'Meal plan created successfully' };
-
+    return toFormState('SUCCESS', 'Meal plan created successfully');
   } catch (error) {
     utils_log_server_error('Error creating meal plan:', error);
     return fromErrorToFormState('Failed to create meal plan');
@@ -130,7 +128,6 @@ export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): P
     //   updatedAt: FieldValue.serverTimestamp(),
     // });
 
-
     // For demonstration purposes - using string-only form to avoid linter errors
     const updatedPlan = {
       id,
@@ -140,7 +137,7 @@ export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): P
     console.log('Meal plan would be updated:', updatedPlan);
 
     revalidatePath('/meal-planning/plans');
-    return { success: true, message: 'Meal plan updated successfully' };
+    return toFormState('SUCCESS', 'Meal plan updated successfully');
   } catch (error) {
     utils_log_server_error('Error updating meal plan:', error);
     return fromErrorToFormState('Failed to update meal plan');
@@ -160,13 +157,11 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
     // In production, we would delete from Firestore
     // await adminFirestore.collection('mealPlans').doc(id).delete();
 
-
     // For demonstration purposes - using string-only form to avoid linter errors
     console.log('Meal plan would be deleted:', { id });
 
     revalidatePath('/meal-planning/plans');
-    return { success: true, message: 'Meal plan deleted successfully' };
-
+    return toFormState('SUCCESS', 'Meal plan deleted successfully');
   } catch (error) {
     utils_log_server_error('Error deleting meal plan:', error);
     return fromErrorToFormState('Failed to delete meal plan');
@@ -178,10 +173,8 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
  */
 export async function getFoodRecipes(): Promise<FoodRecipe[]> {
   try {
-
     // Use our mock data from the local file
     return getMockRecipes();
-
   } catch (error) {
     console.error('Error fetching food recipes:', error);
     return [];
@@ -193,10 +186,8 @@ export async function getFoodRecipes(): Promise<FoodRecipe[]> {
  */
 export async function getFoodRecipeById(id: string): Promise<FoodRecipe | null> {
   try {
-
     // Use our mock data from the local file
     return getMockRecipeById(id);
-
   } catch (error) {
     console.error(`Error fetching food recipe with ID ${id}:`, error);
     return null;
