@@ -140,8 +140,14 @@ export function BasicInfoForm({ onNext }: Props) {
                 {date ? format(date, 'PPP') : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+            <PopoverContent className="w-[--radix-popover-trigger-width] max-w-[300px] p-0" align="start">
+              <Calendar
+                mode="single"
+                className="w-[--radix-popover-trigger-width]"
+                selected={date}
+                onSelect={setDate}
+                initialFocus
+              />
             </PopoverContent>
           </Popover>
         </div>
