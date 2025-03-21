@@ -33,6 +33,12 @@ export const navList: T_navItem[] = [
             role: ['admin', 'caretaker', 'parent'],
             icon: Baby,
           },
+          {
+            title: 'Classroom Management',
+            url: '/dashboard/classroom-management',
+            role: ['admin', 'caretaker'],
+            icon: Book,
+          },
         ],
       },
       {
