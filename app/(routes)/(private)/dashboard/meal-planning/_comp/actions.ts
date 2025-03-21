@@ -14,6 +14,7 @@ import { toFormState, fromErrorToFormState } from '@/components/helpers/form-ite
 // For now using dummy data
 import { children, mealPlans as dummyMealPlans } from '@/services/dummy-data';
 import { Allergen, FoodRecipe, Ingredient, MealPlan } from './store';
+import { createClient } from '@/lib/supabase/server';
 
 /**
  * Get all meal plans for the current user
@@ -212,5 +213,106 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
   } catch (error) {
     utils_log_server_error('Error deleting meal plan:', error);
     return fromErrorToFormState('Failed to delete meal plan');
+  }
+}
+
+/**
+ * Get food recipes for the food list
+ */
+export async function getFoodRecipes(): Promise<FoodRecipe[]> {
+  try {
+    // In a real app, you would fetch these from a database
+    // For demo purposes, we're returning mock data
+    
+    // Simulating a database query
+    const mockRecipes: FoodRecipe[] = [
+      {
+        id: '1',
+        name: 'Quinoa Salad',
+        description: 'A refreshing salad with quinoa, vegetables, and a light dressing.',
+        ingredients: [
+          { name: 'Quinoa', containsAllergens: [] },
+          { name: 'Cucumber', containsAllergens: [] },
+          { name: 'Cherry Tomatoes', containsAllergens: [] },
+          { name: 'Red Onion', containsAllergens: [] },
+          { name: 'Olive Oil', containsAllergens: [] },
+          { name: 'Lemon Juice', containsAllergens: [] },
+        ],
+        instructions: [
+          'Cook quinoa according to package instructions and let it cool.',
+          'Dice cucumber, halve cherry tomatoes, and finely chop red onion.',
+          'Mix all ingredients in a large bowl.',
+          'Dress with olive oil and lemon juice, salt and pepper to taste.',
+          'Serve chilled or at room temperature.',
+        ],
+        allergensFound: [],
+        suggestions: [
+          'Add feta cheese for extra flavor (contains milk allergen).',
+          'Try adding nuts for crunch (tree nut allergen).',
+        ],
+        imageUrl: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?auto=format&fit=crop&q=80',
+      },
+      {
+        id: '2',
+        name: 'Gluten-Free Pancakes',
+        description: 'Fluffy pancakes made with gluten-free flour blend.',
+        ingredients: [
+          { name: 'Gluten-Free Flour Blend', containsAllergens: [] },
+          { name: 'Eggs', containsAllergens: ['Egg'] },
+          { name: 'Milk', containsAllergens: ['Milk'] },
+          { name: 'Baking Powder', containsAllergens: [] },
+          { name: 'Vanilla Extract', containsAllergens: [] },
+          { name: 'Maple Syrup', containsAllergens: [] },
+        ],
+        instructions: [
+          'Mix all dry ingredients in a bowl.',
+          'In a separate bowl, whisk eggs and milk together.',
+          'Combine wet and dry ingredients, add vanilla extract.',
+          'Heat a pan and cook pancakes until bubbles form and edges are set.',
+          'Flip and cook until golden.',
+          'Serve with maple syrup.',
+        ],
+        allergensFound: ['Egg', 'Milk'],
+        suggestions: [
+          'Use plant-based milk for dairy-free option.',
+          'Substitute eggs with applesauce or banana for egg-free version.',
+        ],
+        imageUrl: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&q=80',
+      },
+    ];
+    
+    return mockRecipes;
+    
+  } catch (error) {
+    console.error('Error fetching food recipes:', error);
+    return [];
+  }
+}
+
+/**
+ * Get a single food recipe by ID
+ */
+export async function getFoodRecipeById(id: string): Promise<FoodRecipe | null> {
+  try {
+    // First, get all server-side recipes
+    const allRecipes = await getFoodRecipes();
+    
+    // Check if the recipe exists in the server data
+    const recipe = allRecipes.find(recipe => recipe.id === id);
+    
+    if (recipe) {
+      return recipe;
+    }
+    
+    // If not found, it might be a client-side saved recipe that's only in localStorage
+    // The client will need to check the food list store for this ID
+    
+    // In a real app, we would make a database query here
+    // For now, we'll just return null and let the client handle it
+    return null;
+    
+  } catch (error) {
+    console.error(`Error fetching food recipe with ID ${id}:`, error);
+    return null;
   }
 }
