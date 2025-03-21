@@ -13,7 +13,7 @@ const taskResponseSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { systemPrompt, userPrompt } = await req.json();
+    const { systemPrompt, userPrompt } = await req.json();1
     if (!systemPrompt || !userPrompt) {
       throw new Error('Prompt is required');
     }

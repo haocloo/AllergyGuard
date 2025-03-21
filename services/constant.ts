@@ -2,6 +2,7 @@
 // This file is for Data only
 
 // ui
+
 import {
   User as UserIcon,
   Utensils,
@@ -12,6 +13,7 @@ import {
   AlertCircle,
   Baby,
 } from 'lucide-react';
+
 
 // services
 import type { T_navItem } from '@/services/types';
@@ -37,6 +39,12 @@ export const navList: T_navItem[] = [
         icon: Utensils,
         items: [
           {
+            title: 'Food List',
+            url: '/dashboard/meal-planning',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: List,
+          },
+          {
             title: 'Ingredient Scanner',
             url: '/dashboard/meal-planning/scanner',
             role: ['admin', 'caretaker', 'parent'],
@@ -54,15 +62,21 @@ export const navList: T_navItem[] = [
             role: ['admin', 'caretaker', 'parent'],
             icon: ChefHat,
           },
+          {
+            title: 'Recipe Analysis',
+            url: '/dashboard/meal-planning/recipes/new/analysis',
+            role: ['admin', 'caretaker', 'parent'],
+            icon: AlertCircle,
+          },
         ],
       },
       {
-        title: 'Emergency Support',
+        title: 'Smart Diagnosis',
         icon: AlertCircle,
         items: [
           {
-            title: 'Panic Mode',
-            url: '/dashboard/panic-mode',
+            title: 'Smart Diagnosis',
+            url: '/dashboard/smart-diagnosis',
             role: ['admin', 'caretaker', 'parent'],
             icon: AlertCircle,
           },

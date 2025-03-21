@@ -23,7 +23,7 @@ type CompanyType = {
 
 const company: CompanyType[] = [
   {
-    name: 'Apex',
+    name: 'AllergyGuard',
     logoUrl: '/favicon/android-chrome-512x512.png',
     plan: 'Startup',
   },
