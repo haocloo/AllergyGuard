@@ -6,11 +6,16 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/cn';
 import { useProfileStore } from '../../store';
 import { SEVERITY_COLORS } from '../../types';
-import type { SymptomSeverity } from '../../types';
+import type { SymptomSeverity, Symptom } from '../../types';
+import { useEffect } from 'react';
 
 interface Props {
-  onNext: () => void;
-  onBack: () => void;
+  isEditing?: boolean;
+  initialData?: Symptom[];
+  onSave?: () => void;
+  onCancel?: () => void;
+  onNext?: () => void;
+  onBack?: () => void;
 }
 
 const severityOptions: { value: SymptomSeverity; label: string }[] = [
@@ -19,8 +24,22 @@ const severityOptions: { value: SymptomSeverity; label: string }[] = [
   { value: 'Severe', label: 'Severe' },
 ];
 
-export function SymptomSeverityForm({ onNext, onBack }: Props) {
+export function SymptomSeverityForm({
+  isEditing,
+  initialData,
+  onSave,
+  onCancel,
+  onNext,
+  onBack,
+}: Props) {
   const { formData, setField } = useProfileStore();
+
+  // Initialize with initial data if in edit mode
+  useEffect(() => {
+    if (isEditing && initialData) {
+      setField('symptoms', initialData);
+    }
+  }, [isEditing, initialData, setField]);
 
   // Collect all unique symptoms from allergies
   const allSymptoms = formData.allergies?.reduce((acc, allergy) => {
@@ -115,10 +134,21 @@ export function SymptomSeverityForm({ onNext, onBack }: Props) {
       </div>
 
       <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={onBack}>
-          Previous Step
-        </Button>
-        <Button onClick={onNext}>Next Step</Button>
+        {isEditing ? (
+          <>
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSave}>Save Changes</Button>
+          </>
+        ) : (
+          <>
+            <Button variant="outline" onClick={onBack}>
+              Previous Step
+            </Button>
+            <Button onClick={onNext}>Next Step</Button>
+          </>
+        )}
       </div>
     </div>
   );

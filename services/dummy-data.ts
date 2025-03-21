@@ -15,7 +15,7 @@ export type Teacher = {
   photoUrl?: string;
   phone: string;
   email: string;
-}
+};
 
 export type Classroom = {
   id: string;
@@ -24,7 +24,7 @@ export type Classroom = {
   centerName: string;
   address: string;
   teacher: Teacher;
-}
+};
 
 // Update the classroom data
 export const classrooms: Classroom[] = [
@@ -74,17 +74,51 @@ export const classrooms: Classroom[] = [
 
 // ----- Children Collection -----
 // Each child document holds profile info, allergies, and a reference to the classroom.
-export type Caretaker = {
+export interface Caretaker {
   id: string;
-  userId: string;
   type: 'personal' | 'center';
   name: string;
   email: string;
+  role: string;
   phone: string;
-  notes: string;
-  noteToCaretaker?: string;
-  status: 'active' | 'pending' | 'inactive';
+  notes?: string;
   createdAt: string;
+}
+
+export interface RawAllergy {
+  allergen: string;
+  severity: 'Low' | 'Medium' | 'High';
+  notes?: string;
+  symptoms?: { name: string }[];
+  actionPlan?: {
+    immediateAction?: string;
+    medications?: { name: string; dosage: string }[];
+  };
+  isCustomAllergen?: boolean;
+}
+
+export interface RawChild {
+  id: string;
+  name: string;
+  firstName?: string;
+  lastName?: string;
+  dob: string;
+  gender?: string;
+  photoUrl?: string;
+  parentId: string;
+  classroomId: string;
+  createdAt: string;
+  createdBy: string;
+  allergies: RawAllergy[];
+  symptoms?: { name: string; severity: string }[];
+  emergencyContacts?: {
+    name: string;
+    relationship: string;
+    phone: string;
+    email: string;
+    isMainContact: boolean;
+  }[];
+  caretakers?: Caretaker[];
 }
 
 export const children = [
@@ -505,37 +539,80 @@ export const pediatricAllergies: TDiagnosis[] = [
   },
 ];
 
-// Add dummy users for search feature
+// Update the dummy users with more personal caretakers
 export const users = [
   {
     id: 'user_001',
     name: 'Sarah Wilson',
     email: 'sarah.wilson@example.com',
     role: 'caretaker',
-    phone: '0123456789',
+    phone: '91234567',
   },
   {
     id: 'user_002',
     name: 'James Thompson',
     email: 'james.t@example.com',
     role: 'caretaker',
-    phone: '0123456790',
+    phone: '92345678',
   },
   {
     id: 'user_003',
     name: 'Maria Garcia',
     email: 'maria.g@example.com',
     role: 'caretaker',
-    phone: '0123456791',
+    phone: '93456789',
   },
   {
     id: 'user_004',
-    name: 'Sunshine Daycare Center',
-    email: 'contact@sunshine-daycare.com',
-    role: 'center',
-    phone: '0123456792',
+    name: 'John Smith',
+    email: 'john.smith@example.com',
+    role: 'caretaker',
+    phone: '94567890',
+  },
+  {
+    id: 'user_005',
+    name: 'Emma Davis',
+    email: 'emma.d@example.com',
+    role: 'caretaker',
+    phone: '95678901',
+  },
+  {
+    id: 'user_006',
+    name: 'Michael Chen',
+    email: 'michael.c@example.com',
+    role: 'caretaker',
+    phone: '96789012',
+  },
+  {
+    id: 'user_007',
+    name: 'Lisa Wong',
+    email: 'lisa.w@example.com',
+    role: 'caretaker',
+    phone: '97890123',
   },
 ];
+
+// Update the caretakers data to include the role field
+export const caretakers = [
+  {
+    id: 'caretaker_1',
+    type: 'personal',
+    name: 'Sarah Johnson',
+    email: 'sarah.j@example.com',
+    role: 'Nanny',
+    phone: '91234567',
+    createdAt: '2024-01-15T08:00:00Z',
+  },
+  {
+    id: 'caretaker_2',
+    type: 'center',
+    name: 'Little Stars Daycare',
+    email: 'contact@littlestars.com',
+    role: 'Daycare Center',
+    phone: '97890123',
+    createdAt: '2024-01-20T10:30:00Z',
+  },
+] as const;
 
 // ----------------------------------------------
 // Usage Notes:
@@ -545,4 +622,3 @@ export const users = [
 // - Each document includes a history field to track updates, tying the changes to the user and related document IDs.
 // - Data is tailored for Malaysia, specifically Penang.
 // - In production, replace the fallback currentUserId with the result of lucia_get_user().
-

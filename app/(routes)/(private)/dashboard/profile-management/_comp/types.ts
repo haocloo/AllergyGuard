@@ -3,47 +3,6 @@ import { schema_create_child } from './validation';
 
 export type T_schema_create_child = z.infer<typeof schema_create_child>;
 
-export interface Allergy {
-  allergen: string;
-  notes: string;
-  symptoms: AllergySymptom[];
-  actionPlan: ActionPlan;
-}
-
-export interface AllergySymptom {
-  name: string;
-}
-
-export interface ActionPlan {
-  immediateAction: string;
-  medications: {
-    name: string;
-    dosage: string;
-  }[];
-}
-
-export interface Child {
-  id: string;
-  name: string;
-  dob: string;
-  allergies: Allergy[];
-  parentId: string;
-  classroomId: string;
-  createdAt: string;
-  createdBy: string;
-}
-
-export interface ChildFormData {
-  firstName: string;
-  lastName: string;
-  dob: string;
-  gender: 'male' | 'female';
-  photoUrl?: string;
-  allergies: Allergy[];
-  symptoms: Symptom[];
-  emergencyContacts: EmergencyContact[];
-}
-
 export type SymptomSeverity = 'Mild' | 'Moderate' | 'Severe';
 
 export interface Symptom {
@@ -57,6 +16,72 @@ export interface EmergencyContact {
   phone: string;
   email: string;
   isMainContact: boolean;
+}
+
+export interface Caretaker {
+  id: string;
+  type: 'personal' | 'center';
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface Child {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  gender: 'male' | 'female';
+  photoUrl?: string;
+  parentId: string;
+  classroomId: string;
+  createdAt: string;
+  createdBy: string;
+  allergies: Allergy[];
+  symptoms: Symptom[];
+  emergencyContacts: EmergencyContact[];
+  caretakers: Caretaker[];
+}
+
+export interface AllergySymptom {
+  name: string;
+  isCustom?: boolean;
+}
+
+export interface Allergy {
+  allergen: string;
+  notes: string;
+  severity: 'Low' | 'Medium' | 'High';
+  symptoms: AllergySymptom[];
+  actionPlan: ActionPlan;
+  isCustomAllergen?: boolean;
+}
+
+export interface ActionPlan {
+  immediateAction: string;
+  medications: {
+    name: string;
+    dosage: string;
+  }[];
+}
+
+export interface ChildFormData {
+  firstName: string;
+  lastName: string;
+  name: string;
+  dob: string;
+  gender: 'male' | 'female';
+  photoUrl?: string;
+  allergies: Allergy[];
+  symptoms: Symptom[];
+  emergencyContacts: EmergencyContact[];
+  parentId?: string;
+  classroomId?: string;
+  createdBy?: string;
 }
 
 // Common options

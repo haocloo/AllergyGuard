@@ -26,63 +26,87 @@ import { COMMON_ALLERGENS, COMMON_SYMPTOMS } from '../../types';
 import type { Allergy, AllergySymptom, ActionPlan } from '../../types';
 
 interface Props {
-  onNext: () => void;
-  onBack: () => void;
+  isEditing?: boolean;
+  initialData?: Allergy[];
+  onSave?: () => void;
+  onCancel?: () => void;
+  onNext?: () => void;
+  onBack?: () => void;
 }
 
-interface ExtendedAllergy extends Allergy {
-  isCustomAllergen?: boolean;
-  symptoms: (AllergySymptom & { isCustom?: boolean })[];
-}
+type AllergyField = keyof Pick<Allergy, 'allergen' | 'notes'>;
+type AllergySeverity = 'Low' | 'Medium' | 'High';
 
-export function AllergiesForm({ onNext, onBack }: Props) {
+export function AllergiesForm({ isEditing, initialData, onSave, onCancel, onNext, onBack }: Props) {
   const { formData, setField } = useProfileStore();
   const [customAllergen, setCustomAllergen] = useState('');
   const [customSymptom, setCustomSymptom] = useState('');
 
   const handleAddAllergy = () => {
-    const newAllergy: ExtendedAllergy = {
+    const newAllergy: Allergy = {
       allergen: '',
       notes: '',
+      severity: 'Low',
       symptoms: [],
       actionPlan: {
         immediateAction: '',
         medications: [],
       },
     };
-    setField('allergies', [...(formData.allergies || []), newAllergy]);
+    setField('allergies', [...formData.allergies, newAllergy]);
   };
 
   const handleRemoveAllergy = (index: number) => {
     setField(
       'allergies',
-      (formData.allergies || []).filter((_, i) => i !== index)
+      formData.allergies.filter((_, i) => i !== index)
     );
   };
 
-  const handleAllergyChange = (index: number, field: string, value: any) => {
-    const newAllergies = [...(formData.allergies || [])];
-    newAllergies[index] = { ...newAllergies[index], [field]: value };
+  const handleAllergyChange = (
+    index: number,
+    field: AllergyField | 'severity' | 'actionPlan.immediateAction',
+    value: string
+  ) => {
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[index];
+
+    if (field === 'actionPlan.immediateAction') {
+      allergy.actionPlan = {
+        ...allergy.actionPlan,
+        immediateAction: value,
+      };
+    } else if (field === 'severity') {
+      // Validate severity value
+      if (value === 'Low' || value === 'Medium' || value === 'High') {
+        allergy.severity = value;
+      }
+    } else {
+      // Handle other string fields
+      allergy[field] = value;
+    }
+
     setField('allergies', newAllergies);
   };
 
   const handleSymptomAdd = (allergyIndex: number) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
-    allergy.symptoms = [...(allergy.symptoms || []), { name: '', isCustom: false }];
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex];
+    const newSymptom: AllergySymptom = { name: '', isCustom: false };
+    allergy.symptoms = [...(allergy.symptoms || []), newSymptom];
     setField('allergies', newAllergies);
   };
 
   const handleSymptomRemove = (allergyIndex: number, symptomIndex: number) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex] as Allergy;
     allergy.symptoms = (allergy.symptoms || []).filter((_, i) => i !== symptomIndex);
     setField('allergies', newAllergies);
   };
 
   const handleActionAdd = (allergyIndex: number, field: keyof ActionPlan) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex] as Allergy;
     if (!allergy.actionPlan) {
       allergy.actionPlan = {
         immediateAction: '',
@@ -110,8 +134,8 @@ export function AllergiesForm({ onNext, onBack }: Props) {
     field: 'name' | 'dosage',
     value: string
   ) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex] as Allergy;
     if (!allergy.actionPlan.medications) allergy.actionPlan.medications = [];
 
     allergy.actionPlan.medications[medIndex] = {
@@ -123,8 +147,8 @@ export function AllergiesForm({ onNext, onBack }: Props) {
   };
 
   const handleMedicationRemove = (allergyIndex: number, medIndex: number) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex] as Allergy;
     allergy.actionPlan.medications = allergy.actionPlan.medications.filter(
       (_, i) => i !== medIndex
     );
@@ -132,8 +156,8 @@ export function AllergiesForm({ onNext, onBack }: Props) {
   };
 
   const handleAllergenSelect = (index: number, value: string) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[index] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[index] as Allergy;
 
     if (value === 'Other') {
       allergy.isCustomAllergen = true;
@@ -147,24 +171,30 @@ export function AllergiesForm({ onNext, onBack }: Props) {
   };
 
   const handleSymptomSelect = (allergyIndex: number, symptomIndex: number, value: string) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex];
     if (!allergy.symptoms) allergy.symptoms = [];
 
-    if (value === 'Other') {
-      allergy.symptoms[symptomIndex] = { name: '', isCustom: true };
-    } else {
-      allergy.symptoms[symptomIndex] = { name: value, isCustom: false };
-    }
+    const newSymptom: AllergySymptom = {
+      name: value === 'Other' ? '' : value,
+      isCustom: value === 'Other',
+    };
+    allergy.symptoms[symptomIndex] = newSymptom;
 
     setField('allergies', newAllergies);
   };
 
   const handleSymptomCustomChange = (allergyIndex: number, symptomIndex: number, value: string) => {
-    const newAllergies = [...(formData.allergies || [])];
-    const allergy = newAllergies[allergyIndex] as ExtendedAllergy;
+    const newAllergies = [...formData.allergies];
+    const allergy = newAllergies[allergyIndex];
     if (!allergy.symptoms) allergy.symptoms = [];
-    allergy.symptoms[symptomIndex] = { ...allergy.symptoms[symptomIndex], name: value };
+
+    const updatedSymptom: AllergySymptom = {
+      ...allergy.symptoms[symptomIndex],
+      name: value,
+    };
+    allergy.symptoms[symptomIndex] = updatedSymptom;
+
     setField('allergies', newAllergies);
   };
 
@@ -180,7 +210,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
 
       <div className="space-y-6">
         {(formData.allergies || []).map((rawAllergy, index) => {
-          const allergy = rawAllergy as ExtendedAllergy;
+          const allergy = rawAllergy as Allergy;
           return (
             <div key={index} className="border rounded-lg p-4 space-y-4">
               <div className="flex items-start justify-between gap-4">
@@ -190,9 +220,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
                     <Label>Allergen</Label>
                     <div className="space-y-2">
                       <Select
-                        value={
-                          (allergy as ExtendedAllergy).isCustomAllergen ? 'Other' : allergy.allergen
-                        }
+                        value={(allergy as Allergy).isCustomAllergen ? 'Other' : allergy.allergen}
                         onValueChange={(value) => handleAllergenSelect(index, value)}
                       >
                         <SelectTrigger className="w-full">
@@ -209,7 +237,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
                           </SelectGroup>
                         </SelectContent>
                       </Select>
-                      {(allergy as ExtendedAllergy).isCustomAllergen && (
+                      {(allergy as Allergy).isCustomAllergen && (
                         <Input
                           placeholder="Enter custom allergen"
                           value={allergy.allergen}
@@ -300,7 +328,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
                         <div className="space-y-2">
                           <Label>Immediate Action</Label>
                           <Textarea
-                            value={(allergy as ExtendedAllergy).actionPlan?.immediateAction}
+                            value={allergy.actionPlan?.immediateAction}
                             onChange={(e) =>
                               handleAllergyChange(
                                 index,
@@ -315,7 +343,7 @@ export function AllergiesForm({ onNext, onBack }: Props) {
                         {/* Medications */}
                         <div className="space-y-2 mt-4">
                           <Label>Medications</Label>
-                          {(allergy as ExtendedAllergy).actionPlan?.medications.map(
+                          {(allergy as Allergy).actionPlan?.medications.map(
                             (medication, medIndex) => (
                               <div key={medIndex} className="grid grid-cols-3 gap-2 mb-2">
                                 <div className="col-span-2">
@@ -387,10 +415,21 @@ export function AllergiesForm({ onNext, onBack }: Props) {
       </div>
 
       <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={onBack}>
-          Previous Step
-        </Button>
-        <Button onClick={onNext}>Next Step</Button>
+        {isEditing ? (
+          <>
+            <Button variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button onClick={onSave}>Save Changes</Button>
+          </>
+        ) : (
+          <>
+            <Button variant="outline" onClick={onBack}>
+              Previous Step
+            </Button>
+            <Button onClick={onNext}>Next Step</Button>
+          </>
+        )}
       </div>
     </div>
   );
