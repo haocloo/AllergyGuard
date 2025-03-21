@@ -245,6 +245,24 @@ export function ChildDetailsClient({ initialChild }: Props) {
     }
   };
 
+  // Initialize form data when editing section changes
+  useEffect(() => {
+    if (editingSection) {
+      initializeEditForm({
+        firstName: extendedChild.firstName || '',
+        lastName: extendedChild.lastName || '',
+        dob: extendedChild.dob,
+        gender: (extendedChild.gender as 'male' | 'female') || 'female',
+        photoUrl: extendedChild.photoUrl,
+        allergies: extendedChild.allergies,
+        symptoms: extendedChild.symptoms || [],
+        emergencyContacts: extendedChild.emergencyContacts || [],
+      });
+    }
+    // Don't reset the form here, as this will cause an infinite loop
+    // resetForm should only be called on user actions, not in effects
+  }, [editingSection, extendedChild, initializeEditForm]);
+
   const handleSectionSave = async (section: string) => {
     try {
       // Here you would save the section data to your backend
@@ -502,31 +520,13 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   <h2 className="text-lg font-medium">Allergies</h2>
                   <Dialog
                     open={editingSection === 'allergies'}
-                    onOpenChange={(open) => {
-                      // Only update when dialog is closing to prevent circular updates
-                      if (!open) {
-                        setEditingSection(null);
-                      }
-                    }}
+                    onOpenChange={(open) => !open && setEditingSection(null)}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // Set form data before setting editing section to prevent multiple rerenders
-                          initializeEditForm({
-                            firstName: extendedChild.firstName || '',
-                            lastName: extendedChild.lastName || '',
-                            dob: extendedChild.dob,
-                            gender: (extendedChild.gender as 'male' | 'female') || 'female',
-                            photoUrl: extendedChild.photoUrl,
-                            allergies: extendedChild.allergies,
-                            symptoms: extendedChild.symptoms || [],
-                            emergencyContacts: extendedChild.emergencyContacts || [],
-                          });
-                          setEditingSection('allergies');
-                        }}
+                        onClick={() => setEditingSection('allergies')}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Allergies
@@ -593,31 +593,13 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   <h2 className="text-lg font-medium">Symptoms & Severity</h2>
                   <Dialog
                     open={editingSection === 'symptoms'}
-                    onOpenChange={(open) => {
-                      // Only update when dialog is closing to prevent circular updates
-                      if (!open) {
-                        setEditingSection(null);
-                      }
-                    }}
+                    onOpenChange={(open) => !open && setEditingSection(null)}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // Set form data before setting editing section to prevent multiple rerenders
-                          initializeEditForm({
-                            firstName: extendedChild.firstName || '',
-                            lastName: extendedChild.lastName || '',
-                            dob: extendedChild.dob,
-                            gender: (extendedChild.gender as 'male' | 'female') || 'female',
-                            photoUrl: extendedChild.photoUrl,
-                            allergies: extendedChild.allergies,
-                            symptoms: extendedChild.symptoms || [],
-                            emergencyContacts: extendedChild.emergencyContacts || [],
-                          });
-                          setEditingSection('symptoms');
-                        }}
+                        onClick={() => setEditingSection('symptoms')}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Symptoms
@@ -662,31 +644,13 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   <h2 className="text-lg font-medium">Emergency Contacts</h2>
                   <Dialog
                     open={editingSection === 'contacts'}
-                    onOpenChange={(open) => {
-                      // Only update when dialog is closing to prevent circular updates
-                      if (!open) {
-                        setEditingSection(null);
-                      }
-                    }}
+                    onOpenChange={(open) => !open && setEditingSection(null)}
                   >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // Set form data before setting editing section to prevent multiple rerenders
-                          initializeEditForm({
-                            firstName: extendedChild.firstName || '',
-                            lastName: extendedChild.lastName || '',
-                            dob: extendedChild.dob,
-                            gender: (extendedChild.gender as 'male' | 'female') || 'female',
-                            photoUrl: extendedChild.photoUrl,
-                            allergies: extendedChild.allergies,
-                            symptoms: extendedChild.symptoms || [],
-                            emergencyContacts: extendedChild.emergencyContacts || [],
-                          });
-                          setEditingSection('contacts');
-                        }}
+                        onClick={() => setEditingSection('contacts')}
                       >
                         <Pencil className="h-4 w-4 mr-2" />
                         Edit Contacts

@@ -1,13 +1,19 @@
 import { create } from 'zustand';
 import type { TDiagnosis } from '@/services/dummy-data';
 
+// Enhanced diagnosis type with percentage match and reason
+export type EnhancedDiagnosis = TDiagnosis & {
+  percentageMatch?: number;
+  reason?: string;
+};
+
 interface DiagnosisStore {
-  selectedDiagnosis: TDiagnosis | null;
-  setSelectedDiagnosis: (diagnosis: TDiagnosis | null) => void;
+  selectedDiagnosis: EnhancedDiagnosis | null;
+  setSelectedDiagnosis: (diagnosis: EnhancedDiagnosis | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
-  filteredDiagnoses: TDiagnosis[];
-  setFilteredDiagnoses: (diagnoses: TDiagnosis[]) => void;
+  filteredDiagnoses: EnhancedDiagnosis[];
+  setFilteredDiagnoses: (diagnoses: EnhancedDiagnosis[]) => void;
   hasSearched: boolean;
   setHasSearched: (searched: boolean) => void;
 }

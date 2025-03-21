@@ -4,7 +4,17 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 // Components
-import { Phone, Loader2, Search, Brain, AlertTriangle, X } from 'lucide-react';
+import {
+  Phone,
+  Loader2,
+  Search,
+  Brain,
+  AlertTriangle,
+  X,
+  Zap,
+  Sparkles,
+  Globe,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -13,20 +23,56 @@ import { useToast } from '@/components/ui/use-toast';
 import { LoadingSteps } from './loading-steps';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/cn';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // Services
 import type { TDiagnosis } from '@/services/dummy-data';
-import { useVoiceRecognitionStore, useInterviewSessionSpeechStore } from '@/services/store';
-import { useDiagnosisStore } from './store';
-import { get_diagnosis } from './action';
+import {
+  useVoiceRecognitionStore,
+  useInterviewSessionSpeechStore,
+  SPEECH_RECOGNITION_LANGUAGES,
+} from '@/services/store';
+import { useDiagnosisStore, EnhancedDiagnosis } from './store';
+import { get_diagnosis, DiagnosisResult } from './action';
 
 interface SmartDiagnosisClientProps {
   initialDiagnoses: TDiagnosis[];
 }
 
+// Helper function to get color based on percentage match
+const getMatchColor = (percentage: number) => {
+  if (percentage >= 80) return 'bg-green-100 text-green-800';
+  if (percentage >= 60) return 'bg-yellow-100 text-yellow-800';
+  return 'bg-orange-100 text-orange-800';
+};
+
+// Helper function to get language emoji based on language code
+const getLanguageEmoji = (languageCode: string): string => {
+  switch (languageCode) {
+    case 'en-US':
+      return '🇺🇸';
+    case 'zh-CN':
+      return '🇨🇳';
+    case 'ms-MY':
+      return '🇲🇾';
+    case 'ta-IN':
+      return '🇮🇳';
+    default:
+      return '🌐';
+  }
+};
+
 export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientProps) {
   const [input, setInput] = useState('');
-  const { text, isListening, resetTranscript } = useVoiceRecognitionStore();
+  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
+  const { text, isListening, resetTranscript, selectedLanguage, setSelectedLanguage } =
+    useVoiceRecognitionStore();
   const { handleRecording, permissionState } = useInterviewSessionSpeechStore();
   const { toast } = useToast();
 
@@ -57,11 +103,23 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
       setHasSearched(true);
       setSelectedDiagnosis(null);
 
-      const result = await get_diagnosis();
+      const diagnosisResults = await get_diagnosis();
 
-      const filteredResults = initialDiagnoses.filter((diagnosis) => result.includes(diagnosis.id));
+      // Map the diagnosis results to enhanced diagnoses with percentage match and reason
+      const enhancedDiagnoses: EnhancedDiagnosis[] = diagnosisResults
+        .map((result) => {
+          const diagnosis = initialDiagnoses.find((d) => d.id === result.id);
+          if (!diagnosis) return null;
 
-      setFilteredDiagnoses(filteredResults);
+          return {
+            ...diagnosis,
+            percentageMatch: result.percentageMatch,
+            reason: result.reason,
+          };
+        })
+        .filter(Boolean) as EnhancedDiagnosis[];
+
+      setFilteredDiagnoses(enhancedDiagnoses);
       setIsLoading(false);
     } catch (error) {
       toast({
@@ -78,11 +136,118 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
 
   // Reset to start over
   const handleReset = () => {
+    // Stop listening if active
+    if (isListening) {
+      const recognition = (window as any).__recognition;
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.error('Error stopping recognition:', e);
+        }
+        delete (window as any).__recognition;
+      }
+      useVoiceRecognitionStore.getState().setIsListening(false);
+    }
+
+    // Clear the input and text, but keep the selected language
     setInput('');
-    resetTranscript();
+    useVoiceRecognitionStore.getState().setText('');
+    useVoiceRecognitionStore.getState().setTempText('');
+
+    // Reset diagnosis state
     setSelectedDiagnosis(null);
     setFilteredDiagnoses(initialDiagnoses.slice(0, 3));
     setHasSearched(false);
+
+    toast({
+      title: 'Input cleared',
+      description: 'Ready for new symptoms description',
+      duration: 2000,
+    });
+  };
+
+  // Handle language change
+  const handleLanguageChange = (value: string) => {
+    // Don't do anything if the language is already selected
+    if (value === selectedLanguage) return;
+
+    // Stop listening if currently active but preserve the text
+    if (isListening) {
+      const recognition = (window as any).__recognition;
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {
+          console.error('Error stopping recognition during language change:', e);
+        }
+        delete (window as any).__recognition;
+      }
+      // Only update the listening state, don't clear text
+      useVoiceRecognitionStore.getState().setIsListening(false);
+    }
+
+    // Set changing language state to show indicator
+    setIsChangingLanguage(true);
+
+    // Set the new language
+    setSelectedLanguage(value);
+
+    // Show toast notification
+    const languageName = SPEECH_RECOGNITION_LANGUAGES.find((lang) => lang.code === value)?.name;
+    toast({
+      title: `Language changed to ${languageName}`,
+      description: 'Voice recognition will now detect this language',
+      duration: 3000,
+    });
+
+    // Clear changing language state after a delay
+    setTimeout(() => {
+      setIsChangingLanguage(false);
+    }, 1000);
+  };
+
+  const handleRecordingBtn = () => {
+    try {
+      // If already listening, just stop
+      if (isListening) {
+        const recognition = (window as any).__recognition;
+        if (recognition) {
+          try {
+            recognition.stop();
+          } catch (e) {
+            console.error('Error stopping recognition:', e);
+          }
+          delete (window as any).__recognition;
+        }
+        useVoiceRecognitionStore.getState().setIsListening(false);
+
+        // No need for a toast notification for stopping - the color change is enough
+      } else {
+        // Start listening
+        handleRecording({});
+
+        // No need for a toast notification for starting - the color change is enough
+      }
+    } catch (error) {
+      console.error('Error in recording toggle:', error);
+      // Force reset the recognition state
+      const recognition = (window as any).__recognition;
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch (e) {}
+        delete (window as any).__recognition;
+      }
+      useVoiceRecognitionStore.getState().setIsListening(false);
+
+      toast({
+        title: 'Recording error',
+        description: 'There was an error with the speech recognition. Please try again.',
+        variant: 'destructive',
+        duration: 3000,
+      });
+    }
   };
 
   return (
@@ -132,38 +297,85 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
               </button>
             )}
 
-            {/* Voice button */}
-            <button
-              type="button"
-              onClick={() => handleRecording({})}
-              disabled={permissionState === 'denied' || isLoading}
-              className={cn(
-                'relative w-12 h-12 rounded-full flex items-center justify-center transition-colors',
-                isListening ? 'bg-blue-500 dark:bg-blue-700' : 'bg-gray-50 dark:bg-gray-700'
-              )}
-            >
-              {isListening ? (
-                <div className="relative size-full rounded-full overflow-hidden">
-                  <Image
-                    src="/voice-assistant/voice-animation-start.gif"
-                    width={100}
-                    height={100}
-                    alt="Voice recording Start"
-                    className="w-full h-full object-cover rounded-full"
-                    priority
-                  />
-                </div>
-              ) : (
-                <Image
-                  src="/voice-assistant/voice-animation-stop.png"
-                  width={100}
-                  height={100}
-                  alt="Voice recording Stop"
-                  className="w-full h-full object-cover rounded-full"
-                  priority
-                />
-              )}
-            </button>
+            {/* Voice recognition control - redesigned */}
+            <div className="flex">
+              {/* Recording button */}
+              <button
+                type="button"
+                onClick={handleRecordingBtn}
+                aria-label={isListening ? 'Stop recording' : 'Start recording'}
+                disabled={permissionState === 'denied' || isLoading}
+                className={cn(
+                  'relative z-10 h-12 px-4 flex items-center justify-center rounded-l-full border transition-colors',
+                  isListening
+                    ? 'bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-200'
+                    : 'bg-gray-50 hover:bg-gray-100 border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700'
+                )}
+              >
+                {isListening ? (
+                  <div className="relative  size-8 rounded-full overflow-hidden">
+                    <Image
+                      src="/voice-assistant/voice-animation-start.gif"
+                      width={24}
+                      height={24}
+                      alt="Voice recording Start"
+                      className="w-full h-full object-cover rounded-full"
+                      priority
+                    />
+                  </div>
+                ) : (
+                  <div className="relative size-8 rounded-full overflow-hidden">
+                    <Image
+                      src="/voice-assistant/voice-animation-stop.png"
+                      width={24}
+                      height={24}
+                      alt="Voice recording Stop"
+                      className="w-full h-full  object-cover rounded-full"
+                      priority
+                    />
+                  </div>
+                )}
+              </button>
+
+              {/* Language dropdown */}
+              <Select
+                value={selectedLanguage}
+                onValueChange={handleLanguageChange}
+                disabled={isLoading}
+              >
+                <SelectTrigger
+                  className={cn(
+                    'relative z-10 h-12 min-w-28 rounded-r-full border border-l-0 transition-colors',
+                    isChangingLanguage ? 'bg-blue-50' : '',
+                    'bg-gray-50 hover:bg-gray-100 border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-gray-700'
+                  )}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-base">{getLanguageEmoji(selectedLanguage)}</span>
+                    <span className="text-sm font-medium hidden sm:inline">
+                      {
+                        SPEECH_RECOGNITION_LANGUAGES.find((lang) => lang.code === selectedLanguage)
+                          ?.name
+                      }
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent align="end">
+                  {SPEECH_RECOGNITION_LANGUAGES.map((language) => (
+                    <SelectItem
+                      key={language.code}
+                      value={language.code}
+                      className={selectedLanguage === language.code ? 'bg-primary/10' : ''}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{getLanguageEmoji(language.code)}</span>
+                        <span>{language.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Submit button */}
             <Button
@@ -226,27 +438,45 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                 </p>
 
                 <div className="grid grid-cols-1 gap-3">
-                  {filteredDiagnoses.map((diagnosis) => (
+                  {filteredDiagnoses.map((diagnosis: EnhancedDiagnosis) => (
                     <Card
                       key={diagnosis.id}
-                      className={`p-3 cursor-pointer hover:border-primary transition-all ${
-                        selectedDiagnosis?.id === diagnosis.id ? 'border-primary bg-primary/5' : ''
-                      }`}
+                      className={cn(
+                        `p-3 cursor-pointer transition-all`,
+                        selectedDiagnosis?.id === diagnosis.id ? 'ring-2 ring-primary' : ''
+                      )}
                       onClick={() => setSelectedDiagnosis(diagnosis)}
                     >
-                      <h3 className="font-medium">{diagnosis.name}</h3>
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium">{diagnosis.name}</h3>
+                        {diagnosis.percentageMatch && (
+                          <Badge className={cn('ml-2', getMatchColor(diagnosis.percentageMatch))}>
+                            {diagnosis.percentageMatch}% Match
+                          </Badge>
+                        )}
+                      </div>
+
                       <div className="flex flex-wrap gap-1 mt-2">
                         {diagnosis.symptoms.slice(0, 3).map((symptom, idx) => (
-                          <Badge key={idx} variant="indigo" className="text-xs">
+                          <Badge key={idx} variant="violet" className="text-xs">
                             {symptom}
                           </Badge>
                         ))}
                         {diagnosis.symptoms.length > 3 && (
-                          <Badge variant="indigo" className="text-xs">
+                          <Badge variant="violet" className="text-xs">
                             +{diagnosis.symptoms.length - 3} more
                           </Badge>
                         )}
                       </div>
+                      {/* Diagnosis reasoning - now shown in the card */}
+                      {diagnosis.reason && (
+                        <div className="mt-3 p-2 rounded-md bg-blue-50 text-blue-700 border border-blue-100">
+                          <div className="flex items-start gap-2">
+                            <Sparkles className="h-5 w-5 shrink-0" />
+                            <p className="text-sm text-pretty">{diagnosis.reason}</p>
+                          </div>
+                        </div>
+                      )}
                     </Card>
                   ))}
                 </div>
@@ -273,6 +503,11 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                   Diagnosis
                 </Badge>
                 <h2 className="text-xl font-bold">{selectedDiagnosis.name}</h2>
+                {'percentageMatch' in selectedDiagnosis && selectedDiagnosis.percentageMatch && (
+                  <Badge className={cn('mt-2', getMatchColor(selectedDiagnosis.percentageMatch))}>
+                    {selectedDiagnosis.percentageMatch}% Match
+                  </Badge>
+                )}
               </div>
               <div className="p-4">
                 <p className="text-muted-foreground">{selectedDiagnosis.description}</p>
@@ -281,7 +516,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                   <h3 className="text-sm font-medium mb-2">Common Symptoms:</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedDiagnosis.symptoms.map((symptom, idx) => (
-                      <Badge key={idx} variant="outline">
+                      <Badge key={idx} variant="violet">
                         {symptom}
                       </Badge>
                     ))}
@@ -342,7 +577,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
             <Card className="border-destructive/20 overflow-hidden">
               <div className="bg-destructive/5 px-4 py-3 border-b border-destructive/10">
                 <h3 className="text-lg font-medium text-destructive">Emergency Contact</h3>
-            </div>
+              </div>
               <div className="p-4 space-y-4">
                 <Button variant="destructive" className="gap-2 w-full sm:w-auto">
                   <Phone className="h-4 w-4" />
