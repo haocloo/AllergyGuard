@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, ChefHat, BookOpen, PlusCircle, X, Check } from 'lucide-react';
+import { Search, Filter, ChefHat, BookOpen, PlusCircle, X, Check, Users, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
@@ -22,14 +22,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import type { FoodRecipe } from './store';
 import { useFoodListStore } from './food-list-store';
 import { useMealPlanningStore } from './store';
-
-// Sample family members (in a real app, we would fetch these from the API)
-const familyMembers = [
-  { id: '1', name: 'John', allergies: ['Peanut', 'Milk'] },
-  { id: '2', name: 'Mary', allergies: ['Egg'] },
-  { id: '3', name: 'Emma', allergies: ['Wheat', 'Soy'] },
-  { id: '4', name: 'Lucas', allergies: [] },
-];
+import { familyMembers } from './mock-data';
 
 interface Props {
   initialFoodRecipes: FoodRecipe[];
@@ -95,22 +88,44 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
     
     // Apply user allergen filter
     if (selectedUsers.length > 0) {
-      // Gather all allergies from selected users
-      const selectedUserAllergies = selectedUsers.flatMap(userId => {
-        const user = familyMembers.find(member => member.id === userId);
-        return user ? user.allergies : [];
-      });
-      
-      // Only show recipes that don't contain any of the selected allergens
-      if (selectedUserAllergies.length > 0) {
-        filtered = filtered.filter(recipe => {
-          // Check if any of the recipe's allergens match the user allergies
-          const recipeAllergens = recipe.allergensFound || [];
-          return !recipeAllergens.some(allergen => 
-            selectedUserAllergies.includes(String(allergen))
+      filtered = filtered.filter(recipe => {
+        // Check if recipe is safe for all selected family members
+        const isSafeForSelected = selectedUsers.every(userId => {
+          // Find the user
+          const member = familyMembers.find(m => m.id === userId);
+          if (!member) return true;
+          
+          // If the recipe has no allergens, it's safe for everyone
+          if (!recipe.allergensFound || !Array.isArray(recipe.allergensFound) || recipe.allergensFound.length === 0) {
+            return true;
+          }
+          
+          // If the member has no allergies, they can eat anything
+          if (member.allergies.length === 0) return true;
+          
+          // Check if any of the member's allergies are in the recipe
+          return !member.allergies.some(allergy => 
+            recipe.allergensFound?.includes(allergy)
           );
         });
-      }
+        
+        return isSafeForSelected;
+      });
+    }
+    
+    // Apply view mode filter
+    if (viewMode === 'safe') {
+      filtered = filtered.filter(recipe => {
+        // If no allergens in recipe, it's safe for everyone
+        if (!recipe.allergensFound || !Array.isArray(recipe.allergensFound) || recipe.allergensFound.length === 0) {
+          return true;
+        }
+        
+        // If any family member has allergies that match recipe allergens, it's not universally safe
+        return !familyMembers.some(member => 
+          member.allergies.some(allergy => recipe.allergensFound?.includes(allergy))
+        );
+      });
     }
     
     // Apply sort option
@@ -120,10 +135,17 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
     } else if (sortOption === 'popularity') {
       // Sort by a simulated popularity metric
       filtered.sort((a, b) => b.ingredients.length - a.ingredients.length);
+    } else if (sortOption === 'allergen-free') {
+      // Sort allergen-free recipes first
+      filtered.sort((a, b) => {
+        const aHasAllergens = a.allergensFound && a.allergensFound.length > 0 ? 1 : 0;
+        const bHasAllergens = b.allergensFound && b.allergensFound.length > 0 ? 1 : 0;
+        return aHasAllergens - bHasAllergens;
+      });
     }
     
     setFilteredRecipes(filtered);
-  }, [searchQuery, foodRecipes, selectedUsers, sortOption]);
+  }, [searchQuery, foodRecipes, selectedUsers, sortOption, viewMode]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,6 +180,75 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
     setSortOption('recommended');
     setShowPromoOnly(false);
     setViewMode('all');
+  };
+
+  // Helper function to determine recipe safety
+  const getRecipeSafetyInfo = (recipe: FoodRecipe) => {
+    // Check if we have allergens to display
+    const hasAllergens = recipe.allergensFound && 
+      Array.isArray(recipe.allergensFound) && 
+      recipe.allergensFound.length > 0;
+    
+    // If no allergens, it's safe for everyone
+    if (!hasAllergens) {
+      return {
+        isSafe: true,
+        safeFor: familyMembers,
+        notSafeFor: [],
+        status: "allergen-free",
+        label: "Allergen-free",
+        badgeClass: "bg-green-100 text-green-800 border-green-200",
+        icon: <Users className="h-3 w-3 mr-1" />
+      };
+    }
+    
+    // Find who can safely consume this recipe
+    const safeFor = familyMembers.filter(member => {
+      // If member has no allergies, they can eat everything
+      if (member.allergies.length === 0) return true;
+      
+      // Check if any of the member's allergies are in the recipe
+      return !member.allergies.some(allergy => 
+        recipe.allergensFound?.includes(allergy)
+      );
+    });
+    
+    const notSafeFor = familyMembers.filter(
+      member => !safeFor.some(safe => safe.id === member.id)
+    );
+    
+    // Determine status
+    if (safeFor.length === familyMembers.length) {
+      return {
+        isSafe: true,
+        safeFor,
+        notSafeFor,
+        status: "safe-for-all",
+        label: "Safe for family",
+        badgeClass: "bg-blue-100 text-blue-800 border-blue-200",
+        icon: <Users className="h-3 w-3 mr-1" />
+      };
+    } else if (safeFor.length > 0) {
+      return {
+        isSafe: true,
+        safeFor,
+        notSafeFor,
+        status: "safe-for-some",
+        label: `Safe for ${safeFor.length}/${familyMembers.length}`,
+        badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
+        icon: <Users className="h-3 w-3 mr-1" />
+      };
+    } else {
+      return {
+        isSafe: false,
+        safeFor,
+        notSafeFor,
+        status: "not-safe",
+        label: "Not safe for family",
+        badgeClass: "bg-red-100 text-red-800 border-red-200",
+        icon: <AlertTriangle className="h-3 w-3 mr-1" />
+      };
+    }
   };
 
   return (
@@ -223,74 +314,92 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
           ))
         ) : filteredRecipes.length > 0 ? (
           // Recipe cards with animation
-          filteredRecipes.map((recipe, index) => (
-            <motion.div
-              key={recipe.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-            >
-              <Link href={`/dashboard/meal-planning/recipes/${recipe.id}`}>
-                <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
-                  {/* Recipe Image */}
-                  <div className="relative h-40">
-                    {recipe.imageUrl ? (
-                      <Image 
-                        src={recipe.imageUrl} 
-                        alt={recipe.name} 
-                        fill 
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="h-full flex items-center justify-center bg-gray-100 text-gray-400">
-                        <ChefHat className="w-10 h-10" />
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Recipe Details */}
-                  <CardContent className="p-4">
-                    <h3 className="font-medium text-lg tracking-tight">{recipe.name}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 h-10 mt-1">{recipe.description}</p>
-                    
-                    {/* Ingredients Preview */}
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {recipe.ingredients?.slice(0, 3).map((ing, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {ing.name}
-                        </Badge>
-                      ))}
-                      {recipe.ingredients?.length > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{recipe.ingredients.length - 3} more
-                        </Badge>
+          filteredRecipes.map((recipe, index) => {
+            const safetyInfo = getRecipeSafetyInfo(recipe);
+            
+            return (
+              <motion.div
+                key={recipe.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Link href={`/dashboard/meal-planning/recipes/${recipe.id}`}>
+                  <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
+                    {/* Recipe Image */}
+                    <div className="relative h-40">
+                      {recipe.imageUrl ? (
+                        <Image 
+                          src={recipe.imageUrl} 
+                          alt={recipe.name} 
+                          fill 
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                          <ChefHat className="w-10 h-10" />
+                        </div>
                       )}
+                      
+                      {/* Safety Badge */}
+                      <div className="absolute top-2 right-2">
+                        <Badge className={`${safetyInfo.badgeClass} flex items-center`}>
+                          {safetyInfo.icon}
+                          {safetyInfo.label}
+                        </Badge>
+                      </div>
                     </div>
                     
-                    {/* Allergen Warnings */}
-                    {recipe.allergensFound && recipe.allergensFound.length > 0 && (
-                      <div className="mt-2">
-                        <p className="text-xs text-red-500 font-medium">Contains allergens:</p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {recipe.allergensFound.map((allergen, idx) => (
-                            <Badge key={idx} variant="destructive" className="text-xs">
-                              {allergen}
-                            </Badge>
-                          ))}
-                        </div>
+                    {/* Recipe Details */}
+                    <CardContent className="p-4">
+                      <h3 className="font-medium text-lg tracking-tight">{recipe.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2 h-10 mt-1">{recipe.description}</p>
+                      
+                      {/* Ingredients Preview */}
+                      <div className="mt-3 flex flex-wrap gap-1">
+                        {recipe.ingredients?.slice(0, 3).map((ing, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {ing.name}
+                          </Badge>
+                        ))}
+                        {recipe.ingredients?.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{recipe.ingredients.length - 3} more
+                          </Badge>
+                        )}
                       </div>
-                    )}
-                  </CardContent>
-                  
-                  <CardFooter className="pt-0 px-4 pb-4">
-                    <Button variant="secondary" className="w-full">
-                      View Recipe
-                    </Button>
-                  </CardFooter>
-                </Card>
-              </Link>
-            </motion.div>
-          ))
+                      
+                      {/* Allergen Warnings - with improved display */}
+                      {recipe.allergensFound && recipe.allergensFound.length > 0 && (
+                        <div className="mt-2">
+                          <p className={`text-xs font-medium ${safetyInfo.notSafeFor.length > 0 ? 'text-red-500' : 'text-amber-500'}`}>
+                            {safetyInfo.notSafeFor.length > 0 ? 'Contains allergens:' : 'Contains (but safe):'}
+                          </p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {recipe.allergensFound.map((allergen, idx) => (
+                              <Badge 
+                                key={idx} 
+                                variant={safetyInfo.notSafeFor.length > 0 ? "destructive" : "outline"}
+                                className={safetyInfo.notSafeFor.length === 0 ? "text-amber-600 border-amber-300 bg-amber-50" : ""}
+                              >
+                                {allergen}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                    
+                    <CardFooter className="pt-0 px-4 pb-4">
+                      <Button variant="secondary" className="w-full">
+                        View Recipe
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </Link>
+              </motion.div>
+            );
+          })
         ) : (
           // No results
           <div className="col-span-full text-center py-12 border border-dashed rounded-lg">
@@ -334,6 +443,12 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                     <Label htmlFor="recommended" className="flex-1 cursor-pointer">Recommended</Label>
                   </div>
                   <RadioGroupItem value="recommended" id="recommended" />
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="allergen-free" className="flex-1 cursor-pointer">Allergen-Free First</Label>
+                  </div>
+                  <RadioGroupItem value="allergen-free" id="allergen-free" />
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <div className="flex items-center gap-2">

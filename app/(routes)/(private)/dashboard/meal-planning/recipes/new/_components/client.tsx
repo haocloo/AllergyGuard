@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, User, Check, AlertTriangle, FileText, Import } from 'lucide-react';
+import { Plus, X, User, Check, AlertTriangle, FileText, Import, Sparkles, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // ui
@@ -56,13 +56,18 @@ export function MealPrepFormClient() {
   const [recipeText, setRecipeText] = useState('');
   const [activeImportTab, setActiveImportTab] = useState('paste');
   
+  // New state for recipe generation
+  const [generatingRecipe, setGeneratingRecipe] = useState(false);
+  const [recipeGenerationOpen, setRecipeGenerationOpen] = useState(false);
+  const [generatedRecipeData, setGeneratedRecipeData] = useState<any>(null);
+  
   // Form state
   const [formData, setFormData] = useState({
     servings: '',
     selectedPeople: [] as string[],
     additionalAllergies: [] as string[],
     customAllergen: '',
-    mealIdea: '',
+    mealIdea: 'spicy egg noodle',  // Prefilled for demo
   });
 
   // Add new state for ingredient preview
@@ -283,6 +288,214 @@ export function MealPrepFormClient() {
     }
   };
 
+  // Handle recipe generation
+  const handleRecipeGeneration = () => {
+    // First check if we have enough information
+    if (!formData.mealIdea.trim()) {
+      toast.error("Please describe your meal idea first");
+      return;
+    }
+    
+    // Open the generation dialog
+    setRecipeGenerationOpen(true);
+  };
+  
+  // Start the actual generation process
+  const startRecipeGeneration = async () => {
+    setGeneratingRecipe(true);
+    
+    try {
+      // In a real app, this would call an API endpoint
+      // For our demo, we'll create a mock recipe based on the form data
+      
+      // Get allergens to avoid from form data
+      const allergensToAvoid = formData.additionalAllergies.map(a => a.toLowerCase());
+      
+      // Extract some keywords from the meal idea to guide the recipe generation
+      const mealIdea = formData.mealIdea.toLowerCase();
+      
+      // Special case for Spicy Egg Noodle
+      if (mealIdea.includes('spicy egg noodle') || mealIdea.includes('egg noodle')) {
+        // Create a specialized recipe for Spicy Egg Noodle
+        const spicyEggNoodleRecipe = {
+          name: 'Spicy Egg Noodles with Vegetables',
+          ingredients: [
+            { id: crypto.randomUUID(), name: 'egg noodles', amount: '250', unit: 'g' },
+            { id: crypto.randomUUID(), name: 'eggs', amount: '3', unit: 'pcs' },
+            { id: crypto.randomUUID(), name: 'red bell pepper', amount: '1', unit: 'pcs' },
+            { id: crypto.randomUUID(), name: 'carrots', amount: '2', unit: 'pcs' },
+            { id: crypto.randomUUID(), name: 'spring onions', amount: '4', unit: 'pcs' },
+            { id: crypto.randomUUID(), name: 'garlic cloves', amount: '3', unit: 'pcs' },
+            { id: crypto.randomUUID(), name: 'chili flakes', amount: '1', unit: 'tsp' },
+            { id: crypto.randomUUID(), name: 'soy sauce', amount: '3', unit: 'tbsp' },
+            { id: crypto.randomUUID(), name: 'sesame oil', amount: '1', unit: 'tbsp' },
+            { id: crypto.randomUUID(), name: 'vegetable oil', amount: '2', unit: 'tbsp' },
+            { id: crypto.randomUUID(), name: 'salt', amount: '1/2', unit: 'tsp' },
+            { id: crypto.randomUUID(), name: 'black pepper', amount: '1/4', unit: 'tsp' },
+          ],
+          instructions: `1. Bring a large pot of water to a boil. Add the egg noodles and cook according to package instructions until al dente (usually 3-4 minutes). Drain and rinse with cold water to stop the cooking process.
+
+2. While the noodles are cooking, thinly slice the red bell pepper and carrots into matchsticks. Chop the spring onions, separating the white and green parts. Mince the garlic cloves.
+
+3. In a small bowl, beat the eggs with a pinch of salt and pepper.
+
+4. Heat 1 tablespoon of vegetable oil in a large wok or skillet over medium-high heat. Pour in the beaten eggs and cook until set but still moist, about 1-2 minutes. Remove the eggs and set aside.
+
+5. In the same wok, add the remaining vegetable oil. Add the white parts of spring onions and garlic, and stir-fry for 30 seconds until fragrant.
+
+6. Add the carrots and stir-fry for 2 minutes, then add the bell peppers and cook for another minute.
+
+7. Add the cooked noodles to the wok and toss with the vegetables. Add the soy sauce, sesame oil, chili flakes, salt, and pepper. Stir-fry for 2-3 minutes until everything is well combined and heated through.
+
+8. Break the cooked egg into pieces and add back to the wok. Toss gently to combine.
+
+9. Garnish with the green parts of spring onions, additional chili flakes if desired, and serve hot.
+
+10. Enjoy your spicy egg noodles!`,
+          allergensToAvoid: allergensToAvoid,
+          imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+        };
+        
+        // Store the generated recipe data
+        setGeneratedRecipeData(spicyEggNoodleRecipe);
+        
+        // Store in localStorage to pass to the ingredients page
+        localStorage.setItem('generatedRecipe', JSON.stringify(spicyEggNoodleRecipe));
+        
+        // Wait a moment before redirecting (simulating the generation process)
+        setTimeout(() => {
+          setGeneratingRecipe(false);
+          setRecipeGenerationOpen(false);
+          
+          // Navigate to the ingredients page
+          router.push('/dashboard/meal-planning/recipes/new/ingredients');
+        }, 3000);
+        
+        return;
+      }
+      
+      // For other recipes, continue with existing code
+      const hasChicken = mealIdea.includes('chicken');
+      const hasVegetarian = mealIdea.includes('vegetarian') || mealIdea.includes('vegan');
+      const hasDessert = mealIdea.includes('dessert') || mealIdea.includes('cake') || mealIdea.includes('sweet');
+      
+      // Generate a recipe name based on the meal idea
+      let recipeName = 'Custom Recipe';
+      if (mealIdea.includes('pasta')) {
+        recipeName = hasChicken ? 'Chicken Pasta' : 'Vegetable Pasta';
+      } else if (mealIdea.includes('salad')) {
+        recipeName = hasChicken ? 'Chicken Salad' : 'Garden Salad';
+      } else if (mealIdea.includes('soup')) {
+        recipeName = hasChicken ? 'Chicken Soup' : 'Vegetable Soup';
+      } else if (hasDessert) {
+        recipeName = mealIdea.includes('chocolate') ? 'Chocolate Dessert' : 'Fruit Dessert';
+      } else if (hasChicken) {
+        recipeName = 'Roasted Chicken Dish';
+      } else if (hasVegetarian) {
+        recipeName = 'Vegetarian Delight';
+      }
+      
+      // Generate a list of ingredients that avoid the allergens
+      const baseIngredients = [];
+      
+      // Add protein
+      if (hasChicken && !allergensToAvoid.includes('chicken')) {
+        baseIngredients.push({ id: crypto.randomUUID(), name: 'chicken breast', amount: '2', unit: 'pcs' });
+      } else if (hasVegetarian || allergensToAvoid.includes('chicken')) {
+        if (!allergensToAvoid.includes('tofu')) {
+          baseIngredients.push({ id: crypto.randomUUID(), name: 'firm tofu', amount: '200', unit: 'g' });
+        } else {
+          baseIngredients.push({ id: crypto.randomUUID(), name: 'chickpeas', amount: '1', unit: 'cup' });
+        }
+      }
+      
+      // Add carbs (avoiding wheat if it's an allergen)
+      if (allergensToAvoid.includes('wheat')) {
+        baseIngredients.push({ id: crypto.randomUUID(), name: 'rice', amount: '1', unit: 'cup' });
+      } else if (mealIdea.includes('pasta')) {
+        baseIngredients.push({ id: crypto.randomUUID(), name: 'pasta', amount: '200', unit: 'g' });
+      } else {
+        baseIngredients.push({ id: crypto.randomUUID(), name: 'quinoa', amount: '1', unit: 'cup' });
+      }
+      
+      // Add vegetables
+      baseIngredients.push({ id: crypto.randomUUID(), name: 'carrots', amount: '2', unit: 'pcs' });
+      baseIngredients.push({ id: crypto.randomUUID(), name: 'onion', amount: '1', unit: 'pcs' });
+      baseIngredients.push({ id: crypto.randomUUID(), name: 'garlic', amount: '2', unit: 'pcs' });
+      
+      // Add oil
+      baseIngredients.push({ id: crypto.randomUUID(), name: 'olive oil', amount: '2', unit: 'tbsp' });
+      
+      // Add seasonings
+      baseIngredients.push({ id: crypto.randomUUID(), name: 'salt', amount: '1', unit: 'tsp' });
+      baseIngredients.push({ id: crypto.randomUUID(), name: 'black pepper', amount: '1/2', unit: 'tsp' });
+      
+      // Generate instructions based on the ingredients
+      let instructions = `Here's how to prepare ${recipeName}:\n\n`;
+      
+      if (hasChicken) {
+        instructions += `1. Season the chicken with salt and pepper.\n`;
+        instructions += `2. Heat the olive oil in a pan and cook the chicken until golden brown, about 6-7 minutes per side.\n`;
+        instructions += `3. Remove the chicken and set aside.\n\n`;
+      } else if (baseIngredients.some(i => i.name === 'firm tofu')) {
+        instructions += `1. Press the tofu to remove excess water, then cut into cubes.\n`;
+        instructions += `2. Heat the olive oil in a pan and cook the tofu until golden, about 3-4 minutes per side.\n`;
+        instructions += `3. Remove the tofu and set aside.\n\n`;
+      }
+      
+      instructions += `4. In the same pan, sauté the onions until translucent, about 3 minutes.\n`;
+      instructions += `5. Add garlic and cook for another minute until fragrant.\n`;
+      instructions += `6. Add the carrots and cook for 5 minutes until slightly softened.\n`;
+      
+      if (baseIngredients.some(i => i.name === 'pasta')) {
+        instructions += `7. Meanwhile, cook the pasta according to package instructions. Drain and set aside.\n`;
+        instructions += `8. Add the cooked pasta to the vegetable mixture and toss to combine.\n`;
+      } else if (baseIngredients.some(i => i.name === 'rice')) {
+        instructions += `7. Meanwhile, cook the rice according to package instructions.\n`;
+        instructions += `8. Serve the vegetables over the cooked rice.\n`;
+      } else if (baseIngredients.some(i => i.name === 'quinoa')) {
+        instructions += `7. Meanwhile, cook the quinoa according to package instructions.\n`;
+        instructions += `8. Serve the vegetables over the cooked quinoa.\n`;
+      }
+      
+      if (hasChicken) {
+        instructions += `9. Return the chicken to the pan and heat through for 2 minutes.\n`;
+      } else if (baseIngredients.some(i => i.name === 'firm tofu')) {
+        instructions += `9. Return the tofu to the pan and heat through for 2 minutes.\n`;
+      }
+      
+      instructions += `10. Serve hot and enjoy your allergen-free meal!`;
+      
+      // Prepare the recipe data to be saved in localStorage for the ingredients page
+      const generatedRecipe = {
+        name: recipeName,
+        ingredients: baseIngredients,
+        instructions: instructions,
+        allergensToAvoid: allergensToAvoid
+      };
+      
+      // Store the generated recipe data
+      setGeneratedRecipeData(generatedRecipe);
+      
+      // Store in localStorage to pass to the ingredients page
+      localStorage.setItem('generatedRecipe', JSON.stringify(generatedRecipe));
+      
+      // Wait a moment before redirecting (simulating the generation process)
+      setTimeout(() => {
+        setGeneratingRecipe(false);
+        setRecipeGenerationOpen(false);
+        
+        // Navigate to the ingredients page
+        router.push('/dashboard/meal-planning/recipes/new/ingredients');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error generating recipe:', error);
+      toast.error('Failed to generate recipe. Please try again.');
+      setGeneratingRecipe(false);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-md mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -290,15 +503,17 @@ export function MealPrepFormClient() {
           <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Meal Preparation</h1>
           <p className="text-sm text-muted-foreground">Tell us what you're planning to cook</p>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="h-9 gap-2 border-dashed border-gray-300 mt-2 sm:mt-0"
-          onClick={handleRecipeImport}
-        >
-          <FileText className="h-4 w-4" />
-          <span>Paste Recipe</span>
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="h-9 gap-2 border-dashed border-gray-300 mt-2 sm:mt-0"
+            onClick={handleRecipeImport}
+          >
+            <FileText className="h-4 w-4" />
+            <span>Paste Recipe</span>
+          </Button>
+        </div>
       </div>
       
       <Card className="overflow-hidden border-2">
@@ -512,56 +727,56 @@ export function MealPrepFormClient() {
             
             {/* Question 4: Meal Idea */}
             <div className="space-y-2">
-              <Label htmlFor="mealIdea" className="text-base font-medium">4) What's in your mind?</Label>
+              <Label className="text-base font-medium">4) What kind of meal would you like to make?</Label>
               <Textarea
-                id="mealIdea"
                 name="mealIdea"
-                placeholder="Describe your meal idea, ingredients, or preferences..."
+                placeholder="Describe your meal idea"
                 value={formData.mealIdea}
                 onChange={handleInputChange}
-                className="min-h-24 border-2 resize-none"
-                rows={5}
+                className="resize-none min-h-[100px]"
               />
               
-              {/* AI Ingredient Analysis */}
+              {/* AI Recipe Generation Button - Highlighted */}
+              <div className="mt-3">
+                <Button 
+                  type="button" 
+                  className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white flex items-center justify-center gap-2 h-12 transition-all"
+                  onClick={handleRecipeGeneration}
+                >
+                  <Sparkles className="h-5 w-5" />
+                  <span className="font-medium">Generate Recipe with AI</span>
+                </Button>
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  Our AI will create a complete recipe based on your meal idea and dietary restrictions
+                </p>
+              </div>
+              
+              {/* Ingredient Preview */}
               {previewIngredients.length > 0 && (
-                <div className="mt-3 rounded-md border border-gray-200 p-3">
-                  <div className="flex items-center mb-2">
-                    <div className="text-gray-600 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                        <path fillRule="evenodd" d="M12 1.5a.75.75 0 01.75.75V4.5a.75.75 0 01-1.5 0V2.25A.75.75 0 0112 1.5zM5.636 4.136a.75.75 0 011.06 0l1.592 1.591a.75.75 0 01-1.061 1.06l-1.591-1.59a.75.75 0 010-1.061zm12.728 0a.75.75 0 010 1.06l-1.591 1.592a.75.75 0 01-1.06-1.061l1.59-1.591a.75.75 0 011.061 0zm-6.816 4.496a.75.75 0 01.82.311l5.228 7.917a.75.75 0 01-.777 1.148l-2.097-.43 1.045 3.9a.75.75 0 01-1.45.388l-1.044-3.899-1.601 1.42a.75.75 0 01-1.247-.606l.569-9.47a.75.75 0 01.554-.68zM3 10.5a.75.75 0 01.75-.75H6a.75.75 0 010 1.5H3.75A.75.75 0 013 10.5zm14.25 0a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H18a.75.75 0 01-.75-.75zm-8.962 3.712a.75.75 0 010 1.061l-1.591 1.591a.75.75 0 11-1.061-1.06l1.591-1.592a.75.75 0 011.06 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <h4 className="text-sm font-medium">AI-Detected Ingredients</h4>
+                <div className="mt-4 p-3 bg-gray-50 rounded-md border">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-sm font-medium">Detected Ingredients:</h4>
+                    <Badge variant="outline" className="text-xs">
+                      {previewIngredients.length} items
+                    </Badge>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    {previewIngredients.map((ingredient, index) => (
-                      <div 
-                        key={index} 
-                        className={`flex items-center p-2 rounded ${
-                          ingredient.allergic ? 'bg-red-50 border border-red-100' : 'bg-gray-50 border border-gray-100'
-                        }`}
+                  <div className="flex flex-wrap gap-1">
+                    {previewIngredients.map((ing, idx) => (
+                      <Badge 
+                        key={idx} 
+                        variant={ing.allergic ? "destructive" : "secondary"}
+                        className="px-2 py-1 text-xs"
                       >
-                        {ingredient.allergic && (
-                          <AlertTriangle className="w-3 h-3 text-red-500 mr-2" />
-                        )}
-                        <span className={`text-xs ${ingredient.allergic ? 'text-red-700 font-medium' : 'text-gray-700'}`}>
-                          {ingredient.name}
-                          {ingredient.allergic && ' (potential allergen)'}
-                        </span>
-                      </div>
+                        {ing.name}
+                        {ing.allergic && <AlertTriangle className="ml-1 h-3 w-3" />}
+                      </Badge>
                     ))}
                   </div>
-                  
-                  <p className="text-xs text-gray-500 mt-2">
-                    Our AI has detected these ingredients in your description. Potential allergens are highlighted.
-                  </p>
                 </div>
               )}
             </div>
             
-            {/* Next Button */}
+            {/* Buttons Section */}
             <div className="flex justify-end pt-2">
               <Button
                 type="button"
@@ -669,6 +884,67 @@ Bake at 180ºc for 20-40 min or until cake is golden brown`);
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Recipe Generation Dialog - new code */}
+      <Dialog open={recipeGenerationOpen} onOpenChange={setRecipeGenerationOpen}>
+        <DialogContent className="sm:max-w-[575px]">
+          <DialogHeader>
+            <DialogTitle>Generate Allergen-Safe Recipe</DialogTitle>
+            <DialogDescription>
+              We'll create a recipe based on your meal idea and ensure it avoids all specified allergens.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="my-4 space-y-4">
+            <div className="flex flex-col space-y-2 border-l-4 border-primary pl-4 py-2">
+              <span className="text-sm font-medium">Meal Idea:</span>
+              <p className="text-sm text-muted-foreground">{formData.mealIdea}</p>
+            </div>
+            
+            {formData.additionalAllergies.length > 0 && (
+              <div className="flex flex-col space-y-2 border-l-4 border-red-500 pl-4 py-2">
+                <span className="text-sm font-medium">Allergies to Avoid:</span>
+                <div className="flex flex-wrap gap-1">
+                  {formData.additionalAllergies.map(allergen => (
+                    <Badge key={allergen} variant="destructive" className="bg-red-100 text-red-800 hover:bg-red-200">
+                      {allergen}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="bg-muted rounded-md p-4 text-sm">
+              <p>Our AI will:</p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>Generate a complete recipe based on your meal idea</li>
+                <li>Ensure all ingredients are safe and free of specified allergens</li>
+                <li>Create detailed step-by-step instructions</li>
+                <li>Take you directly to the ingredients page with everything filled in</li>
+              </ul>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRecipeGenerationOpen(false)} disabled={generatingRecipe}>
+              Cancel
+            </Button>
+            <Button onClick={startRecipeGeneration} disabled={generatingRecipe} className="gap-2">
+              {generatingRecipe ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span>Generate Recipe</span>
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-} 
+}

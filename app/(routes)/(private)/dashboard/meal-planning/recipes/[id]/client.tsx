@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChefHat, Clock, ArrowLeft, Heart, Share, Printer, AlertTriangle, Award } from 'lucide-react';
+import { ChefHat, Clock, ArrowLeft, Heart, Share, Printer, AlertTriangle, Award, Users, Check, Info } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 // ui components
@@ -13,10 +13,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 // types
 import type { FoodRecipe } from '../../_comp/store';
 import { useFoodListStore } from '../../_comp/food-list-store';
+import { familyMembers } from '../../_comp/mock-data';
 
 interface Props {
   serverRecipe: FoodRecipe | null;
@@ -79,6 +85,65 @@ export function RecipeDetailClient({ serverRecipe, recipeId }: Props) {
   const hasAllergens = recipe.allergensFound && 
     Array.isArray(recipe.allergensFound) && 
     recipe.allergensFound.length > 0;
+    
+  // Determine which family members can safely consume this recipe
+  const getSafeFamilyMembers = () => {
+    // If no allergens in the recipe, everyone can eat it
+    if (!hasAllergens) {
+      return familyMembers;
+    }
+    
+    // Otherwise, check each family member's allergies against recipe allergens
+    return familyMembers.filter(member => {
+      // If the member has no allergies, they can eat everything
+      if (member.allergies.length === 0) return true;
+      
+      // Check if any of the member's allergies are in the recipe's allergens
+      return !member.allergies.some(allergy => 
+        recipe.allergensFound?.includes(allergy)
+      );
+    });
+  };
+  
+  const safeFamilyMembers = getSafeFamilyMembers();
+  const atRiskFamilyMembers = familyMembers.filter(
+    member => !safeFamilyMembers.some(safe => safe.id === member.id)
+  );
+  
+  // Determine the safety status for clearer labeling
+  const getSafetyStatus = () => {
+    if (!hasAllergens) {
+      return {
+        variant: "secondary" as const,
+        icon: <Users className="h-3 w-3" />,
+        text: "Allergen-free for everyone",
+        badgeClass: "bg-green-100 text-green-800 hover:bg-green-200"
+      };
+    } else if (safeFamilyMembers.length === familyMembers.length) {
+      return {
+        variant: "secondary" as const,
+        icon: <Users className="h-3 w-3" />,
+        text: "Contains allergens, but safe for all family members",
+        badgeClass: "bg-blue-100 text-blue-800 hover:bg-blue-200"
+      };
+    } else if (safeFamilyMembers.length > 0) {
+      return {
+        variant: "secondary" as const,
+        icon: <Users className="h-3 w-3" />,
+        text: `Safe for ${safeFamilyMembers.length}/${familyMembers.length} family members`,
+        badgeClass: ""
+      };
+    } else {
+      return {
+        variant: "destructive" as const,
+        icon: <AlertTriangle className="h-3 w-3" />,
+        text: "Not safe for any family members",
+        badgeClass: ""
+      };
+    }
+  };
+  
+  const safetyStatus = getSafetyStatus();
   
   return (
     <div className="py-6 max-w-4xl mx-auto">
@@ -117,24 +182,128 @@ export function RecipeDetailClient({ serverRecipe, recipeId }: Props) {
             <Badge variant="secondary" className="flex items-center gap-1">
               <Award className="h-3 w-3" /> {nutritionInfo.servings} servings
             </Badge>
+            
+            {/* Family Safety Indicator */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
+                  <Badge 
+                    variant={safetyStatus.variant}
+                    className={`flex items-center gap-1 ${safetyStatus.badgeClass}`}
+                  >
+                    {safetyStatus.icon} 
+                    {safetyStatus.text}
+                  </Badge>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0">
+                <Card className="w-full border-0 shadow-none">
+                  <CardHeader className="p-3 pb-2">
+                    <CardTitle className="text-sm">Family Safety</CardTitle>
+                    {hasAllergens && (
+                      <p className="text-xs text-amber-600">
+                        This recipe contains allergens, but they may not affect your family members.
+                      </p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="p-3 pt-0 space-y-3">
+                    {safeFamilyMembers.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-green-600 mb-1">Safe to consume for:</p>
+                        <ul className="space-y-1">
+                          {safeFamilyMembers.map(member => (
+                            <li key={member.id} className="text-xs flex items-center gap-1">
+                              <span className="w-3 h-3 rounded-full bg-green-100 flex items-center justify-center">
+                                <Check className="w-2 h-2 text-green-600" />
+                              </span>
+                              <span>{member.name}</span>
+                              {member.allergies.length > 0 && (
+                                <span className="text-gray-400 text-[10px]">
+                                  (allergic to: {member.allergies.join(', ')})
+                                </span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {atRiskFamilyMembers.length > 0 && (
+                      <div>
+                        <p className="text-xs font-medium text-red-600 mb-1">Not safe for:</p>
+                        <ul className="space-y-1">
+                          {atRiskFamilyMembers.map(member => (
+                            <li key={member.id} className="text-xs flex items-center gap-1">
+                              <span className="w-3 h-3 rounded-full bg-red-100 flex items-center justify-center">
+                                <AlertTriangle className="w-2 h-2 text-red-600" />
+                              </span>
+                              <span>{member.name}</span>
+                              <span className="text-gray-400 text-[10px]">
+                                (allergic to: {member.allergies.join(', ')})
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Show allergen list in popover */}
+                    {hasAllergens && (
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <p className="text-xs font-medium text-gray-600 mb-1">Allergens in this recipe:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {recipe.allergensFound.map((allergen, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {String(allergen)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </PopoverContent>
+            </Popover>
           </div>
           
           {/* Allergen Warnings */}
           {hasAllergens && (
-            <Card className="bg-red-50 border-red-200 mb-4">
+            <Card className={`border mb-4 ${atRiskFamilyMembers.length > 0 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
               <CardContent className="p-4">
                 <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+                  <AlertTriangle className={`h-5 w-5 ${atRiskFamilyMembers.length > 0 ? 'text-red-500' : 'text-amber-500'} mr-2 mt-0.5`} />
                   <div>
-                    <h4 className="font-medium text-red-700">Allergen Warning</h4>
-                    <p className="text-sm text-red-600 mb-2">This recipe contains the following allergens:</p>
+                    <h4 className={`font-medium ${atRiskFamilyMembers.length > 0 ? 'text-red-700' : 'text-amber-700'}`}>
+                      {atRiskFamilyMembers.length > 0 ? 'Allergen Warning' : 'Allergen Information'}
+                    </h4>
+                    <p className={`text-sm ${atRiskFamilyMembers.length > 0 ? 'text-red-600' : 'text-amber-600'} mb-2`}>
+                      {atRiskFamilyMembers.length > 0 
+                        ? `This recipe contains allergens that may affect ${atRiskFamilyMembers.length} member${atRiskFamilyMembers.length > 1 ? 's' : ''} of your family:` 
+                        : 'This recipe contains the following allergens, but they don\'t affect your family members:'}
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       {recipe.allergensFound.map((allergen, idx) => (
-                        <Badge key={idx} variant="destructive">
+                        <Badge 
+                          key={idx} 
+                          variant={atRiskFamilyMembers.length > 0 ? "destructive" : "secondary"}
+                          className={atRiskFamilyMembers.length === 0 ? "text-amber-600 border-amber-300 bg-amber-50" : ""}
+                        >
                           {String(allergen)}
                         </Badge>
                       ))}
                     </div>
+                    {atRiskFamilyMembers.length > 0 && (
+                      <div className="mt-3 text-sm text-red-600">
+                        <p className="font-medium">Not safe for:</p>
+                        <ul className="list-disc list-inside space-y-1 mt-1">
+                          {atRiskFamilyMembers.map(member => (
+                            <li key={member.id}>
+                              {member.name} (allergic to: {member.allergies.join(', ')})
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               </CardContent>
