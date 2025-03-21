@@ -2,7 +2,8 @@ import { notFound } from 'next/navigation';
 import Breadcrumbs from '@/components/layout/breadcrumb';
 import { children } from '@/services/dummy-data';
 import { ChildDetailsClient } from '../_comp/child-details/client';
-import type { Child, Allergy } from '../_comp/types';
+import type { Child, Allergy, Symptom, EmergencyContact, Caretaker } from '../_comp/types';
+import type { RawChild } from '@/services/dummy-data';
 
 interface Props {
   params: {
@@ -11,7 +12,7 @@ interface Props {
 }
 
 export default async function ChildDetailsPage({ params }: Props) {
-  const rawChild = children.find((c) => c.id === params.childId);
+  const rawChild = children.find((c) => c.id === params.childId) as RawChild | undefined;
 
   if (!rawChild) {
     notFound();
@@ -21,45 +22,63 @@ export default async function ChildDetailsPage({ params }: Props) {
   const child: Child = {
     id: rawChild.id,
     name: rawChild.name,
-    firstName: rawChild.firstName,
-    lastName: rawChild.lastName,
+    firstName: rawChild.firstName || rawChild.name.split(' ')[0],
+    lastName: rawChild.lastName || rawChild.name.split(' ')[1] || '',
     dob: rawChild.dob,
-    gender: rawChild.gender,
-    photoUrl: rawChild.photoUrl,
+    gender: (rawChild.gender as 'male' | 'female') || 'male',
+    photoUrl: rawChild.photoUrl || undefined,
     parentId: rawChild.parentId,
     classroomId: rawChild.classroomId,
     createdAt: rawChild.createdAt,
     createdBy: rawChild.createdBy,
-    // Transform allergies to match expected structure
-    allergies: rawChild.allergies.map((allergy) => ({
-      allergen: allergy.allergen,
-      notes: allergy.notes,
-      symptoms: allergy.symptoms.map((symptom) => ({
-        name: symptom.name,
-      })),
-      actionPlan: {
-        immediateAction: allergy.actionPlan.immediateAction,
-        medications: allergy.actionPlan.medications.map((med) => ({
-          name: med.name,
-          dosage: med.dosage,
-        })),
-      },
-    })),
-    // Include symptoms
-    symptoms: rawChild.symptoms.map((symptom) => ({
-      name: symptom.name,
-      severity: symptom.severity,
-    })),
-    // Include emergency contacts
-    emergencyContacts: rawChild.emergencyContacts.map((contact) => ({
-      name: contact.name,
-      relationship: contact.relationship,
-      phone: contact.phone,
-      email: contact.email,
-      isMainContact: contact.isMainContact,
-    })),
-    // Include caretakers if any
-    caretakers: rawChild.caretakers || [],
+    allergies: rawChild.allergies.map(
+      (allergy): Allergy => ({
+        allergen: allergy.allergen,
+        notes: allergy.notes || '',
+        severity: (allergy.severity as 'Low' | 'Medium' | 'High') || 'Low',
+        symptoms:
+          allergy.symptoms?.map((symptom) => ({
+            name: symptom.name,
+          })) || [],
+        actionPlan: {
+          immediateAction: allergy.actionPlan?.immediateAction || '',
+          medications:
+            allergy.actionPlan?.medications?.map((med) => ({
+              name: med.name,
+              dosage: med.dosage,
+            })) || [],
+        },
+      })
+    ),
+    symptoms:
+      rawChild.symptoms?.map(
+        (symptom): Symptom => ({
+          name: symptom.name,
+          severity: symptom.severity as 'Mild' | 'Moderate' | 'Severe',
+        })
+      ) || [],
+    emergencyContacts:
+      rawChild.emergencyContacts?.map(
+        (contact): EmergencyContact => ({
+          name: contact.name,
+          relationship: contact.relationship,
+          phone: contact.phone,
+          email: contact.email,
+          isMainContact: contact.isMainContact,
+        })
+      ) || [],
+    caretakers: (rawChild.caretakers || []).map(
+      (caretaker): Caretaker => ({
+        id: caretaker.id,
+        type: caretaker.type,
+        name: caretaker.name,
+        email: caretaker.email,
+        role: caretaker.role || 'Caretaker',
+        phone: caretaker.phone,
+        notes: caretaker.notes,
+        createdAt: caretaker.createdAt,
+      })
+    ),
   };
 
   const breadcrumbItems = [

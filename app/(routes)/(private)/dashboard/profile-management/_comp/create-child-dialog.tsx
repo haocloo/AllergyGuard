@@ -37,7 +37,17 @@ export function CreateChildDialog() {
   };
 
   const handleAddAllergy = () => {
-    setField('allergies', [...formData.allergies, { allergen: '', severity: 'Low', notes: '' }]);
+    const newAllergy: Allergy = {
+      allergen: '',
+      notes: '',
+      severity: 'Low',
+      symptoms: [],
+      actionPlan: {
+        immediateAction: '',
+        medications: [],
+      },
+    };
+    setField('allergies', [...formData.allergies, newAllergy]);
   };
 
   const handleRemoveAllergy = (index: number) => {
@@ -49,36 +59,48 @@ export function CreateChildDialog() {
 
   const handleAllergyChange = (index: number, field: keyof Allergy, value: string) => {
     const newAllergies = [...formData.allergies];
-    newAllergies[index] = { ...newAllergies[index], [field]: value };
+    newAllergies[index] = {
+      ...newAllergies[index],
+      [field]: value,
+    };
     setField('allergies', newAllergies);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      setIsSubmitting(true);
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const newChild: Child = {
         id: uuidv4(),
-        name: formData.name,
-        dob: date?.toISOString() || new Date().toISOString(),
+        name: `${formData.firstName} ${formData.lastName}`,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dob: formData.dob,
+        gender: formData.gender,
+        photoUrl: formData.photoUrl,
         allergies: formData.allergies,
-        parentId: uuidv4(), // This would come from auth context in real app
-        classroomId: uuidv4(), // This would be selected in real app
+        symptoms: formData.symptoms,
+        emergencyContacts: formData.emergencyContacts,
+        parentId: formData.parentId || uuidv4(), // Fallback for development
+        classroomId: formData.classroomId || uuidv4(), // Fallback for development
         createdAt: new Date().toISOString(),
-        createdBy: uuidv4(), // This would come from auth context in real app
+        createdBy: formData.createdBy || uuidv4(), // Fallback for development
+        caretakers: [], // Initialize with empty array
       };
 
       addChild(newChild);
-      handleClose();
+      setIsCreateDialogOpen(false);
+      reset();
       toast({
         title: 'Success',
         description: 'Child profile created successfully',
-        variant: 'success',
       });
     } catch (error) {
+      console.error('Failed to create child:', error);
       toast({
         title: 'Error',
         description: 'Failed to create child profile',
