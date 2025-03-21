@@ -95,6 +95,7 @@ export async function createMealPlan(
     //   id: docRef.id,
     // });
 
+
     // For demonstration purposes - using string-only form to avoid linter errors
     const newPlan = {
       ...mealPlan,
@@ -106,6 +107,7 @@ export async function createMealPlan(
 
     revalidatePath('/meal-planning/plans');
     return { success: true, message: 'Meal plan created successfully' };
+
   } catch (error) {
     utils_log_server_error('Error creating meal plan:', error);
     return fromErrorToFormState('Failed to create meal plan');
@@ -127,6 +129,7 @@ export async function updateMealPlan(id: string, mealPlan: Partial<MealPlan>): P
     //   ...mealPlan,
     //   updatedAt: FieldValue.serverTimestamp(),
     // });
+
 
     // For demonstration purposes - using string-only form to avoid linter errors
     const updatedPlan = {
@@ -157,11 +160,13 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
     // In production, we would delete from Firestore
     // await adminFirestore.collection('mealPlans').doc(id).delete();
 
+
     // For demonstration purposes - using string-only form to avoid linter errors
     console.log('Meal plan would be deleted:', { id });
 
     revalidatePath('/meal-planning/plans');
     return { success: true, message: 'Meal plan deleted successfully' };
+
   } catch (error) {
     utils_log_server_error('Error deleting meal plan:', error);
     return fromErrorToFormState('Failed to delete meal plan');
@@ -173,8 +178,10 @@ export async function deleteMealPlan(id: string): Promise<FormState> {
  */
 export async function getFoodRecipes(): Promise<FoodRecipe[]> {
   try {
+
     // Use our mock data from the local file
     return getMockRecipes();
+
   } catch (error) {
     console.error('Error fetching food recipes:', error);
     return [];
@@ -186,8 +193,10 @@ export async function getFoodRecipes(): Promise<FoodRecipe[]> {
  */
 export async function getFoodRecipeById(id: string): Promise<FoodRecipe | null> {
   try {
+
     // Use our mock data from the local file
     return getMockRecipeById(id);
+
   } catch (error) {
     console.error(`Error fetching food recipe with ID ${id}:`, error);
     return null;

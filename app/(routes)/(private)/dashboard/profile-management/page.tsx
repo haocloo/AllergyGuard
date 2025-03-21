@@ -1,7 +1,7 @@
 import Breadcrumbs from '@/components/layout/breadcrumb';
-import { ProfileManagementClient } from './_comp/client';
-import { get_classrooms, get_children } from './_comp/actions';
-import type { Classroom, Child } from './_comp/types';
+import { ProfileClient } from './_comp/client';
+import { children } from '@/services/dummy-data';
+import type { Child, Allergy } from './_comp/types';
 
 export default async function ProfileManagementPage() {
   const breadcrumbItems = [
@@ -9,30 +9,37 @@ export default async function ProfileManagementPage() {
     { label: 'Profile Management' },
   ];
 
-  // Fetch classrooms with error handling
-  let initialClassrooms: Classroom[] = [];
-  try {
-    initialClassrooms = await get_classrooms();
-  } catch (error) {
-    console.error('Error loading classrooms:', error);
-  }
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-  // Fetch children with error handling
-  let initialChildren: Child[] = [];
-  try {
-    initialChildren = await get_children();
-  } catch (error) {
-    console.error('Error loading children profiles:', error);
-  }
+  // Transform children data to match expected Child type
+  const transformedChildren: Child[] = children.map((child) => ({
+    id: child.id,
+    name: child.name,
+    dob: child.dob,
+    parentId: child.parentId,
+    classroomId: child.classroomId,
+    createdAt: child.createdAt,
+    createdBy: child.createdBy,
+    allergies: child.allergies.map(
+      (allergy) =>
+        ({
+          allergen: allergy.allergen,
+          notes: allergy.notes || '',
+          symptoms: [],
+          actionPlan: {
+            immediateAction: '',
+            medications: [],
+          },
+        } as Allergy)
+    ),
+  }));
 
   return (
     <div className="flex flex-col min-h-screen w-full overflow-hidden">
       <Breadcrumbs items={breadcrumbItems} />
       <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 max-w-full">
-        <ProfileManagementClient
-          initialClassrooms={initialClassrooms}
-          initialChildren={initialChildren}
-        />
+        <ProfileClient initialChildren={transformedChildren} />
       </div>
     </div>
   );

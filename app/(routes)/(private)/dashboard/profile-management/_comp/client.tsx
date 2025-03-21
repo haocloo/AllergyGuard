@@ -1,62 +1,50 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClassroomManagement } from './classroom-management';
-import { ChildProfileManagement } from './child-profile-management';
-import { useClassroomStore } from './store';
-import { useChildProfileStore } from './store';
-import type { Classroom, Child } from './types';
+import { useEffect } from 'react';
+import { Plus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { useProfileStore } from './store';
+import { ChildrenGrid } from './children-grid';
+import type { Child } from './types';
 
-interface ProfileManagementClientProps {
-  initialClassrooms: Classroom[];
+interface Props {
   initialChildren: Child[];
 }
 
-export function ProfileManagementClient({
-  initialClassrooms,
-  initialChildren,
-}: ProfileManagementClientProps) {
-  const [activeTab, setActiveTab] = useState<string>('classroom');
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+export function ProfileClient({ initialChildren }: Props) {
+  const { setChildren } = useProfileStore();
+  const router = useRouter();
 
-  // Initialize stores with initial data
-  const setClassrooms = useClassroomStore((state) => state.setClassrooms);
-  const setChildren = useChildProfileStore((state) => state.setChildren);
-
+  // Initialize children data
   useEffect(() => {
-    // Set initial data in the stores
-    setClassrooms(initialClassrooms);
     setChildren(initialChildren);
-    setIsLoading(false);
-  }, [initialClassrooms, initialChildren, setClassrooms, setChildren]);
+  }, [initialChildren, setChildren]);
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Profile Management</h1>
-      <p className="text-muted-foreground">
-        Manage children profiles, classrooms and allergy information.
-      </p>
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Children Profiles</h1>
+        <p className="text-sm text-muted-foreground">
+          Manage your children's profiles and allergies
+        </p>
+      </div>
 
-      <Tabs
-        defaultValue="classroom"
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="w-full mt-6"
+      {/* Main Content */}
+      <div className="flex-grow">
+        <ChildrenGrid />
+      </div>
+
+      {/* Floating Action Button */}
+      <Button
+        onClick={() => router.push('/dashboard/profile-management/new')}
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl"
+        size="icon"
       >
-        <TabsList className="grid grid-cols-2 w-full max-w-md">
-          <TabsTrigger value="classroom">Classroom Mode</TabsTrigger>
-          <TabsTrigger value="children">Child Profiles</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="classroom" className="mt-6">
-          <ClassroomManagement isLoading={isLoading} />
-        </TabsContent>
-
-        <TabsContent value="children" className="mt-6">
-          <ChildProfileManagement isLoading={isLoading} />
-        </TabsContent>
-      </Tabs>
+        <Plus className="h-6 w-6" />
+        <span className="sr-only">Add Child Profile</span>
+      </Button>
     </div>
   );
 }
