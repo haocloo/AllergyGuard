@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 // Components
-import { Phone, Loader2, Search, Brain, AlertTriangle, X } from 'lucide-react';
+import { Phone, Loader2, Search, Brain, AlertTriangle, X, Zap, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -17,12 +17,19 @@ import { cn } from '@/lib/cn';
 // Services
 import type { TDiagnosis } from '@/services/dummy-data';
 import { useVoiceRecognitionStore, useInterviewSessionSpeechStore } from '@/services/store';
-import { useDiagnosisStore } from './store';
-import { get_diagnosis } from './action';
+import { useDiagnosisStore, EnhancedDiagnosis } from './store';
+import { get_diagnosis, DiagnosisResult } from './action';
 
 interface SmartDiagnosisClientProps {
   initialDiagnoses: TDiagnosis[];
 }
+
+// Helper function to get color based on percentage match
+const getMatchColor = (percentage: number) => {
+  if (percentage >= 80) return 'bg-green-100 text-green-800';
+  if (percentage >= 60) return 'bg-yellow-100 text-yellow-800';
+  return 'bg-orange-100 text-orange-800';
+};
 
 export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientProps) {
   const [input, setInput] = useState('');
@@ -57,11 +64,23 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
       setHasSearched(true);
       setSelectedDiagnosis(null);
 
-      const result = await get_diagnosis();
+      const diagnosisResults = await get_diagnosis();
 
-      const filteredResults = initialDiagnoses.filter((diagnosis) => result.includes(diagnosis.id));
+      // Map the diagnosis results to enhanced diagnoses with percentage match and reason
+      const enhancedDiagnoses: EnhancedDiagnosis[] = diagnosisResults
+        .map((result) => {
+          const diagnosis = initialDiagnoses.find((d) => d.id === result.id);
+          if (!diagnosis) return null;
 
-      setFilteredDiagnoses(filteredResults);
+          return {
+            ...diagnosis,
+            percentageMatch: result.percentageMatch,
+            reason: result.reason,
+          };
+        })
+        .filter(Boolean) as EnhancedDiagnosis[];
+
+      setFilteredDiagnoses(enhancedDiagnoses);
       setIsLoading(false);
     } catch (error) {
       toast({
@@ -226,27 +245,45 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                 </p>
 
                 <div className="grid grid-cols-1 gap-3">
-                  {filteredDiagnoses.map((diagnosis) => (
+                  {filteredDiagnoses.map((diagnosis: EnhancedDiagnosis) => (
                     <Card
                       key={diagnosis.id}
-                      className={`p-3 cursor-pointer hover:border-primary transition-all ${
-                        selectedDiagnosis?.id === diagnosis.id ? 'border-primary bg-primary/5' : ''
-                      }`}
+                      className={cn(
+                        `p-3 cursor-pointer transition-all`,
+                        selectedDiagnosis?.id === diagnosis.id ? 'ring-2 ring-primary' : ''
+                      )}
                       onClick={() => setSelectedDiagnosis(diagnosis)}
                     >
-                      <h3 className="font-medium">{diagnosis.name}</h3>
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium">{diagnosis.name}</h3>
+                        {diagnosis.percentageMatch && (
+                          <Badge className={cn('ml-2', getMatchColor(diagnosis.percentageMatch))}>
+                            {diagnosis.percentageMatch}% Match
+                          </Badge>
+                        )}
+                      </div>
+
                       <div className="flex flex-wrap gap-1 mt-2">
                         {diagnosis.symptoms.slice(0, 3).map((symptom, idx) => (
-                          <Badge key={idx} variant="indigo" className="text-xs">
+                          <Badge key={idx} variant="violet" className="text-xs">
                             {symptom}
                           </Badge>
                         ))}
                         {diagnosis.symptoms.length > 3 && (
-                          <Badge variant="indigo" className="text-xs">
+                          <Badge variant="violet" className="text-xs">
                             +{diagnosis.symptoms.length - 3} more
                           </Badge>
                         )}
                       </div>
+                      {/* Diagnosis reasoning - now shown in the card */}
+                      {diagnosis.reason && (
+                        <div className="mt-3 p-2 rounded-md bg-blue-50 text-blue-700 border border-blue-100">
+                          <div className="flex items-start gap-2">
+                            <Sparkles className="h-5 w-5 shrink-0" />
+                            <p className="text-sm text-pretty">{diagnosis.reason}</p>
+                          </div>
+                        </div>
+                      )}
                     </Card>
                   ))}
                 </div>
@@ -273,6 +310,11 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                   Diagnosis
                 </Badge>
                 <h2 className="text-xl font-bold">{selectedDiagnosis.name}</h2>
+                {'percentageMatch' in selectedDiagnosis && selectedDiagnosis.percentageMatch && (
+                  <Badge className={cn('mt-2', getMatchColor(selectedDiagnosis.percentageMatch))}>
+                    {selectedDiagnosis.percentageMatch}% Match
+                  </Badge>
+                )}
               </div>
               <div className="p-4">
                 <p className="text-muted-foreground">{selectedDiagnosis.description}</p>
@@ -281,7 +323,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                   <h3 className="text-sm font-medium mb-2">Common Symptoms:</h3>
                   <div className="flex flex-wrap gap-2">
                     {selectedDiagnosis.symptoms.map((symptom, idx) => (
-                      <Badge key={idx} variant="outline">
+                      <Badge key={idx} variant="violet">
                         {symptom}
                       </Badge>
                     ))}
@@ -342,7 +384,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
             <Card className="border-destructive/20 overflow-hidden">
               <div className="bg-destructive/5 px-4 py-3 border-b border-destructive/10">
                 <h3 className="text-lg font-medium text-destructive">Emergency Contact</h3>
-            </div>
+              </div>
               <div className="p-4 space-y-4">
                 <Button variant="destructive" className="gap-2 w-full sm:w-auto">
                   <Phone className="h-4 w-4" />
