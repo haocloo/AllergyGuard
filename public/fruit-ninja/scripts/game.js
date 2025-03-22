@@ -74,13 +74,24 @@ exports.sliceAt = function( fruit, angle ){
     if( state( "game-state" ).isnot( "playing" ) )
         return;
 
-    if( fruit.type != "boom" ){
+    // Check if the fruit is a dairy allergen
+    var dairyItems = ["milk", "cheese", "icecream", "cake", "yoghurt"];
+    var isDairy = dairyItems.indexOf(fruit.type) > -1;
+
+    if( fruit.type != "boom" && !isDairy ){
         fruit.broken( angle );
         if( index = fruits.indexOf( fruit ) )
             fruits.splice( index, 1 );
         score.number( ++ scoreNumber );
         this.applyScore( scoreNumber );
-    }else{
+    } else if (isDairy) {
+        // Deduct life when dairy item is cut
+        fruit.broken( angle );
+        if( index = fruits.indexOf( fruit ) )
+            fruits.splice( index, 1 );
+        lose.showLoseAt( fruit.originX );
+    } else {
+        // It's a bomb
         boomSnd.play();
         this.pauseAllFruit();
         background.wobble();
