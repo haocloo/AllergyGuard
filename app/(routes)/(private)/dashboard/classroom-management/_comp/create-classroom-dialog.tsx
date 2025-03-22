@@ -27,6 +27,7 @@ interface ClassroomFormData {
     name: string;
     role: string;
     phone: string;
+    email?: string;
     photoUrl?: string;
   };
 }
@@ -44,6 +45,7 @@ export function CreateClassroomDialog({ open, onOpenChange }: Props) {
       name: '',
       role: '',
       phone: '',
+      email: '',
     },
   });
 
@@ -114,6 +116,7 @@ export function CreateClassroomDialog({ open, onOpenChange }: Props) {
         name: '',
         role: '',
         phone: '',
+        email: '',
         photoUrl: undefined,
       },
     });
@@ -123,48 +126,41 @@ export function CreateClassroomDialog({ open, onOpenChange }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     try {
-      // Create new classroom object with all required fields
       const newClassroom: Classroom = {
         id: uuidv4(),
         code: generateClassroomCode(),
         name: formData.name,
-        centerName: 'Default Center Name', // Add default values
-        address: 'Default Address',
         teacher: {
           id: uuidv4(),
           name: formData.teacher.name,
           role: formData.teacher.role,
           phone: formData.teacher.phone,
+          email: formData.teacher.email,
           photoUrl: formData.teacher.photoUrl,
         },
-        children: [], // Initialize empty arrays
+        children: [],
         allergenAlerts: [],
         createdAt: new Date().toISOString(),
       };
 
-      // Save to localStorage and update store
       await createLocalClassroom(newClassroom);
       addClassroom(newClassroom);
+      onOpenChange(false);
+      resetForm();
 
       toast({
         title: 'Success',
         description: 'Classroom created successfully',
       });
-
-      // Reset form and close dialog
-      resetForm();
-      onOpenChange(false);
     } catch (error) {
+      console.error('Error creating classroom:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create classroom. Please try again.',
+        description: 'Failed to create classroom',
         variant: 'destructive',
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -332,6 +328,23 @@ export function CreateClassroomDialog({ open, onOpenChange }: Props) {
                       placeholder="Contact number"
                       className="bg-muted/50"
                       required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.teacher.email || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          teacher: { ...prev.teacher, email: e.target.value },
+                        }))
+                      }
+                      placeholder="Email address"
+                      className="bg-muted/50"
                     />
                   </div>
                 </div>

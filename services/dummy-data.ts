@@ -15,36 +15,9 @@ import type {
 // In production, use lucia_get_user() to obtain the user id.
 const currentUserId = process.env.NEXT_PUBLIC_user_id || 'b806239e-8a3a-4712-9862-1ccd9b821981';
 
-// Define local interfaces without conflicting with imported types
-export interface Teacher {
-  id: string;
-  name: string;
-  role: string;
-  phone: string;
-  email: string;
-  photoUrl?: string;
-}
+// Remove local interface definitions and use imported types
 
-export interface Child {
-  id: string;
-  name: string;
-  photoUrl?: string;
-  allergies: string[];
-}
-
-export interface Classroom {
-  id: string;
-  code: string;
-  name: string;
-  centerName: string;
-  address: string;
-  teacher: Teacher;
-  children: Child[];
-  allergenAlerts: AllergenAlert[];
-  createdAt: string;
-}
-
-// Update the classroom data
+// Mock data
 export const classrooms: Classroom[] = [
   {
     id: '1',
@@ -59,6 +32,7 @@ export const classrooms: Classroom[] = [
         'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&h=200&auto=format&fit=crop',
       role: 'Head Teacher',
       phone: '012-345-6789',
+      email: 'sarah.j@sunshine.edu.my',
     },
     children: [
       {
@@ -775,3 +749,6 @@ export const caretakers = [
 // - Each document includes a history field to track updates, tying the changes to the user and related document IDs.
 // - Data is tailored for Malaysia, specifically Penang.
 // - In production, replace the fallback currentUserId with the result of lucia_get_user().
+
+// Export the imported types for use elsewhere
+export type { AllergenAlert, Classroom, Child, Teacher };

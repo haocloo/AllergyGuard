@@ -27,6 +27,7 @@ export interface Teacher {
   name: string;
   role: string;
   phone: string;
+  email?: string;
   photoUrl?: string;
 }
 
@@ -51,6 +52,8 @@ export interface Classroom {
   children: Child[];
   allergenAlerts: AllergenAlert[];
   createdAt: string;
+  centerName?: string;
+  address?: string;
 }
 
 export interface ClassroomFormData {

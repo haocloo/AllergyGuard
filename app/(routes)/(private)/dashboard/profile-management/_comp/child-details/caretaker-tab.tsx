@@ -36,11 +36,20 @@ import { cn } from '@/lib/cn';
 import type { Child } from '../types';
 import type { CaretakerFormData, TempCaretaker, SearchUser } from './types';
 import { validateCaretakerForm } from './utils';
-import type { Classroom } from '@/services/dummy-data';
+import type { Classroom } from '@/app/(routes)/(private)/dashboard/classroom-management/_comp/types';
 // ... import other necessary components
 
 interface CaretakerTabProps {
   initialChild: Child;
+}
+
+interface CaretakerForm {
+  type: 'center' | 'individual';
+  name: string;
+  email: string;
+  role: string;
+  phone: string;
+  notes: string;
 }
 
 export function CaretakerTab({ initialChild }: CaretakerTabProps) {
@@ -61,6 +70,7 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
     email: '',
     phone: '',
     role: '',
+    noteToCaretaker: '',
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
@@ -81,7 +91,6 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
           role: caretakerForm.role,
           phone: caretakerForm.phone,
           notes: caretakerForm.noteToCaretaker,
-          createdAt: new Date().toISOString(),
         };
 
         setTempCaretakers((prev) => [...prev, newCaretaker]);
@@ -97,6 +106,7 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
           email: '',
           phone: '',
           role: '',
+          noteToCaretaker: '',
         });
         setShowCaretakerDialog(false);
         setPersonalCaretakerStep('search');
@@ -109,12 +119,11 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
         const newCaretaker: TempCaretaker = {
           id: `temp_${Date.now()}`,
           type: 'center',
-          name: selectedClassroom.centerName,
-          email: selectedClassroom.teacher.email,
+          name: selectedClassroom.centerName || selectedClassroom.name,
+          email: selectedClassroom.teacher.email || '',
           role: selectedClassroom.name,
           phone: selectedClassroom.teacher.phone,
           notes: caretakerForm.noteToCaretaker,
-          createdAt: new Date().toISOString(),
         };
 
         setTempCaretakers((prev) => [...prev, newCaretaker]);
@@ -129,6 +138,7 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
           email: '',
           phone: '',
           role: '',
+          noteToCaretaker: '',
         });
         setShowCaretakerDialog(false);
 
@@ -160,6 +170,7 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
         email: '',
         phone: '',
         role: '',
+        noteToCaretaker: '',
       });
       setFormErrors({});
       setClassroomFormErrors({});
@@ -222,6 +233,54 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
       setClassroomFormErrors({
         code: 'Invalid classroom code. Please check and try again.',
       });
+    }
+  };
+
+  const handleClassroomSelect = (classroom: Classroom) => {
+    if (classroom) {
+      setSelectedClassroom(classroom);
+      setClassroomFormErrors({});
+      setCaretakerForm((prev) => ({
+        ...prev,
+        type: 'center',
+        name: classroom.centerName || classroom.name,
+        email: classroom.teacher.email || '',
+        role: classroom.name,
+        phone: classroom.teacher.phone,
+      }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (selectedClassroom) {
+      const formData: CaretakerFormData = {
+        type: 'center',
+        name: selectedClassroom.centerName || selectedClassroom.name,
+        email: selectedClassroom.teacher.email || '',
+        role: selectedClassroom.name,
+        phone: selectedClassroom.teacher.phone,
+        noteToCaretaker: caretakerForm.noteToCaretaker,
+      };
+
+      // Validate form data
+      const validationErrors = validateCaretakerForm(formData);
+      if (Object.keys(validationErrors).length > 0) {
+        setFormErrors(validationErrors);
+        return;
+      }
+
+      try {
+        // Process the form data
+        // ... rest of the submit logic
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Failed to add caretaker',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -454,6 +513,7 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
                             email: '',
                             phone: '',
                             role: '',
+                            noteToCaretaker: '',
                           });
                         }}
                       >
@@ -577,6 +637,7 @@ export function CaretakerTab({ initialChild }: CaretakerTabProps) {
                         email: '',
                         phone: '',
                         role: '',
+                        noteToCaretaker: '',
                       });
                     }}
                   >
