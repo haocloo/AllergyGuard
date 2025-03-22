@@ -30,6 +30,14 @@ const ALLERGEN_ICONS: Record<string, string> = {
   Seafood: '🦞',
 };
 
+// Add background images for classrooms
+const CLASSROOM_BACKGROUNDS = [
+  'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1080&auto=format&fit=crop', // colorful classroom
+  'https://images.unsplash.com/photo-1448932252197-d19750584e56?q=80&w=1080&auto=format&fit=crop', // wooden texture
+  'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1080&auto=format&fit=crop', // pastel classroom
+  'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=1080&auto=format&fit=crop', // bright classroom
+];
+
 export function ClassroomDetails({ classroom }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAllergy, setSelectedAllergy] = useState<string | null>(null);
@@ -61,25 +69,53 @@ export function ClassroomDetails({ classroom }: Props) {
     }
   };
 
+  // Get background image based on classroom name
+  const getBackgroundImage = (name: string) => {
+    const charSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return CLASSROOM_BACKGROUNDS[charSum % CLASSROOM_BACKGROUNDS.length];
+  };
+
   return (
     <div className="space-y-4">
-      {/* Classroom Header - More compact */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            {classroom.name}
-          </h1>
-          <div className="flex items-center gap-2 mt-1">
-            <code className="text-xs bg-muted px-2 py-1 rounded">{classroom.code}</code>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 hover:bg-background/50"
-              onClick={handleCopyCode}
-            >
-              {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-            </Button>
+      {/* Hero Section with Background */}
+      <div className="relative h-[200px] rounded-lg overflow-hidden mb-6">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${getBackgroundImage(classroom.name)})` }}
+        />
+        <div className="absolute inset-0 bg-black/40" />
+
+        {/* Content overlay */}
+        <div className="absolute inset-0 p-6 flex flex-col justify-end">
+          <div className="flex items-start justify-between">
+            <div className="space-y-2">
+              <h1 className="text-2xl font-semibold tracking-tight text-white flex items-center gap-2">
+                <GraduationCap className="h-6 w-6" />
+                {classroom.name}
+              </h1>
+              <div className="flex items-center gap-2">
+                <code className="text-xs bg-black/20 text-white px-2 py-1 rounded backdrop-blur-sm">
+                  {classroom.code}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 hover:bg-white/10 text-white"
+                  onClick={handleCopyCode}
+                >
+                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className="bg-white/10 text-white border-white/20 backdrop-blur-sm"
+              >
+                {classroom.children.length} Children
+              </Badge>
+            </div>
           </div>
         </div>
       </div>

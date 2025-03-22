@@ -1,9 +1,8 @@
 'use client';
 
-import { Users, GraduationCap, ChevronRight } from 'lucide-react';
+import { Users, GraduationCap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/cn';
 import { useEffect, useState } from 'react';
 import type { Classroom } from './types';
@@ -12,94 +11,58 @@ interface Props {
   classroom: Classroom;
 }
 
-// Update the color combinations to be more vibrant but still professional
-const colorPairs = [
-  'from-blue-100/80 to-violet-200/80 dark:from-blue-900/40 dark:to-violet-900/40',
-  'from-emerald-100/80 to-teal-200/80 dark:from-emerald-900/40 dark:to-teal-900/40',
-  'from-orange-100/80 to-amber-200/80 dark:from-orange-900/40 dark:to-amber-900/40',
-  'from-rose-100/80 to-pink-200/80 dark:from-rose-900/40 dark:to-pink-900/40',
-  'from-cyan-100/80 to-sky-200/80 dark:from-cyan-900/40 dark:to-sky-900/40',
-  'from-purple-100/80 to-fuchsia-200/80 dark:from-purple-900/40 dark:to-fuchsia-900/40',
-  'from-lime-100/80 to-green-200/80 dark:from-lime-900/40 dark:to-green-900/40',
-  'from-yellow-100/80 to-orange-200/80 dark:from-yellow-900/40 dark:to-orange-900/40',
+// Update background images to be more classroom/education themed
+const CLASSROOM_BACKGROUNDS = [
+  'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1080&auto=format&fit=crop', // colorful classroom
+  'https://images.unsplash.com/photo-1448932252197-d19750584e56?q=80&w=1080&auto=format&fit=crop', // wooden texture
+  'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1080&auto=format&fit=crop', // pastel classroom
+  'https://images.unsplash.com/photo-1519331379826-f10be5486c6f?q=80&w=1080&auto=format&fit=crop', // bright classroom
 ];
 
 export function ClassroomCard({ classroom }: Props) {
-  const [gradientColor, setGradientColor] = useState(colorPairs[0]);
+  const [backgroundImage, setBackgroundImage] = useState('');
 
-  // Function to get a consistent color based on teacher's name
-  const getColorFromName = (name: string) => {
+  // Function to get a consistent background image based on classroom name
+  const getBackgroundImage = (name: string) => {
     const charSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    return colorPairs[charSum % colorPairs.length];
+    return CLASSROOM_BACKGROUNDS[charSum % CLASSROOM_BACKGROUNDS.length];
   };
 
   useEffect(() => {
-    setGradientColor(getColorFromName(classroom.teacher.name));
-  }, [classroom.teacher.name]);
+    setBackgroundImage(getBackgroundImage(classroom.name));
+  }, [classroom.name]);
 
   return (
-    <Card
-      className={cn(
-        'group relative overflow-hidden transition-all duration-300',
-        'hover:shadow-lg hover:scale-[1.02]',
-        'cursor-pointer h-[160px]'
-      )}
-    >
-      {/* Background with gradient */}
-      <div
-        className={cn(
-          'absolute inset-0 bg-gradient-to-br',
-          gradientColor,
-          'opacity-100 group-hover:opacity-90 transition-opacity'
-        )}
-      />
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer">
+      {/* Background Image with Overlay - reduced height */}
+      <div className="relative h-[160px] w-full">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${backgroundImage})` }}
+        />
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
 
-      {/* Content overlay with subtle backdrop blur */}
-      <div className="absolute inset-0 bg-white/10 dark:bg-gray-950/10 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity" />
-
-      <div className="relative p-4 flex flex-col h-full">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100 group-hover:text-primary transition-colors">
-            {classroom.name}
-          </h3>
-          <div className="flex items-center gap-2">
-            {/* Class Label */}
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-background/80 backdrop-blur-sm">
-              <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Class</span>
-            </div>
-            {/* Arrow Icon */}
-            <div className="h-6 w-6 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center">
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-            </div>
+      {/* Content Section - reduced padding */}
+      <div className="p-3 bg-white dark:bg-gray-950">
+        {/* Classroom Info */}
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-base font-semibold">{classroom.name}</h3>
+          <div className="flex items-center gap-1.5">
+            <Users className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">{classroom.children?.length || 0}</span>
           </div>
         </div>
 
-        {/* Bottom Section with Teacher Info and Children Count */}
-        <div className="mt-auto space-y-2">
-          {/* Teacher Info */}
-          <div className="flex items-center gap-3 bg-background/80 backdrop-blur-sm rounded-full py-1.5 px-2">
-            <Avatar className="h-8 w-8 ring-2 ring-background shadow-sm">
-              <AvatarImage src={classroom.teacher.photoUrl} />
-              <AvatarFallback className="bg-primary/10">{classroom.teacher.name[0]}</AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium leading-none text-gray-800 dark:text-gray-100">
-                {classroom.teacher.name}
-              </p>
-              <p className="text-xs text-muted-foreground mt-0.5">Head Teacher</p>
-            </div>
-          </div>
-
-          {/* Children Count */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/80 backdrop-blur-sm w-fit">
-            <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center">
-              <Users className="h-3.5 w-3.5 text-primary" />
-            </div>
-            <span className="text-xs font-medium text-gray-800 dark:text-gray-100">
-              {classroom.children?.length || 0} Children
-            </span>
+        {/* Teacher Info - slightly smaller */}
+        <div className="flex items-center gap-2">
+          <Avatar className="h-7 w-7">
+            <AvatarImage src={classroom.teacher.photoUrl} />
+            <AvatarFallback>{classroom.teacher.name[0]}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-medium leading-none">{classroom.teacher.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{classroom.teacher.role}</p>
           </div>
         </div>
       </div>
