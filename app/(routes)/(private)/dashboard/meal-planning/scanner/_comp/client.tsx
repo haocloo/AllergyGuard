@@ -147,7 +147,7 @@ const AFFECTED_CHILDREN = [
     name: 'Bob Wilson',
     allergies: ['Milk'],
     photoUrl:
-      'https://images.unsplash.com/photo-1517252035391-27b6c0d8c5ff?q=80&w=100&h=100&fit=crop&crop=faces',
+      'https://images.unsplash.com/photo-1521146764736-56c929d59c83?q=80&w=100&h=100&fit=crop&crop=faces',
   },
   {
     id: 'c3',
