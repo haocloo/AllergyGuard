@@ -6,12 +6,29 @@ import { BasicInfoForm } from './steps/basic-info';
 import { AllergiesForm } from './steps/allergies';
 import { SymptomSeverityForm } from './steps/symptom-severity';
 import { EmergencyContactForm } from './steps/emergency-contact';
+import { UserCircle, AlertCircle, Heart, Phone } from 'lucide-react';
 
 const steps = [
-  { title: 'Basic Information', description: 'Personal details' },
-  { title: 'Allergies', description: 'Allergy information' },
-  { title: 'Symptom Severity', description: 'Symptoms and triggers' },
-  { title: 'Emergency Contacts', description: 'Contact information' },
+  {
+    title: 'Basic Information',
+    description: 'Personal details',
+    icon: <UserCircle className="h-4 w-4" />,
+  },
+  {
+    title: 'Allergies',
+    description: 'Allergy information',
+    icon: <AlertCircle className="h-4 w-4" />,
+  },
+  {
+    title: 'Symptom Severity',
+    description: 'Symptoms and triggers',
+    icon: <Heart className="h-4 w-4" />,
+  },
+  {
+    title: 'Emergency Contacts',
+    description: 'Contact information',
+    icon: <Phone className="h-4 w-4" />,
+  },
 ];
 
 export function CreateProfileClient() {

@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
+import { format, differenceInYears } from 'date-fns';
 import {
   AlertCircle,
   Pencil,
@@ -22,6 +22,20 @@ import {
   MoreVertical,
   Trash,
   ChevronLeft,
+  Calendar,
+  User2,
+  Users2,
+  Heart,
+  Activity,
+  Mail,
+  UserCircle2,
+  BadgeAlert,
+  Pill,
+  Syringe,
+  ShieldAlert,
+  UserCog,
+  CalendarClock,
+  Baby,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import type { Child, Symptom, SymptomSeverity } from '../types';
@@ -174,6 +188,18 @@ interface FormStepProps {
   onBack: () => void;
 }
 
+// Add at the top with other imports
+const bgColors = [
+  'from-blue-500/10 via-purple-500/10 to-pink-500/10',
+  'from-purple-500/10 via-pink-500/10 to-orange-500/10',
+  'from-pink-500/10 via-orange-500/10 to-yellow-500/10',
+  'from-orange-500/10 via-yellow-500/10 to-green-500/10',
+  'from-yellow-500/10 via-green-500/10 to-teal-500/10',
+  'from-green-500/10 via-teal-500/10 to-cyan-500/10',
+  'from-teal-500/10 via-cyan-500/10 to-blue-500/10',
+  'from-cyan-500/10 via-blue-500/10 to-purple-500/10',
+];
+
 export function ChildDetailsClient({ initialChild }: Props) {
   const router = useRouter();
 
@@ -229,6 +255,10 @@ export function ChildDetailsClient({ initialChild }: Props) {
       });
     }
   }, [editingSection, initialChild, initializeEditForm]);
+
+  // Get consistent background color
+  const bgColorIndex = parseInt(initialChild.id.slice(-3), 16) % bgColors.length;
+  const bgGradient = bgColors[bgColorIndex];
 
   const handleSectionSave = async (section: 'allergies' | 'symptoms' | 'contacts' | 'basic') => {
     try {
@@ -439,90 +469,139 @@ export function ChildDetailsClient({ initialChild }: Props) {
     }
   };
 
+  // Add this function at the top of the component
+  const handleCall = (phoneNumber: string) => {
+    window.location.href = `tel:${phoneNumber}`;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{initialChild.name}'s Profile</h1>
+        <div className="flex items-center gap-3">
+          <Baby className="h-8 w-8 text-primary" />
+          <h1 className="text-2xl font-semibold">{initialChild.name}'s Profile</h1>
+        </div>
         <Button variant="outline" onClick={() => router.back()}>
           Back
         </Button>
       </div>
 
       <Card className="overflow-hidden">
-        {/* Profile Header */}
-        <div className="relative h-48 bg-muted">
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-          <div className="w-full h-full">
-            {initialChild.photoUrl ? (
-              <img
-                src={initialChild.photoUrl}
-                alt={initialChild.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${initialChild.id}`}
-                    className="bg-background"
-                  />
-                  <AvatarFallback>
-                    {initialChild.firstName?.[0]}
-                    {initialChild.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            )}
+        {/* Profile Header with Dynamic Background - Made more compact */}
+        <div
+          className={cn(
+            'relative h-48 bg-gradient-to-br transition-colors duration-300', // Reduced height from h-64
+            bgGradient,
+            'group-hover:saturate-[1.2]'
+          )}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/50 to-transparent" />
+          <div className="absolute inset-0 flex items-center justify-start px-8 gap-6">
+            <div
+              className={cn(
+                'relative aspect-square w-32', // Changed to use aspect-square
+                'rounded-full overflow-hidden',
+                'bg-background/50 backdrop-blur-sm shadow-xl',
+                'transform hover:scale-105 transition-transform duration-300',
+                'flex items-center justify-center' // Added flex centering
+              )}
+            >
+              <Avatar className="w-full h-full">
+                <AvatarImage
+                  src={
+                    initialChild.photoUrl ||
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${initialChild.id}`
+                  }
+                  className="bg-background object-cover" // Added object-cover
+                />
+                <AvatarFallback className="text-2xl">
+                  {initialChild.firstName?.[0]}
+                  {initialChild.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="text-left">
+              <h2 className="text-2xl font-semibold">{initialChild.name}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {differenceInYears(new Date(), new Date(initialChild.dob))} years old • Born{' '}
+                {format(new Date(initialChild.dob), 'PPP')}
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="p-6 space-y-8">
-          {/* Basic Information */}
-          <section className="space-y-4">
-            <h2 className="text-lg font-medium">Basic Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <EditableField
-                label="First Name"
-                value={initialChild.firstName}
-                onSave={(value) => handleSectionSave('basic')}
-              />
-              <EditableField
-                label="Last Name"
-                value={initialChild.lastName}
-                onSave={(value) => handleSectionSave('basic')}
-              />
-              <EditableField
-                label="Date of Birth"
-                value={format(new Date(initialChild.dob), 'PPP')}
-                onSave={(value) => handleSectionSave('basic')}
-              />
-              <EditableField
-                label="Gender"
-                value={initialChild.gender || 'Not specified'}
-                onSave={(value) => handleSectionSave('basic')}
-              />
+          {/* Basic Information - Made more compact */}
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-5 w-1 rounded-full bg-primary" />
+              <User2 className="h-4 w-4 text-primary" />
+              <h2 className="text-base font-medium">Basic Information</h2>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {' '}
+              {/* Changed to 4 columns */}
+              <div className="space-y-1 p-3 rounded-lg bg-muted/50">
+                {' '}
+                {/* Reduced padding */}
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <UserCircle2 className="h-3.5 w-3.5" />
+                  <label className="text-xs font-medium">First Name</label>
+                </div>
+                <p className="text-sm font-medium">{initialChild.firstName}</p>
+              </div>
+              <div className="space-y-1 p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <UserCircle2 className="h-3.5 w-3.5" />
+                  <label className="text-xs font-medium">Last Name</label>
+                </div>
+                <p className="text-sm font-medium">{initialChild.lastName}</p>
+              </div>
+              <div className="space-y-1 p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <CalendarClock className="h-3.5 w-3.5" />
+                  <label className="text-xs font-medium">Date of Birth</label>
+                </div>
+                <p className="text-sm font-medium">{format(new Date(initialChild.dob), 'PP')}</p>
+              </div>
+              <div className="space-y-1 p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <UserCog className="h-3.5 w-3.5" />
+                  <label className="text-xs font-medium">Gender</label>
+                </div>
+                <p className="text-sm font-medium capitalize">
+                  {initialChild.gender || 'Not specified'}
+                </p>
+              </div>
             </div>
           </section>
 
           <Tabs defaultValue="health" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="health" className="text-xs sm:text-sm px-1 sm:px-4">
+            <TabsList className="grid w-full grid-cols-3 h-12">
+              <TabsTrigger value="health" className="text-sm flex items-center gap-2">
+                <Heart className="h-4 w-4" />
                 Health Info
               </TabsTrigger>
-              <TabsTrigger value="emergency" className="text-xs sm:text-sm px-1 sm:px-4">
+              <TabsTrigger value="emergency" className="text-sm flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4" />
                 Emergency
               </TabsTrigger>
-              <TabsTrigger value="caretakers" className="text-xs sm:text-sm px-1 sm:px-4">
+              <TabsTrigger value="caretakers" className="text-sm flex items-center gap-2">
+                <Users2 className="h-4 w-4" />
                 Caretakers
               </TabsTrigger>
             </TabsList>
 
             {/* Health Information Tab */}
-            <TabsContent value="health" className="space-y-6 pt-4">
+            <TabsContent value="health" className="space-y-6 pt-6">
               {/* Allergies Section */}
               <section className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-medium">Allergies</h2>
+                  <div className="flex items-center gap-2">
+                    <div className="h-6 w-1 rounded-full bg-destructive" />
+                    <BadgeAlert className="h-5 w-5 text-destructive" />
+                    <h2 className="text-lg font-medium">Allergies</h2>
+                  </div>
                   <Dialog
                     open={editingSection === 'allergies'}
                     onOpenChange={(open) => !open && setEditingSection(null)}
@@ -531,6 +610,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="bg-background/50 backdrop-blur-sm"
                         onClick={() => {
                           setEditingSection('allergies');
                           initializeEditForm({
@@ -556,11 +636,31 @@ export function ChildDetailsClient({ initialChild }: Props) {
                     </DialogContent>
                   </Dialog>
                 </div>
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {initialChild.allergies.map((allergy, index) => (
-                    <div key={index} className="border rounded-lg p-4 space-y-4">
+                    <div
+                      key={index}
+                      className={cn(
+                        'border rounded-lg p-4 space-y-3 transition-all duration-300',
+                        'hover:shadow-md hover:border-primary/50',
+                        allergy.severity === 'High' && 'bg-red-50/50 dark:bg-red-950/50',
+                        allergy.severity === 'Medium' && 'bg-yellow-50/50 dark:bg-yellow-950/50',
+                        allergy.severity === 'Low' && 'bg-green-50/50 dark:bg-green-950/50'
+                      )}
+                    >
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium">{allergy.allergen}</h3>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            'border-2',
+                            allergy.severity === 'High' && 'border-destructive text-destructive',
+                            allergy.severity === 'Medium' && 'border-yellow-500 text-yellow-700',
+                            allergy.severity === 'Low' && 'border-green-500 text-green-700'
+                          )}
+                        >
+                          {allergy.severity}
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">{allergy.notes}</p>
 
@@ -576,18 +676,25 @@ export function ChildDetailsClient({ initialChild }: Props) {
                         </div>
                       </div>
 
-                      {/* Action Plan */}
+                      {/* Action Plan with icons */}
                       <div className="space-y-2">
-                        <label className="text-sm font-medium">Action Plan</label>
+                        <div className="flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          <label className="text-sm font-medium">Action Plan</label>
+                        </div>
                         <p className="text-sm">{allergy.actionPlan.immediateAction}</p>
 
-                        {/* Medications */}
+                        {/* Medications with icon */}
                         {allergy.actionPlan.medications.length > 0 && (
                           <div className="mt-2">
-                            <label className="text-sm font-medium">Medications</label>
+                            <div className="flex items-center gap-2">
+                              <Pill className="h-4 w-4" />
+                              <label className="text-sm font-medium">Medications</label>
+                            </div>
                             <ul className="mt-1 space-y-1">
                               {allergy.actionPlan.medications.map((med, i) => (
-                                <li key={i} className="text-sm">
+                                <li key={i} className="text-sm flex items-center gap-2">
+                                  <Syringe className="h-3 w-3 text-muted-foreground" />
                                   {med.name} - {med.dosage}
                                 </li>
                               ))}
@@ -696,21 +803,62 @@ export function ChildDetailsClient({ initialChild }: Props) {
                     </DialogContent>
                   </Dialog>
                 </div>
-                {initialChild.emergencyContacts && initialChild.emergencyContacts.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {initialChild.emergencyContacts.map((contact, index) => (
-                      <div key={index} className="border rounded-lg p-4 space-y-2">
-                        <div className="flex items-center justify-between">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {initialChild.emergencyContacts.map((contact, index) => (
+                    <div
+                      key={index}
+                      className={cn(
+                        'border rounded-lg p-4 space-y-3 transition-all duration-200',
+                        'hover:shadow-md hover:border-primary/50',
+                        contact.isMainContact && 'bg-primary/5 border-primary/20'
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <UserCircle2 className="h-5 w-5 text-primary" />
                           <h3 className="font-medium">{contact.name}</h3>
-                          {contact.isMainContact && <Badge variant="secondary">Main Contact</Badge>}
                         </div>
-                        <p className="text-sm text-muted-foreground">{contact.relationship}</p>
-                        <p className="text-sm">{contact.phone}</p>
-                        <p className="text-sm">{contact.email}</p>
+                        {contact.isMainContact && (
+                          <Badge
+                            variant="secondary"
+                            className="bg-primary/10 text-primary border-primary/20"
+                          >
+                            Main Contact
+                          </Badge>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                )}
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Users2 className="h-4 w-4" />
+                        {contact.relationship}
+                      </p>
+
+                      {/* Updated Phone Number Button */}
+                      <button
+                        onClick={() => handleCall(contact.phone)}
+                        className={cn(
+                          'w-full group flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200',
+                          'bg-green-500/10 hover:bg-green-500/20 active:bg-green-500/30',
+                          'border border-green-500/20 hover:border-green-500/30',
+                          'text-green-700 dark:text-green-500'
+                        )}
+                      >
+                        <Phone
+                          className={cn(
+                            'h-4 w-4 transition-transform duration-200',
+                            'group-hover:scale-110 group-active:scale-95'
+                          )}
+                        />
+                        <span className="text-sm font-medium">{contact.phone}</span>
+                        <span className="text-xs text-muted-foreground ml-auto">Tap to call</span>
+                      </button>
+
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-md bg-muted/50">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{contact.email}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </section>
             </TabsContent>
 
