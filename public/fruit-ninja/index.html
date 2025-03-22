@@ -80,8 +80,7 @@ div[id="allergen-results"], [id*="allergen"] {
 </style>
 </head>
 <body>
-<!-- Direct HTML button that will always be visible -->
-<button id="show-allergen-btn" onclick="showInlineAllergenResults()">SHOW ALLERGEN RESULTS</button>
+<!-- Removed the allergen button -->
 
 <div id="extra"></div>
 <div id="desc">
@@ -90,7 +89,7 @@ div[id="allergen-results"], [id*="allergen"] {
 </div>
 <script src="scripts/all.js"></script>
 <script>
-// Even more direct approach - standalone function with all necessary code
+// Keep the function definition but remove all the manual triggers
 function showInlineAllergenResults() {
     console.log("Inline allergen results function triggered");
     
@@ -104,18 +103,20 @@ function showInlineAllergenResults() {
     var overlay = document.createElement('div');
     overlay.id = 'allergen-results';
     
-    // Apply important properties directly to the element
+    // Apply important properties directly to the element - improve centering and position higher
     overlay.style.position = 'fixed';
     overlay.style.top = '0';
     overlay.style.left = '0';
     overlay.style.width = '100%';
     overlay.style.height = '100%';
     overlay.style.zIndex = '9999999'; // Ultra high z-index
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
     overlay.style.display = 'flex';
     overlay.style.justifyContent = 'center';
-    overlay.style.alignItems = 'center';
+    overlay.style.alignItems = 'center'; 
+    overlay.style.paddingBottom = '10%'; // Shift content upward by adding padding to bottom
     overlay.style.fontFamily = 'Arial, sans-serif';
+    overlay.style.boxSizing = 'border-box';
     
     // Dairy allergen explanations
     var explanations = {
@@ -126,45 +127,59 @@ function showInlineAllergenResults() {
         "yoghurt": "Yoghurt is made by fermenting milk and contains the same allergenic proteins."
     };
     
+    // Food-specific emojis for each allergen
+    var foodEmojis = {
+        "milk": "🥛",
+        "cheese": "🧀",
+        "icecream": "🍦",
+        "cake": "🍰",
+        "yoghurt": "🥣"
+    };
+    
     // Sample allergens to display
     var examples = ["cheese", "milk", "icecream", "cake", "yoghurt"];
     
-    // Create HTML content with hover/tap functionality
-    var html = '<div style="background:rgba(0,0,0,0.95); max-width:90%; width:600px; border:5px solid #ff5252; border-radius:15px; padding:20px; box-shadow:0 0 30px rgba(255,0,0,0.8); color:white; position:relative;">';
+    // Create HTML content with improved styling
+    var html = '<div style="background: linear-gradient(to bottom, #2d2d2d, #222); max-width:90%; width:450px; margin:0 auto; border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5); color:white; position:relative;">';
     
-    // Top close button (X)
-    html += '<button id="inline-top-close-btn" style="position:absolute; top:10px; right:10px; background:#ff5252; color:white; border:none; border-radius:50%; width:30px; height:30px; font-size:16px; font-weight:bold; cursor:pointer; z-index:999999;">✖</button>';
+    // Top close button - improved styling
+    html += '<button id="inline-top-close-btn" style="position:absolute; top:10px; right:10px; background:#ff5252; color:white; border:none; border-radius:50%; width:30px; height:30px; font-size:16px; font-weight:bold; cursor:pointer; z-index:999999; box-shadow:0 2px 5px rgba(0,0,0,0.3); transition:all 0.2s ease;">✖</button>';
     
-    // Title
-    html += '<h2 style="color:#ff5252; text-align:center; margin-bottom:15px; font-size:26px; text-shadow:0 0 5px rgba(255,82,82,0.7); padding-right:30px;">⚠️ Allergen Alert! ⚠️</h2>';
-    html += '<p style="text-align:center; margin-bottom:15px; font-size:16px; color:#ffcc00;">Oops! You cut these foods that contain DAIRY allergens:</p>';
+    // Title - improved styling
+    html += '<div style="border-left:5px solid #ff5252; padding-left:15px; margin-bottom:15px;">';
+    html += '<h2 style="color:#ff5252; margin:0 0 5px 0; font-size:24px; font-weight:700;">⚠️ Allergen Alert</h2>';
+    html += '<p style="margin:0; font-size:14px; color:#ddd;">You cut foods with DAIRY allergens</p>';
+    html += '</div>';
     
-    // Grid layout for allergen items
-    html += '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin:10px 0;">';
+    // Grid layout for allergen items - improved styling
+    html += '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin:15px 0; position: relative;">';
     
-    // Add allergen items with hover effect
+    // Add allergen items with improved hover effect - LARGER HOVER BOX
     examples.forEach(function(item) {
         var itemName = item.charAt(0).toUpperCase() + item.slice(1);
-        html += '<div class="allergen-item" style="position:relative; background:rgba(255,82,82,0.2); border-radius:10px; border-left:5px solid #ff5252; padding:12px; text-align:center; cursor:pointer; transition:all 0.3s ease;">' +
-                '<strong style="color:#ff9e9e; font-size:16px; display:block;">🚫 ' + itemName + '</strong>' +
-                '<div class="allergen-desc" style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.95); border-radius:10px; padding:10px; opacity:0; transition:opacity 0.3s ease; display:flex; align-items:center; justify-content:center; z-index:2; pointer-events:none;">' +
-                '<p style="font-size:14px; margin:0;">' + explanations[item] + '</p>' +
+        var emoji = foodEmojis[item] || "⚠️"; // Use the food-specific emoji or default to warning
+        html += '<div class="allergen-item" data-allergen-type="' + item + '" style="position:relative; background:linear-gradient(to bottom, #3a3a3a, #2d2d2d); border-radius:8px; overflow:hidden; padding:12px 10px; text-align:center; cursor:pointer; transition:all 0.3s ease; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:1;">' +
+                '<div style="position:absolute; top:0; left:0; width:100%; height:4px; background:#ff5252;"></div>' +
+                '<strong style="color:#ff9e9e; font-size:15px; display:block; margin-bottom:3px;">' + emoji + ' ' + itemName + '</strong>' +
+                '<span style="font-size:11px; color:#aaa;">Tap for info</span>' +
+                '<div class="allergen-full-desc" style="display:none; margin-top:10px; text-align:left; opacity:0; max-height:0; overflow:hidden; transition:all 0.3s ease;">' +
+                '<p style="font-size:13px; margin:0; color:#fff; line-height:1.5;">' + explanations[item] + '</p>' +
                 '</div>' +
                 '</div>';
     });
     
     html += '</div>'; // Close grid layout
     
-    // Tips section
-    html += '<div style="background:rgba(76,175,80,0.2); padding:12px; border-radius:10px; margin:15px 0 10px; border-left:5px solid #4CAF50;">' +
-            '<p style="margin:0; color:#a5d6a7; font-size:14px;"><strong>💡 TIP:</strong> Always read food labels and ask about ingredients to stay safe!</p>' +
+    // Tips section - improved styling
+    html += '<div style="background:linear-gradient(to right, rgba(76,175,80,0.1), rgba(76,175,80,0.2)); padding:12px 15px; border-radius:8px; margin:15px 0 12px; border-left:4px solid #4CAF50; box-shadow:0 1px 3px rgba(0,0,0,0.1);">' +
+            '<p style="margin:0; color:#a5d6a7; font-size:13px; line-height:1.4;"><strong>💡 TIP:</strong> Always read food labels and ask about ingredients to stay safe!</p>' +
             '</div>';
     
     // Note about how to view descriptions
-    html += '<p style="text-align:center; font-size:14px; margin:10px 0; color:#aaa;">Hover/tap on an allergen to see details</p>';
+    html += '<p style="text-align:center; font-size:13px; margin:10px 0; color:#aaa; font-style:italic;">Tap/hover on an allergen to see details</p>';
     
-    // Main close button
-    html += '<button id="inline-close-btn" style="display:block; width:80%; margin:15px auto 5px; padding:12px 20px; background:#4CAF50; color:white; border:none; border-radius:30px; cursor:pointer; font-size:18px; font-weight:bold; box-shadow:0 4px 8px rgba(76,175,80,0.5);">👍 Got it!</button>' +
+    // Main close button - improved styling
+    html += '<button id="inline-close-btn" style="display:block; width:90%; margin:15px auto 5px; padding:12px; background:linear-gradient(to bottom, #4CAF50, #3d9740); color:white; border:none; border-radius:25px; cursor:pointer; font-size:16px; font-weight:bold; box-shadow:0 4px 8px rgba(0,0,0,0.3); transition:all 0.2s ease;">👍 Got it!</button>' +
             '</div>';
     
     overlay.innerHTML = html;
@@ -172,48 +187,159 @@ function showInlineAllergenResults() {
     
     // Add event listeners for hover/tap interactions
     setTimeout(function() {
-        // Set up hover/tap behavior for allergen items
+        // Add hover effects to buttons and allergen items
+        var topCloseBtn = document.getElementById('inline-top-close-btn');
+        var closeBtn = document.getElementById('inline-close-btn');
         var allergenItems = overlay.querySelectorAll('.allergen-item');
+        
+        // Helper function for showing allergen info
+        function showAllergenInfo(element) {
+            // For allergen items
+            var rect = element.getBoundingClientRect();
+            var parentRect = element.parentElement.getBoundingClientRect();
+            var allergenType = element.getAttribute('data-allergen-type');
+            
+            // Make sure we only affect this specific allergen
+            element.setAttribute('data-expanded', 'true');
+            element.setAttribute('data-original-position', JSON.stringify({
+                top: rect.top - parentRect.top,
+                left: rect.left - parentRect.left,
+                width: rect.width,
+                height: rect.height
+            }));
+            
+            // Position and style for expanded state - carefully avoiding interference
+            element.style.position = 'absolute';
+            element.style.top = (rect.top - parentRect.top) + 'px';
+            element.style.left = (rect.left - parentRect.left) + 'px';
+            element.style.width = rect.width + 'px';
+            element.style.transform = 'scale(1.25)';
+            element.style.transformOrigin = 'center center';
+            element.style.zIndex = '5';
+            element.style.backgroundColor = '#444';
+            element.style.boxShadow = '0 10px 20px rgba(0,0,0,0.4)';
+            
+            // Show description - only for this specific element
+            var desc = element.querySelector('.allergen-full-desc');
+            if (desc) {
+                desc.style.display = 'block';
+                setTimeout(function() {
+                    if (element.getAttribute('data-expanded') === 'true') {
+                        desc.style.opacity = '1';
+                        desc.style.maxHeight = '200px';
+                        desc.style.padding = '10px 5px 5px 5px';
+                    }
+                }, 10);
+            }
+        }
+        
+        // Helper function for hiding allergen info
+        function hideAllergenInfo(element) {
+            // For allergen items
+            element.setAttribute('data-expanded', 'false');
+            
+            // Restore normal styling
+            element.style.transform = 'scale(1)';
+            element.style.zIndex = '1';
+            element.style.backgroundColor = '';
+            element.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+            
+            // Hide description
+            var desc = element.querySelector('.allergen-full-desc');
+            if (desc) {
+                desc.style.opacity = '0';
+                desc.style.maxHeight = '0';
+                desc.style.padding = '0';
+                setTimeout(function() {
+                    if (element.getAttribute('data-expanded') === 'false') {
+                        desc.style.display = 'none';
+                    }
+                }, 300);
+            }
+            
+            // Restore original positioning after transition
+            setTimeout(function() {
+                if (element.getAttribute('data-expanded') === 'false') {
+                    element.style.position = 'relative';
+                    element.style.top = '';
+                    element.style.left = '';
+                    element.style.width = '';
+                }
+            }, 300);
+        }
+        
+        // Helper function for handling hover start effects (buttons only)
+        function applyHoverStart(element) {
+            if (element.id === 'inline-top-close-btn') {
+                element.style.backgroundColor = '#ff3333';
+                element.style.transform = 'scale(1.05)';
+            } else if (element.id === 'inline-close-btn') {
+                element.style.backgroundColor = '#3d9740';
+                element.style.transform = 'translateY(-2px)';
+                element.style.boxShadow = '0 6px 10px rgba(0,0,0,0.4)';
+            }
+        }
+        
+        // Helper function for handling hover end effects (buttons only)
+        function applyHoverEnd(element) {
+            if (element.id === 'inline-top-close-btn') {
+                element.style.backgroundColor = '#ff5252';
+                element.style.transform = 'scale(1)';
+            } else if (element.id === 'inline-close-btn') {
+                element.style.backgroundColor = '';
+                element.style.transform = 'translateY(0)';
+                element.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+            }
+        }
+        
+        // Add hover events to buttons only
+        if (topCloseBtn) {
+            topCloseBtn.addEventListener('mouseenter', function() {
+                applyHoverStart(this);
+            });
+            topCloseBtn.addEventListener('mouseleave', function() {
+                applyHoverEnd(this);
+            });
+        }
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('mouseenter', function() {
+                applyHoverStart(this);
+            });
+            closeBtn.addEventListener('mouseleave', function() {
+                applyHoverEnd(this);
+            });
+        }
+        
+        // Add click events to allergen items
         allergenItems.forEach(function(item) {
-            // For mouse devices - hover shows description
-            item.addEventListener('mouseenter', function() {
-                var desc = this.querySelector('.allergen-desc');
-                if (desc) desc.style.opacity = '1';
-            });
+            // Reset any lingering state
+            item.setAttribute('data-expanded', 'false');
             
-            item.addEventListener('mouseleave', function() {
-                var desc = this.querySelector('.allergen-desc');
-                if (desc) desc.style.opacity = '0';
-            });
-            
-            // For touch devices - tap toggles description
+            // Only click behavior (no hover)
             item.addEventListener('click', function(e) {
                 e.stopPropagation();
-                var desc = this.querySelector('.allergen-desc');
-                if (desc) {
-                    if (desc.style.opacity === '1') {
-                        desc.style.opacity = '0';
-                        desc.style.pointerEvents = 'none';
-                    } else {
-                        // Hide all other descriptions first
-                        allergenItems.forEach(function(otherItem) {
-                            var otherDesc = otherItem.querySelector('.allergen-desc');
-                            if (otherDesc) {
-                                otherDesc.style.opacity = '0';
-                                otherDesc.style.pointerEvents = 'none';
-                            }
-                        });
-                        
-                        // Show this description
-                        desc.style.opacity = '1';
-                        desc.style.pointerEvents = 'auto';
+                
+                // Close any other open items first
+                allergenItems.forEach(function(otherItem) {
+                    if (otherItem !== item && otherItem.getAttribute('data-expanded') === 'true') {
+                        hideAllergenInfo(otherItem);
                     }
+                });
+                
+                var isExpanded = this.getAttribute('data-expanded') === 'true';
+                
+                if (isExpanded) {
+                    // Collapse
+                    hideAllergenInfo(this);
+                } else {
+                    // Expand
+                    showAllergenInfo(this);
                 }
             });
         });
         
         // Bottom close button
-        var closeBtn = document.getElementById('inline-close-btn');
         if (closeBtn) {
             closeBtn.onclick = function(e) {
                 if (overlay.parentNode) {
@@ -224,7 +350,6 @@ function showInlineAllergenResults() {
         }
         
         // Top close button
-        var topCloseBtn = document.getElementById('inline-top-close-btn');
         if (topCloseBtn) {
             topCloseBtn.onclick = function(e) {
                 if (overlay.parentNode) {
@@ -234,69 +359,70 @@ function showInlineAllergenResults() {
             };
         }
         
+        // Add click handlers to the hovering description boxes
+        var descBoxes = overlay.querySelectorAll('.allergen-full-desc');
+        descBoxes.forEach(function(box) {
+            box.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent clicks from closing
+            });
+        });
+        
         // Make sure clicks don't pass through to game elements
         overlay.addEventListener('click', function(e) {
             e.stopPropagation();
         });
     }, 100);
     
-    console.log("Hover-based allergen results overlay displayed");
+    console.log("Improved allergen results overlay displayed");
 }
 
-// Direct global function for showing allergen results
+// Keeping this function for backward compatibility
 function showAllergenResultsGlobal() {
     console.log("Global function triggered");
-    // Try the inline function first as it's more reliable
     showInlineAllergenResults();
-    
-    // Also try the event approach as backup
-    var event = new CustomEvent("show-allergen-results");
-    document.dispatchEvent(event);
-    
-    // Backup method - add a temporary element with specific ID
-    var trigger = document.createElement('div');
-    trigger.id = 'trigger-allergen-results';
-    trigger.style.display = 'none';
-    document.body.appendChild(trigger);
-    
-    // Remove the element after a short time
-    setTimeout(function() {
-        if (trigger && trigger.parentNode) {
-            trigger.parentNode.removeChild(trigger);
-        }
-    }, 1000);
 }
 
-// Add a visible button to trigger allergen results
-document.addEventListener("DOMContentLoaded", function() {
-    var debugBtn = document.createElement('button');
-    debugBtn.textContent = "SHOW ALLERGEN RESULTS";
-    debugBtn.style.position = "fixed";
-    debugBtn.style.bottom = "50px";
-    debugBtn.style.right = "50px";
-    debugBtn.style.zIndex = "999999";
-    debugBtn.style.padding = "15px";
-    debugBtn.style.background = "red";
-    debugBtn.style.color = "white";
-    debugBtn.style.border = "3px solid yellow";
-    debugBtn.style.borderRadius = "5px";
-    debugBtn.style.cursor = "pointer";
-    debugBtn.style.fontSize = "20px";
-    debugBtn.style.fontWeight = "bold";
-    debugBtn.style.boxShadow = "0 0 20px yellow";
-    
-    debugBtn.onclick = function() {
-        showInlineAllergenResults(); // Use the more reliable inline function
-    };
-    
-    document.body.appendChild(debugBtn);
-});
+// Removed all DOMContentLoaded and auto-show timers
 
-// Auto-show the allergen results after a delay (for testing)
-setTimeout(function() {
-    console.log("Auto-showing allergen results for testing");
-    showInlineAllergenResults();
-}, 5000);  // Show after 5 seconds
+// The new game-over integration
+window.onFruitNinjaGameOver = function() {
+    console.log("Game over detected by global function");
+    
+    // Wait 3 seconds after game over before showing allergen results
+    setTimeout(function() {
+        // Show the allergen results using the function already defined in index.html
+        showInlineAllergenResults();
+    }, 3000);
+};
+
+// Check periodically if game is over
+(function() {
+    let gameWasPlaying = false;
+    
+    // Check game state every 500ms
+    setInterval(function() {
+        // Try to access game state through the compiled code
+        try {
+            // Check if a "game-state" exists in the state object
+            if (typeof require === 'function') {
+                const state = require("scripts/state");
+                
+                // If game was playing before but is now "over", trigger our function
+                if (gameWasPlaying && state("game-state").is("over")) {
+                    gameWasPlaying = false;
+                    window.onFruitNinjaGameOver();
+                }
+                
+                // Track if game is currently playing
+                if (state("game-state").is("playing")) {
+                    gameWasPlaying = true;
+                }
+            }
+        } catch(e) {
+            // Silently fail if we can't access state
+        }
+    }, 500);
+})();
 </script>
 </body>
 </html>
