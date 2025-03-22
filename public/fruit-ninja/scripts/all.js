@@ -288,8 +288,13 @@ define("scripts/game.js", function(exports){
 	    if( state( "game-state" ).isnot( "playing" ) )
 	        return ;
 	
-	    if( fruit.type != "boom" )
+	    // Define dairy items that shouldn't deduct a life when falling off the screen
+	    var dairyItems = ["milk", "cheese", "icecream", "cake", "yoghurt"];
+	    
+	    // Only deduct a life if it's not a bomb and not a dairy item
+	    if( fruit.type != "boom" && dairyItems.indexOf(fruit.type) === -1 )
 	        lose.showLoseAt( fruit.originX );
+	    // If it's a dairy item falling out, we don't deduct a life (doing nothing)
 	});
 	
 	message.addEventListener("game.over", function(){

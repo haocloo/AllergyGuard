@@ -85,7 +85,7 @@ exports.sliceAt = function( fruit, angle ){
         score.number( ++ scoreNumber );
         this.applyScore( scoreNumber );
     } else if (isDairy) {
-        // Deduct life when dairy item is cut
+        // When dairy item is cut, still deduct a life
         fruit.broken( angle );
         if( index = fruits.indexOf( fruit ) )
             fruits.splice( index, 1 );
@@ -118,8 +118,13 @@ message.addEventListener("fruit.remove", function( fruit ){
 });
 
 var eventFruitFallOutOfViewer = function( fruit ){
-    if( fruit.type != "boom" )
+    // Define dairy items that shouldn't deduct a life when falling off the screen
+    var dairyItems = ["milk", "cheese", "icecream", "cake", "yoghurt"];
+    
+    // Only deduct a life if it's not a bomb and not a dairy item
+    if( fruit.type != "boom" && dairyItems.indexOf(fruit.type) === -1 )
         lose.showLoseAt( fruit.originX );
+    // If it's a dairy item falling out, we don't deduct a life (doing nothing)
 };
 
 state( "game-state" ).hook( function( value ){
