@@ -94,17 +94,27 @@ export function Badges({ childId }: BadgesProps) {
                     <img 
                       src={badge.image}
                       alt={badge.name}
-                      className="w-16 h-16 mx-auto mb-2 object-contain"
+                      className="w-20 h-20 mx-auto mb-2 object-contain drop-shadow-md"
+                      onError={(e) => {
+                        const target = e.currentTarget;
+                        target.style.display = 'none';
+                        const fallback = document.createElement('div');
+                        fallback.className = 'w-20 h-20 mx-auto mb-2 rounded-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-red-500 text-white text-2xl font-bold';
+                        fallback.innerText = badge.name.charAt(0);
+                        target.parentNode?.appendChild(fallback);
+                      }}
                     />
                   ) : (
-                    <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                      <span className="text-2xl">🏆</span>
+                    <div className="w-20 h-20 mx-auto mb-2 rounded-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-red-500 text-white text-2xl font-bold">
+                      {badge.name.charAt(0)}
                     </div>
                   )}
                   
                   {isEarned && (
-                    <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
-                      ✓
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-md">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
                     </div>
                   )}
                 </div>

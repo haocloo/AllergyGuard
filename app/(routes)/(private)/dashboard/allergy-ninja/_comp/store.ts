@@ -45,7 +45,7 @@ export const initialBadges: GameBadge[] = [
     id: 'badge-1',
     name: 'Allergy Ninja Apprentice',
     description: 'Score 100 points in a single game',
-    image: '/images/badges/ninja-apprentice.png',
+    image: '/images/badge/badge-1.png',
     unlockRequirement: {
       score: 100,
     },
@@ -54,20 +54,38 @@ export const initialBadges: GameBadge[] = [
     id: 'badge-2',
     name: 'Fruit Master',
     description: 'Successfully slice 20 safe fruits',
-    image: '/images/badges/fruit-master.png',
+    image: '/images/badge/badge-2.png',
     unlockRequirement: {
       safeItemsSliced: 20,
     },
   },
-  {
-    id: 'badge-3',
-    name: 'Allergy Ninja Master',
-    description: 'Score 500 points in a single game',
-    image: '/images/badges/ninja-master.png',
-    unlockRequirement: {
-      score: 500,
-    },
-  },
+  // {
+  //   id: 'badge-3',
+  //   name: 'Allergy Defender',
+  //   description: 'Score 300 points in a single game',
+  //   image: '/images/badge/badge-3.png', 
+  //   unlockRequirement: {
+  //     score: 300,
+  //   },
+  // },
+  // {
+  //   id: 'badge-4',
+  //   name: 'Safety Expert',
+  //   description: 'Successfully slice 50 safe foods without mistakes',
+  //   image: '/images/badge/badge-4.png',
+  //   unlockRequirement: {
+  //     safeItemsSliced: 50,
+  //   },
+  // },
+  // {
+  //   id: 'badge-5',
+  //   name: 'Allergy Ninja Master',
+  //   description: 'Score 500 points in a single game',
+  //   image: '/images/badge/badge-5.png',
+  //   unlockRequirement: {
+  //     score: 500,
+  //   },
+  // },
 ];
 
 // Sample Malaysian food items with and without common allergens
