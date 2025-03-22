@@ -68,7 +68,7 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                 className="overflow-hidden absolute w-[1280px] h-[1200px] -top-[325px] -left-[325px]"
                 title="Fruit Ninja Game"
                 loading="lazy"
-                scrolling="no"
+                scrolling="yes"
                 sandbox="allow-scripts allow-same-origin"
                 // <GameComponent
                 //   childId={selectedChildId}

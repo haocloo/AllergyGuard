@@ -11,13 +11,292 @@
 <link rel="stylesheet" href="images/index.css">
 <title>code-projects.org</title>
 <!--[if lt IE 9]><script>document.createElement("canvas");</script><![endif]-->
+<style>
+/* Big flashy button that will be impossible to miss */
+#show-allergen-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: red;
+    color: white;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border: 3px solid yellow;
+    border-radius: 10px;
+    cursor: pointer;
+    z-index: 100000;
+    box-shadow: 0 0 20px rgba(255,255,0,0.8);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Fix iframe scrolling issues */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: auto;
+}
+
+/* Make sure scrollable content is obvious */
+*[style*="overflow:auto"], *[style*="overflow-y:auto"] {
+    scrollbar-width: thin;
+    scrollbar-color: #ff5252 #333;
+    -webkit-overflow-scrolling: touch;
+    touch-action: auto;
+}
+
+/* Ensure scrollable areas are visually distinct */
+*[style*="overflow:auto"]::-webkit-scrollbar, *[style*="overflow-y:auto"]::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*[style*="overflow:auto"]::-webkit-scrollbar-thumb, *[style*="overflow-y:auto"]::-webkit-scrollbar-thumb {
+    background: #ff5252;
+    border-radius: 4px;
+}
+
+*[style*="overflow:auto"]::-webkit-scrollbar-track, *[style*="overflow-y:auto"]::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 4px;
+}
+
+/* Ensure scrollable elements respond correctly to touch */
+*[style*="overflow:auto"], *[style*="overflow-y:auto"],
+div[id="allergen-results"], [id*="allergen"] {
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: auto !important;
+}
+</style>
 </head>
 <body>
+<!-- Direct HTML button that will always be visible -->
+<button id="show-allergen-btn" onclick="showInlineAllergenResults()">SHOW ALLERGEN RESULTS</button>
+
 <div id="extra"></div>
 <div id="desc">
 	<div>code-projects<a href="http://www.code-projects.org" target="_blank"></a></div>
 	<div id="browser"></div>
 </div>
 <script src="scripts/all.js"></script>
+<script>
+// Even more direct approach - standalone function with all necessary code
+function showInlineAllergenResults() {
+    console.log("Inline allergen results function triggered");
+    
+    // Remove any existing results first
+    var existingResult = document.getElementById('allergen-results');
+    if (existingResult) {
+        existingResult.parentNode.removeChild(existingResult);
+    }
+    
+    // Create a completely self-contained overlay without needing to scroll
+    var overlay = document.createElement('div');
+    overlay.id = 'allergen-results';
+    
+    // Apply important properties directly to the element
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.zIndex = '9999999'; // Ultra high z-index
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    overlay.style.display = 'flex';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.fontFamily = 'Arial, sans-serif';
+    
+    // Dairy allergen explanations
+    var explanations = {
+        "milk": "Milk contains proteins (casein and whey) that can cause allergic reactions. People with milk allergies should avoid all dairy products.",
+        "cheese": "Cheese is made from milk and contains the same proteins that trigger milk allergies. Even small amounts can cause reactions in sensitive people.",
+        "icecream": "Ice cream is made with milk and cream, making it a major allergen for people with dairy allergies.",
+        "cake": "Many cakes contain milk, butter, and sometimes cream. These dairy ingredients can cause allergic reactions.",
+        "yoghurt": "Yoghurt is made by fermenting milk and contains the same allergenic proteins."
+    };
+    
+    // Sample allergens to display
+    var examples = ["cheese", "milk", "icecream", "cake", "yoghurt"];
+    
+    // Create HTML content with hover/tap functionality
+    var html = '<div style="background:rgba(0,0,0,0.95); max-width:90%; width:600px; border:5px solid #ff5252; border-radius:15px; padding:20px; box-shadow:0 0 30px rgba(255,0,0,0.8); color:white; position:relative;">';
+    
+    // Top close button (X)
+    html += '<button id="inline-top-close-btn" style="position:absolute; top:10px; right:10px; background:#ff5252; color:white; border:none; border-radius:50%; width:30px; height:30px; font-size:16px; font-weight:bold; cursor:pointer; z-index:999999;">✖</button>';
+    
+    // Title
+    html += '<h2 style="color:#ff5252; text-align:center; margin-bottom:15px; font-size:26px; text-shadow:0 0 5px rgba(255,82,82,0.7); padding-right:30px;">⚠️ Allergen Alert! ⚠️</h2>';
+    html += '<p style="text-align:center; margin-bottom:15px; font-size:16px; color:#ffcc00;">Oops! You cut these foods that contain DAIRY allergens:</p>';
+    
+    // Grid layout for allergen items
+    html += '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:10px; margin:10px 0;">';
+    
+    // Add allergen items with hover effect
+    examples.forEach(function(item) {
+        var itemName = item.charAt(0).toUpperCase() + item.slice(1);
+        html += '<div class="allergen-item" style="position:relative; background:rgba(255,82,82,0.2); border-radius:10px; border-left:5px solid #ff5252; padding:12px; text-align:center; cursor:pointer; transition:all 0.3s ease;">' +
+                '<strong style="color:#ff9e9e; font-size:16px; display:block;">🚫 ' + itemName + '</strong>' +
+                '<div class="allergen-desc" style="position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.95); border-radius:10px; padding:10px; opacity:0; transition:opacity 0.3s ease; display:flex; align-items:center; justify-content:center; z-index:2; pointer-events:none;">' +
+                '<p style="font-size:14px; margin:0;">' + explanations[item] + '</p>' +
+                '</div>' +
+                '</div>';
+    });
+    
+    html += '</div>'; // Close grid layout
+    
+    // Tips section
+    html += '<div style="background:rgba(76,175,80,0.2); padding:12px; border-radius:10px; margin:15px 0 10px; border-left:5px solid #4CAF50;">' +
+            '<p style="margin:0; color:#a5d6a7; font-size:14px;"><strong>💡 TIP:</strong> Always read food labels and ask about ingredients to stay safe!</p>' +
+            '</div>';
+    
+    // Note about how to view descriptions
+    html += '<p style="text-align:center; font-size:14px; margin:10px 0; color:#aaa;">Hover/tap on an allergen to see details</p>';
+    
+    // Main close button
+    html += '<button id="inline-close-btn" style="display:block; width:80%; margin:15px auto 5px; padding:12px 20px; background:#4CAF50; color:white; border:none; border-radius:30px; cursor:pointer; font-size:18px; font-weight:bold; box-shadow:0 4px 8px rgba(76,175,80,0.5);">👍 Got it!</button>' +
+            '</div>';
+    
+    overlay.innerHTML = html;
+    document.body.appendChild(overlay);
+    
+    // Add event listeners for hover/tap interactions
+    setTimeout(function() {
+        // Set up hover/tap behavior for allergen items
+        var allergenItems = overlay.querySelectorAll('.allergen-item');
+        allergenItems.forEach(function(item) {
+            // For mouse devices - hover shows description
+            item.addEventListener('mouseenter', function() {
+                var desc = this.querySelector('.allergen-desc');
+                if (desc) desc.style.opacity = '1';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                var desc = this.querySelector('.allergen-desc');
+                if (desc) desc.style.opacity = '0';
+            });
+            
+            // For touch devices - tap toggles description
+            item.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var desc = this.querySelector('.allergen-desc');
+                if (desc) {
+                    if (desc.style.opacity === '1') {
+                        desc.style.opacity = '0';
+                        desc.style.pointerEvents = 'none';
+                    } else {
+                        // Hide all other descriptions first
+                        allergenItems.forEach(function(otherItem) {
+                            var otherDesc = otherItem.querySelector('.allergen-desc');
+                            if (otherDesc) {
+                                otherDesc.style.opacity = '0';
+                                otherDesc.style.pointerEvents = 'none';
+                            }
+                        });
+                        
+                        // Show this description
+                        desc.style.opacity = '1';
+                        desc.style.pointerEvents = 'auto';
+                    }
+                }
+            });
+        });
+        
+        // Bottom close button
+        var closeBtn = document.getElementById('inline-close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = function(e) {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                e.stopPropagation();
+            };
+        }
+        
+        // Top close button
+        var topCloseBtn = document.getElementById('inline-top-close-btn');
+        if (topCloseBtn) {
+            topCloseBtn.onclick = function(e) {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                e.stopPropagation();
+            };
+        }
+        
+        // Make sure clicks don't pass through to game elements
+        overlay.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }, 100);
+    
+    console.log("Hover-based allergen results overlay displayed");
+}
+
+// Direct global function for showing allergen results
+function showAllergenResultsGlobal() {
+    console.log("Global function triggered");
+    // Try the inline function first as it's more reliable
+    showInlineAllergenResults();
+    
+    // Also try the event approach as backup
+    var event = new CustomEvent("show-allergen-results");
+    document.dispatchEvent(event);
+    
+    // Backup method - add a temporary element with specific ID
+    var trigger = document.createElement('div');
+    trigger.id = 'trigger-allergen-results';
+    trigger.style.display = 'none';
+    document.body.appendChild(trigger);
+    
+    // Remove the element after a short time
+    setTimeout(function() {
+        if (trigger && trigger.parentNode) {
+            trigger.parentNode.removeChild(trigger);
+        }
+    }, 1000);
+}
+
+// Add a visible button to trigger allergen results
+document.addEventListener("DOMContentLoaded", function() {
+    var debugBtn = document.createElement('button');
+    debugBtn.textContent = "SHOW ALLERGEN RESULTS";
+    debugBtn.style.position = "fixed";
+    debugBtn.style.bottom = "50px";
+    debugBtn.style.right = "50px";
+    debugBtn.style.zIndex = "999999";
+    debugBtn.style.padding = "15px";
+    debugBtn.style.background = "red";
+    debugBtn.style.color = "white";
+    debugBtn.style.border = "3px solid yellow";
+    debugBtn.style.borderRadius = "5px";
+    debugBtn.style.cursor = "pointer";
+    debugBtn.style.fontSize = "20px";
+    debugBtn.style.fontWeight = "bold";
+    debugBtn.style.boxShadow = "0 0 20px yellow";
+    
+    debugBtn.onclick = function() {
+        showInlineAllergenResults(); // Use the more reliable inline function
+    };
+    
+    document.body.appendChild(debugBtn);
+});
+
+// Auto-show the allergen results after a delay (for testing)
+setTimeout(function() {
+    console.log("Auto-showing allergen results for testing");
+    showInlineAllergenResults();
+}, 5000);  // Show after 5 seconds
+</script>
 </body>
 </html>
