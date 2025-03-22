@@ -14,22 +14,28 @@ export const caretakerSchema = z.object({
 });
 
 // Helper functions for caretaker management
-export const validateCaretakerForm = (data: CaretakerFormData) => {
-  try {
-    caretakerSchema.parse(data);
-    return true;
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errors: Record<string, string> = {};
-      error.errors.forEach((err) => {
-        if (err.path) {
-          errors[err.path[0]] = err.message;
-        }
-      });
-      return errors;
-    }
-    return false;
+export const validateCaretakerForm = (data: CaretakerFormData): Record<string, string> => {
+  const errors: Record<string, string> = {};
+
+  if (!data.name?.trim()) {
+    errors.name = 'Name is required';
   }
+
+  if (!data.email?.trim()) {
+    errors.email = 'Email is required';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.email = 'Invalid email format';
+  }
+
+  if (!data.phone?.trim()) {
+    errors.phone = 'Phone number is required';
+  }
+
+  if (!data.role?.trim()) {
+    errors.role = 'Role is required';
+  }
+
+  return errors;
 };
 
 export const createTempCaretaker = (data: CaretakerFormData): TempCaretaker => {
@@ -41,6 +47,5 @@ export const createTempCaretaker = (data: CaretakerFormData): TempCaretaker => {
     role: data.role,
     phone: data.phone,
     notes: data.noteToCaretaker,
-    createdAt: new Date().toISOString(),
   };
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, differenceInYears } from 'date-fns';
 import { MoreVertical, Pencil, Trash2, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { useProfileStore } from '../store';
-import type { Child, Allergy } from '../types';
+import type { Child } from '../types';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/cn';
 
@@ -23,10 +23,17 @@ interface Props {
   child: Child;
 }
 
-// Create an extended interface that includes missing properties
-interface ExtendedChild extends Child {
-  photoUrl?: string;
-}
+// Add vibrant background colors
+const bgColors = [
+  'from-blue-500/20 to-purple-500/20',
+  'from-purple-500/20 to-pink-500/20',
+  'from-pink-500/20 to-orange-500/20',
+  'from-orange-500/20 to-yellow-500/20',
+  'from-yellow-500/20 to-green-500/20',
+  'from-green-500/20 to-teal-500/20',
+  'from-teal-500/20 to-cyan-500/20',
+  'from-cyan-500/20 to-blue-500/20',
+];
 
 export function ChildCard({ child }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -34,10 +41,11 @@ export function ChildCard({ child }: Props) {
   const { toast } = useToast();
   const router = useRouter();
 
-  const age = differenceInYears(new Date(), new Date(child.dob));
+  // Get a consistent background color based on child's ID
+  const bgColorIndex = parseInt(child.id.slice(-3), 16) % bgColors.length;
+  const bgGradient = bgColors[bgColorIndex];
 
-  // Create extended version with proper typing
-  const extendedChild: ExtendedChild = child;
+  const age = differenceInYears(new Date(), new Date(child.dob));
 
   const handleDelete = async () => {
     try {
@@ -72,27 +80,27 @@ export function ChildCard({ child }: Props) {
         'hover:shadow-md hover:border-primary/50 cursor-pointer group'
       )}
     >
-      {/* Profile Picture Section */}
-      <div className="relative w-full h-48 bg-muted">
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-        <div className="w-full h-full">
-          {extendedChild.photoUrl ? (
-            <img
-              src={extendedChild.photoUrl}
-              alt={child.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-muted">
-              <Avatar className="h-32 w-32">
-                <AvatarImage
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${child.id}`}
-                  className="bg-background"
-                />
-                <AvatarFallback>{child.name[0]}</AvatarFallback>
-              </Avatar>
-            </div>
-          )}
+      {/* Profile Picture Section with Dynamic Background */}
+      <div
+        className={cn(
+          'relative w-full h-48 bg-gradient-to-br transition-colors duration-300',
+          bgGradient,
+          'group-hover:saturate-[1.2]'
+        )}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative w-32 h-32 rounded-full overflow-hidden bg-background/50 backdrop-blur-sm shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+            <Avatar className="w-full h-full">
+              <AvatarImage
+                src={
+                  child.photoUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${child.id}`
+                }
+                className="bg-background"
+              />
+              <AvatarFallback>{child.name[0]}</AvatarFallback>
+            </Avatar>
+          </div>
         </div>
       </div>
 
@@ -100,7 +108,11 @@ export function ChildCard({ child }: Props) {
       <div className="absolute top-4 right-4 z-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-background/50 backdrop-blur-sm hover:bg-background/80"
+            >
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -138,16 +150,17 @@ export function ChildCard({ child }: Props) {
                 <AlertCircle className="h-4 w-4" />
                 Allergies
               </div>
-              <div className="flex flex-wrap justify-center gap-1">
+              <div className="flex flex-wrap justify-center gap-1.5">
                 {child.allergies.map((allergy, i) => (
                   <Badge
                     key={i}
                     variant="outline"
                     className={cn(
-                      'border-2',
-                      (allergy as any).severity === 'High' && 'border-destructive text-destructive',
-                      (allergy as any).severity === 'Medium' && 'border-yellow-500 text-yellow-700',
-                      (allergy as any).severity === 'Low' && 'border-green-500 text-green-700'
+                      'border-2 shadow-sm transition-all duration-300',
+                      'group-hover:shadow group-hover:translate-y-[-1px]',
+                      allergy.severity === 'High' && 'border-destructive text-destructive',
+                      allergy.severity === 'Medium' && 'border-yellow-500 text-yellow-700',
+                      allergy.severity === 'Low' && 'border-green-500 text-green-700'
                     )}
                   >
                     {allergy.allergen}
