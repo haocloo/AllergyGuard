@@ -1,9 +1,13 @@
+'use client';
+
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { motion } from 'framer-motion';
 
 interface Step {
   title: string;
   description: string;
+  icon: React.ReactNode;
 }
 
 interface Props {
@@ -13,7 +17,16 @@ interface Props {
 
 export function Steps({ steps, currentStep }: Props) {
   return (
-    <div className="relative after:absolute after:left-0 after:top-[15px] after:h-[2px] after:w-full after:bg-muted">
+    <div className="relative">
+      <div className="absolute left-0 top-[15px] h-[2px] w-full bg-muted">
+        <motion.div
+          className="h-full bg-primary"
+          initial={{ width: '0%' }}
+          animate={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+        />
+      </div>
+
       <div className="relative z-10 flex justify-between">
         {steps.map((step, i) => (
           <div
@@ -24,38 +37,70 @@ export function Steps({ steps, currentStep }: Props) {
               i !== steps.length - 1 && 'pr-4'
             )}
           >
-            <div
+            <motion.div
+              initial={false}
+              animate={{
+                scale: i === currentStep ? 1.1 : 1,
+                backgroundColor: i <= currentStep ? 'var(--primary)' : 'var(--background)',
+              }}
               className={cn(
                 'h-8 w-8 rounded-full border-2 flex items-center justify-center',
-                'bg-background transition-colors duration-500',
+                'transition-colors duration-500',
                 i === currentStep
-                  ? 'border-primary text-primary'
+                  ? 'border-primary text-primary-foreground'
                   : i < currentStep
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-muted text-muted-foreground'
               )}
             >
               {i < currentStep ? (
-                <Check className="h-4 w-4" />
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Check className="h-4 w-4" />
+                </motion.div>
               ) : (
-                <span className="text-sm">{i + 1}</span>
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-sm"
+                >
+                  {i + 1}
+                </motion.span>
               )}
-            </div>
+            </motion.div>
+
             <div className="hidden sm:flex flex-col items-center">
-              <span
-                className={cn(
-                  'text-xs font-medium',
-                  i === currentStep
-                    ? 'text-primary'
-                    : i < currentStep
-                    ? 'text-foreground'
-                    : 'text-muted-foreground'
-                )}
+              <motion.span
+                initial={false}
+                animate={{
+                  color:
+                    i === currentStep
+                      ? 'var(--primary)'
+                      : i < currentStep
+                      ? 'var(--foreground)'
+                      : 'var(--muted-foreground)',
+                }}
+                className="text-xs font-medium"
               >
                 {step.title}
-              </span>
+              </motion.span>
               <span className="text-xs text-muted-foreground">{step.description}</span>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{
+                opacity: i === currentStep ? 1 : 0,
+                y: i === currentStep ? 0 : 10,
+              }}
+              className="sm:hidden absolute -bottom-8 left-0 right-0 text-center"
+            >
+              <span className="text-sm font-medium text-primary">{step.title}</span>
+            </motion.div>
           </div>
         ))}
       </div>
