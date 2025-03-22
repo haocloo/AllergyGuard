@@ -190,11 +190,11 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
       <div className="w-full bg-white dark:bg-slate-900 rounded-lg shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
         {/* Tab Navigation */}
         <div className="border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-slate-800 dark:to-slate-900">
-          <ul className="flex flex-wrap text-sm font-medium text-center">
-            <li className="mr-2">
+          <ul className="flex w-full text-sm font-medium text-center">
+            <li className="flex-1">
               <button
                 onClick={() => setActiveTab('howtoplay')}
-                className={`inline-block p-4 rounded-t-lg ${
+                className={`inline-block w-full p-4 ${
                   activeTab === 'howtoplay'
                     ? 'bg-white dark:bg-slate-900 text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
                     : 'hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-gray-300'
@@ -203,10 +203,10 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                 How to Play
               </button>
             </li>
-            <li className="mr-2">
+            <li className="flex-1">
               <button
                 onClick={() => setActiveTab('leaderboard')}
-                className={`inline-block p-4 rounded-t-lg ${
+                className={`inline-block w-full p-4 ${
                   activeTab === 'leaderboard'
                     ? 'bg-white dark:bg-slate-900 text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
                     : 'hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-gray-300'
@@ -215,10 +215,10 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                 Leaderboard
               </button>
             </li>
-            <li className="mr-2">
+            <li className="flex-1">
               <button
                 onClick={() => setActiveTab('badges')}
-                className={`inline-block p-4 rounded-t-lg ${
+                className={`inline-block w-full p-4 ${
                   activeTab === 'badges'
                     ? 'bg-white dark:bg-slate-900 text-blue-600 border-b-2 border-blue-600 dark:text-blue-400 dark:border-blue-400'
                     : 'hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-700 dark:hover:text-gray-300'
@@ -241,66 +241,70 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                 How to Play Allergy Ninja
               </h2>
               
+              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                Welcome to Allergy Ninja! This fun and educational game helps children learn about food allergies while having fun. The goal is simple: slice safe foods and avoid those containing your allergens.
+              </p>
+              
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div className="flex items-start">
                     <div className="flex-shrink-0 bg-orange-100 dark:bg-orange-900/30 h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5 text-orange-600 dark:text-orange-300 font-bold">1</div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Choose Your Ninja</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Select a ninja profile to personalize your game experience with their specific allergies.</p>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Choose Your Ninja</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Select a ninja profile to personalize your game experience with their specific allergies. Each ninja has different allergies to avoid.</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
                     <div className="flex-shrink-0 bg-orange-100 dark:bg-orange-900/30 h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5 text-orange-600 dark:text-orange-300 font-bold">2</div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Start the Game</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Click the Play Game button to begin your training as an Allergy Ninja.</p>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Start the Game</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Click the "Start Playing" button to begin your training as an Allergy Ninja. The game will launch with your profile's allergies.</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
                     <div className="flex-shrink-0 bg-orange-100 dark:bg-orange-900/30 h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5 text-orange-600 dark:text-orange-300 font-bold">3</div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Slice Safe Foods</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Swipe or tap to slice foods that are safe for your ninja to eat.</p>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Slice Safe Foods</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Swipe or tap to slice foods that are safe for your ninja to eat. Each successful slice adds to your score.</p>
                     </div>
                   </div>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div className="flex items-start">
                     <div className="flex-shrink-0 bg-orange-100 dark:bg-orange-900/30 h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5 text-orange-600 dark:text-orange-300 font-bold">4</div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Avoid Allergen Foods</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Avoid slicing foods containing your ninja's allergens. These are your weaknesses!</p>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Avoid Allergen Foods</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Be careful not to slice foods containing your ninja's allergens. These are your weaknesses and will reduce your score if sliced.</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
                     <div className="flex-shrink-0 bg-orange-100 dark:bg-orange-900/30 h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5 text-orange-600 dark:text-orange-300 font-bold">5</div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Earn Points</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Gain points for correctly slicing safe foods. Lose points for slicing allergens.</p>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Earn Points</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Gain points for correctly slicing safe foods. Lose points for slicing allergens. Try to get a high score to climb the leaderboard!</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
                     <div className="flex-shrink-0 bg-orange-100 dark:bg-orange-900/30 h-8 w-8 rounded-full flex items-center justify-center mr-3 mt-0.5 text-orange-600 dark:text-orange-300 font-bold">6</div>
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">Collect Badges</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Earn achievement badges and climb the leaderboard as you improve!</p>
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Collect Badges</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">Earn achievement badges as you improve your skills. Badges are awarded for reaching score milestones and slicing safe foods.</p>
                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+              <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
                 <p className="text-sm text-blue-800 dark:text-blue-300 font-medium flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
-                  Pro Tip: The more you play, the better you'll get at recognizing foods to avoid!
+                  <span className="leading-relaxed">Pro Tip: The more you play, the better you'll get at recognizing foods to avoid! Regular practice helps build allergy awareness.</span>
                 </p>
               </div>
             </div>
@@ -308,15 +312,19 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
           
           {activeTab === 'leaderboard' && (
             <div className="bg-gradient-to-br from-white to-blue-50 dark:from-slate-900 dark:to-slate-800 rounded-lg shadow-sm p-6 border border-blue-100 dark:border-slate-700">
-              <h2 className="text-xl font-bold mb-6 text-blue-800 dark:text-blue-300 flex items-center">
+              <h2 className="text-xl font-bold mb-4 text-blue-800 dark:text-blue-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Allergy Ninja Champions
               </h2>
               
+              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                Our top players have mastered the art of avoiding allergens while collecting points. Can you make it to the top of the leaderboard?
+              </p>
+              
               {/* Top 3 Players Podium */}
-              <div className="flex justify-center items-end mb-8 mt-2 space-x-4 md:space-x-6">
+              <div className="flex justify-center items-end mb-8 mt-4 space-x-4 md:space-x-8">
                 {/* 2nd Place */}
                 <div className="flex flex-col items-center">
                   <div className="rounded-full h-12 w-12 bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center mb-2 text-white font-bold text-xl shadow-md">
@@ -360,7 +368,8 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
               </div>
               
               {/* Leaderboard Table */}
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto mt-6">
+                <h3 className="text-md font-semibold text-gray-700 dark:text-gray-300 mb-3">Complete Rankings</h3>
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
@@ -538,23 +547,29 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
               </div>
               
               <div className="mt-6 text-center">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Keep playing to improve your score and climb the leaderboard!</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Keep playing to improve your score and climb the leaderboard! New champions are crowned weekly.
+                </p>
               </div>
             </div>
           )}
           
           {activeTab === 'badges' && (
             <div className="bg-gradient-to-br from-white to-purple-50 dark:from-slate-900 dark:to-slate-800 rounded-lg shadow-sm p-6 border border-purple-100 dark:border-slate-700">
-              <h2 className="text-xl font-bold mb-6 text-purple-800 dark:text-purple-300 flex items-center">
+              <h2 className="text-xl font-bold mb-4 text-purple-800 dark:text-purple-300 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
                 Ninja Achievements
               </h2>
               
+              <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+                Badges are awarded as you progress through the game. Each badge represents a milestone in your Allergy Ninja journey.
+              </p>
+              
               {selectedChildId ? (
                 <div className="border border-purple-200 dark:border-purple-900/30 rounded-lg overflow-hidden">
-                <Badges childId={selectedChildId} />
+                  <Badges childId={selectedChildId} />
                 </div>
               ) : (
                 <div className="text-center p-8 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-900/30">
@@ -564,17 +579,22 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                     </svg>
                   </div>
                   <h3 className="text-lg font-semibold text-purple-800 dark:text-purple-300 mb-2">No Ninja Selected</h3>
-                  <p className="text-gray-600 dark:text-gray-400">Please select a ninja profile to view earned badges and achievements.</p>
+                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">Please select a ninja profile to view earned badges and achievements.</p>
                 </div>
               )}
               
-              <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-indigo-100 dark:border-indigo-900/30">
-                <h3 className="font-semibold text-indigo-800 dark:text-indigo-300 mb-3 flex items-center">
+              <div className="mt-8 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-5 rounded-lg border border-indigo-100 dark:border-indigo-900/30">
+                <h3 className="font-semibold text-indigo-800 dark:text-indigo-300 mb-4 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                   Available Badges
                 </h3>
+                
+                <p className="text-gray-600 dark:text-gray-400 mb-5 leading-relaxed">
+                  Collect all five badges to become a true Allergy Ninja Master! Each badge has specific requirements to unlock.
+                </p>
+                
                 <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 gap-4">
                   <div className="text-center p-4 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all">
                     <div className="mx-auto mb-2">
