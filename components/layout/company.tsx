@@ -43,13 +43,11 @@ export default function Company() {
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-sidebar-primary-foreground">
-            <Image
+            <img
               src={activeTeam.logoUrl}
               alt={`${activeTeam.name} logo`}
               width={16}
               height={16}
-              quality={100}
-              priority
               className="size-6 object-contain"
             />
           </div>
@@ -74,7 +72,7 @@ export default function Company() {
             className="gap-2 p-2"
           >
             <div className="flex size-6 items-center justify-center rounded-sm border">
-              <Image
+              <img
                 src={team.logoUrl}
                 alt={`${team.name} logo`}
                 width={16}
