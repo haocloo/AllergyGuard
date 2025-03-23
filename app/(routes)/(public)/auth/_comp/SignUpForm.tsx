@@ -134,7 +134,7 @@ export default function SignUpForm({ name, phone, role }: SignUpFormProps) {
       </div>
 
       {/* role */}
-      <div className="flex flex-col justify-start gap-2">
+      {/* <div className="flex flex-col justify-start gap-2">
         <Label htmlFor="role">{tAuth('role')}</Label>
         <ToggleGroup
           className="justify-start"
@@ -162,7 +162,7 @@ export default function SignUpForm({ name, phone, role }: SignUpFormProps) {
           </ToggleGroupItem>
         </ToggleGroup>
         {formState.fieldErrors.role && <FieldError formState={formState} name="role" />}
-      </div>
+      </div> */}
 
       {/* submit button */}
       <Button type="submit" variant="default" className="w-full mb-2" disabled={pending}>
