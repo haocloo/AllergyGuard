@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useGameStore, initialBadges } from './store';
 import { getChildBadges } from './actions';
-import type { GameBadge } from './types';
 
 interface BadgesProps {
   childId: string;
