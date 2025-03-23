@@ -105,7 +105,7 @@ export function ChildCard({ child }: Props) {
       </div>
 
       {/* Actions Menu */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-4 right-4 -z-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

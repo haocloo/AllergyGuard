@@ -96,7 +96,7 @@ export async function GET(
         userEmail = primaryEmail ? primaryEmail.email : null;
       }
     }
-    const defaultRole = '';
+    const defaultRole = 'admin';
     const user: T_user_register_secret = {
       provider: provider,
       provider_user_id: oauthUser.id || oauthUser.sub, // .sub is for OPENID

@@ -59,6 +59,7 @@ export function ClassroomDetails({ classroom }: Props) {
       toast({
         title: 'Success',
         description: 'Classroom code copied to clipboard',
+        variant: 'success',
       });
     } catch (error) {
       toast({

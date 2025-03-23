@@ -1,9 +1,8 @@
 'use client';
 
-import { Users, GraduationCap } from 'lucide-react';
+import { Users } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/cn';
 import { useEffect, useState } from 'react';
 import type { Classroom } from './types';
 
@@ -65,31 +64,6 @@ export function ClassroomCard({ classroom }: Props) {
             <p className="text-xs text-muted-foreground mt-0.5">{classroom.teacher.role}</p>
           </div>
         </div>
-      </div>
-    </Card>
-  );
-}
-
-// Update the AddClassroomCard to be more minimal
-export function AddClassroomCard() {
-  return (
-    <Card
-      className={cn(
-        'group relative overflow-hidden transition-all duration-300',
-        'hover:shadow-lg hover:scale-[1.02] cursor-pointer',
-        'flex items-center justify-center',
-        'border-2 border-dashed h-[160px]',
-        'bg-transparent hover:bg-muted/5'
-      )}
-    >
-      <div className="text-center px-4">
-        <div className="w-10 h-10 rounded-full border-2 border-primary/30 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
-          <GraduationCap className="h-5 w-5 text-primary" />
-        </div>
-        <h3 className="font-medium text-primary text-sm">Add New Classroom</h3>
-        <p className="text-xs text-muted-foreground mt-1 max-w-[160px]">
-          Create a new classroom space
-        </p>
       </div>
     </Card>
   );

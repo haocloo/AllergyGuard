@@ -12,7 +12,7 @@ export default async function NewRecipePage() {
   return (
     <div className="flex flex-col min-h-screen w-full overflow-hidden">
       <Breadcrumbs items={breadcrumbItems} />
-      <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 max-w-full">
+      <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 w-full">
         <MealPrepFormClient />
       </div>
     </div>

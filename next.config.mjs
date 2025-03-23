@@ -63,13 +63,6 @@ const nextConfig = {
       },
     ],
   },
-  transpilePackages: [
-    'three',
-    '@react-three/fiber',
-    '@react-three/drei',
-    'three-stdlib',
-    'postprocessing',
-  ],
   webpack: (config) => {
     config.externals = config.externals || [];
     config.externals.push({

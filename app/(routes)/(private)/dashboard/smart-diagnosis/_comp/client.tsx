@@ -281,8 +281,8 @@ export function SmartDiagnosisClient({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">Smart Medical Diagnosis</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-2xl font-bold text-primary">Smart Medical Diagnosis</h1>
+            <p className="text-sm text-muted-foreground">
               Get quick medical guidance for emergency situations
             </p>
           </div>
@@ -313,33 +313,33 @@ export function SmartDiagnosisClient({
                 <Card
                   key={user.id}
                   className={cn(
-                  `p-3 cursor-pointer transition-all hover:bg-primary/5`,
-                  selectedUser === user.id ? 'ring-2 ring-primary bg-primary/5' : ''
-                )}
-                onClick={() => setSelectedUser(user.id)}
-              >
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                    {user.photoUrl ? (
-                      <Image
-                        src={user.photoUrl}
-                        alt={user.name}
-                        width={64}
-                        height={64}
-                        className="rounded-full object-cover"
-                      />
-                    ) : (
-                      <User className="w-8 h-8 text-primary" />
-                    )}
-                  </div>
-                  <h3 className="font-medium">{user.name}</h3>
-                  <div className="flex flex-wrap gap-1 justify-center">
-                    {user.allergies.map((allergy, index) => (
-                      <Badge key={index} variant="darkRed" className="text-xs">
-                        {allergy}
-                      </Badge>
-                    ))}
-                  </div>
+                    `p-3 cursor-pointer transition-all hover:bg-primary/5`,
+                    selectedUser === user.id ? 'ring-2 ring-primary bg-primary/5' : ''
+                  )}
+                  onClick={() => setSelectedUser(user.id)}
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                      {user.photoUrl ? (
+                        <Image
+                          src={user.photoUrl}
+                          alt={user.name}
+                          width={64}
+                          height={64}
+                          className="rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-8 h-8 text-primary" />
+                      )}
+                    </div>
+                    <h3 className="font-medium">{user.name}</h3>
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {user.allergies.map((allergy, index) => (
+                        <Badge key={index} variant="darkRed" className="text-xs">
+                          {allergy}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </Card>
               );

@@ -608,9 +608,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                   >
                     <DialogTrigger asChild>
                       <Button
-                        variant="outline"
                         size="sm"
-                        className="bg-background/50 backdrop-blur-sm"
                         onClick={() => {
                           setEditingSection('allergies');
                           initializeEditForm({

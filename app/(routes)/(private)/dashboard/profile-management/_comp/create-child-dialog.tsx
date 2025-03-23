@@ -98,6 +98,7 @@ export function CreateChildDialog() {
       toast({
         title: 'Success',
         description: 'Child profile created successfully',
+        variant: 'success',
       });
     } catch (error) {
       console.error('Failed to create child:', error);

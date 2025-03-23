@@ -21,9 +21,9 @@ export default function ClassroomManagementPage() {
     <div className="flex flex-col min-h-screen w-full overflow-hidden">
       <Breadcrumbs items={breadcrumbItems} />
       <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5">
-        <div className="max-w-7xl w-full mx-auto space-y-4">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">Classroom Management</h1>
+        <div className="max-w-7xl w-full space-y-4 px-2">
+          <div className="mb-4">
+            <h1 className="text-2xl sm:text-2xl font-bold text-primary">Classroom Management</h1>
             <p className="text-sm text-muted-foreground">Create and manage your classroom spaces</p>
           </div>
 

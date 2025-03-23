@@ -23,8 +23,9 @@ function AddClassroomButton({ onClick }: { onClick: () => void }) {
         'group relative overflow-hidden transition-all duration-300',
         'hover:shadow-lg hover:scale-[1.02] cursor-pointer',
         'flex items-center justify-center',
-        'border-2 border-dashed h-[160px]',
-        'bg-transparent hover:bg-muted/5'
+        'border-2 border-dashed min-h-[160px] h-full',
+        'bg-transparent hover:bg-muted/5',
+        'border-dotted border-2 border-primary/30'
       )}
     >
       <div className="text-center px-4">
