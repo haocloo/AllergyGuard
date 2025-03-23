@@ -325,18 +325,33 @@ export const children = [
     photoUrl: '',
     allergies: [
       {
-        allergen: 'Eggs',
-        notes: 'Mild rash sometimes',
-        symptoms: [{ name: 'Rash' }, { name: 'Itching' }],
+        allergen: 'Peanuts',
+        notes: 'Moderate reaction - avoid all peanut products',
+        symptoms: [{ name: 'Hives' }, { name: 'Swelling' }],
         actionPlan: {
-          immediateAction: 'Apply antihistamine cream and monitor',
-          medications: [{ name: 'Benadryl Cream', dosage: 'Apply thin layer' }],
+          immediateAction: 'Administer antihistamine and monitor. Use EpiPen if symptoms worsen.',
+          medications: [
+            { name: 'Benadryl', dosage: '10mg' },
+            { name: 'EpiPen Jr', dosage: '0.15mg' },
+          ],
+        },
+      },
+      {
+        allergen: 'Shrimp',
+        notes: 'Mild to moderate reaction to shellfish',
+        symptoms: [{ name: 'Rash' }, { name: 'Itching' }, { name: 'Nausea' }],
+        actionPlan: {
+          immediateAction: 'Administer antihistamine and monitor closely',
+          medications: [{ name: 'Benadryl', dosage: '10mg' }],
         },
       },
     ],
     symptoms: [
+      { name: 'Hives', severity: 'Moderate' },
+      { name: 'Swelling', severity: 'Moderate' },
       { name: 'Rash', severity: 'Mild' },
       { name: 'Itching', severity: 'Mild' },
+      { name: 'Nausea', severity: 'Mild' },
     ],
     emergencyContacts: [
       {
