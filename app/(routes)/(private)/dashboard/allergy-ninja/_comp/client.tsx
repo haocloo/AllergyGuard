@@ -1,9 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GameComponent } from './game-component';
-import { ProfileSelector } from './profile-selector';
-import { Leaderboard } from './leaderboard';
 import { Badges } from './badges';
 import { useGameStore } from './store';
 import { ChildProfile, Allergy } from './types';

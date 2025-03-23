@@ -256,7 +256,7 @@ export const children = [
     name: 'Alice Smith',
     dob: '2015-06-20',
     gender: 'female',
-    photoUrl: '',
+    photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=child_001',
     allergies: [
       {
         allergen: 'Peanuts',
@@ -322,7 +322,7 @@ export const children = [
     name: 'Bob Johnson',
     dob: '2016-08-15',
     gender: 'male',
-    photoUrl: '',
+    photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=child_002',
     allergies: [
       {
         allergen: 'Peanuts',
@@ -371,6 +371,7 @@ export const children = [
     id: 'child_003',
     name: 'Charlie',
     dob: '2014-03-10',
+    photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=child_003',
     allergies: [{ allergen: 'Shellfish', severity: 'High', notes: 'Severe reaction' }],
     parentId: currentUserId,
     classroomId: classrooms[1].id,

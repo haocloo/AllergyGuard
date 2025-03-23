@@ -27,6 +27,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/com
 // Import mock data from the correct location
 import { familyMembers, childAllergies } from '../../_comp/mock-data';
 import { Allergen } from '../../_comp/store';
+import { children } from '@/services/dummy-data';
 
 // Allergen icons and info
 const ALLERGEN_INFO = {
@@ -154,7 +155,7 @@ const AFFECTED_CHILDREN: AffectedChild[] = familyMembers.map((member: {id: strin
   id: member.id,
   name: member.name,
   allergies: member.allergies,
-  photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name.replace(/\s+/g, '')}&backgroundColor=b6e3f4,c0aede,d1d4f9&radius=50`,
+  photoUrl: children.find(c => c.id === member.id)?.photoUrl || '',
 }));
 
 export function ScannerClient() {

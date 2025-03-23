@@ -11,12 +11,14 @@ import { familyMembers } from '../../meal-planning/_comp/mock-data';
 
 // Map familyMembers data to ChildProfile type
 const SAMPLE_CHILDREN: ChildProfile[] = familyMembers.map((member) => {
-  const childData = children.find(c => c.id === member.id);
-  
+  const childData = children.find((c) => c.id === member.id);
+
   return {
     id: member.id,
     name: member.name,
-    age: childData?.dob ? new Date().getFullYear() - new Date(childData.dob).getFullYear() : Math.floor(Math.random() * 5) + 5,
+    age: childData?.dob
+      ? new Date().getFullYear() - new Date(childData.dob).getFullYear()
+      : Math.floor(Math.random() * 5) + 5,
     allergies: member.allergies,
     avatar: childData?.photoUrl || `/images/avatars/child-${Math.floor(Math.random() * 3) + 1}.png`,
     createdAt: new Date().toISOString(),
@@ -46,7 +48,7 @@ const SAMPLE_ALLERGIES: Allergy[] = [
   {
     id: 'shellfish',
     name: 'Shellfish',
-    severity: 'severe', 
+    severity: 'severe',
     category: 'seafood',
   },
   {
@@ -54,7 +56,7 @@ const SAMPLE_ALLERGIES: Allergy[] = [
     name: 'Shrimp',
     severity: 'moderate',
     category: 'seafood',
-  }
+  },
 ];
 
 // Game results storage (in-memory for demo)
@@ -84,17 +86,17 @@ export async function saveGameResult(data: GameResult): Promise<{ success: boole
       allergenItemsSliced: data.allergenItemsSliced,
       totalItemsSliced: data.totalItemsSliced,
     });
-    
+
     // In a real app, save to your database
     // For demo, add to in-memory array
     gameResults.push(data);
-    
+
     // Update badges based on game result
     await updateBadgesForGameResult(data);
-    
+
     // Revalidate the page to reflect changes
     revalidatePath('/dashboard/allergy-ninja');
-    
+
     return { success: true };
   } catch (error) {
     console.error('Failed to save game result:', error);
@@ -105,21 +107,21 @@ export async function saveGameResult(data: GameResult): Promise<{ success: boole
 // Update badges based on game results
 async function updateBadgesForGameResult(result: GameResult): Promise<void> {
   const { childId, score, safeItemsSliced } = result;
-  
+
   // Initialize badges array for child if not exists
   if (!childBadges[childId]) {
     childBadges[childId] = [];
   }
-  
+
   // Badge thresholds - match these with initialBadges in store.ts
   if (score >= 100 && !childBadges[childId].includes('badge-1')) {
     childBadges[childId].push('badge-1'); // Allergy Ninja Apprentice
   }
-  
+
   if (safeItemsSliced >= 20 && !childBadges[childId].includes('badge-2')) {
     childBadges[childId].push('badge-2'); // Fruit Master
   }
-  
+
   if (score >= 500 && !childBadges[childId].includes('badge-3')) {
     childBadges[childId].push('badge-3'); // Allergy Ninja Master
   }
@@ -136,20 +138,20 @@ export async function getChildBadges(childId: string): Promise<string[]> {
 export async function getLeaderboard(): Promise<LeaderboardEntry[]> {
   // In a real app, fetch from your database
   // For demo, generate from in-memory game results
-  
+
   // Map game results to leaderboard entries
-  const entries: LeaderboardEntry[] = gameResults.map(result => {
-    const profile = SAMPLE_CHILDREN.find(p => p.id === result.childId);
-    
+  const entries: LeaderboardEntry[] = gameResults.map((result) => {
+    const profile = SAMPLE_CHILDREN.find((p) => p.id === result.childId);
+
     return {
       childId: result.childId,
       childName: profile?.name || 'Unknown Player',
-      avatar: profile?.avatar || '',
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${result.childId}`,
       score: result.score,
       timestamp: result.timestamp,
     };
   });
-  
+
   // Sort by score (highest first) and limit to top 10
   return entries.sort((a, b) => b.score - a.score).slice(0, 10);
-} 
+}

@@ -33,9 +33,9 @@ export function Leaderboard() {
   // Generate leaderboard from local state as fallback
   const generateLocalLeaderboard = () => {
     // Map the game results to leaderboard entries
-    const entries: LeaderboardEntry[] = gameResults.map(result => {
-      const profile = childProfiles.find(p => p.id === result.childId);
-      
+    const entries: LeaderboardEntry[] = gameResults.map((result) => {
+      const profile = childProfiles.find((p) => p.id === result.childId);
+
       return {
         childId: result.childId,
         childName: profile?.name || 'Unknown Player',
@@ -74,31 +74,42 @@ export function Leaderboard() {
               </tr>
             </thead>
             <tbody>
-              {leaderboard.map((entry, index) => (
-                <tr key={`${entry.childId}-${entry.timestamp}`} className="border-b dark:border-slate-700">
-                  <td className="py-3 font-medium">{index + 1}</td>
-                  <td className="py-3">
-                    <div className="flex items-center">
-                      {entry.avatar ? (
-                        <img src={entry.avatar} alt={entry.childName} className="w-8 h-8 rounded-full mr-2" />
-                      ) : (
-                        <div className="w-8 h-8 bg-blue-500 rounded-full mr-2 flex items-center justify-center text-white font-bold">
-                          {entry.childName.substring(0, 1)}
-                        </div>
-                      )}
-                      <span>{entry.childName}</span>
-                    </div>
-                  </td>
-                  <td className="py-3 text-right font-semibold">{entry.score}</td>
-                  <td className="py-3 text-right text-sm text-gray-500">
-                    {new Date(entry.timestamp).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
+              {leaderboard.map((entry, index) => {
+                console.log('---------------------------');
+                console.log(entry.avatar);
+                return (
+                  <tr
+                    key={`${entry.childId}-${entry.timestamp}`}
+                    className="border-b dark:border-slate-700"
+                  >
+                    <td className="py-3 font-medium">{index + 1}</td>
+                    <td className="py-3">
+                      <div className="flex items-center">
+                        {entry.avatar ? (
+                          <img
+                            src={entry.avatar}
+                            alt={entry.childName}
+                            className="w-8 h-8 rounded-full mr-2"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 bg-blue-500 rounded-full mr-2 flex items-center justify-center text-white font-bold">
+                            {entry.childName.substring(0, 1)}
+                          </div>
+                        )}
+                        <span>{entry.childName}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 text-right font-semibold">{entry.score}</td>
+                    <td className="py-3 text-right text-sm text-gray-500">
+                      {new Date(entry.timestamp).toLocaleDateString()}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
     </div>
   );
-} 
+}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { format, differenceInYears } from 'date-fns';
 import { MoreVertical, Pencil, Trash2, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
