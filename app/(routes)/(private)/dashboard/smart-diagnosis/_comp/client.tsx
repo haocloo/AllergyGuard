@@ -111,7 +111,7 @@ export function SmartDiagnosisClient({
     if (!selectedUser) {
       toast({
         title: 'User selection required',
-        description: 'Please select a user before proceeding with diagnosis',
+        description: 'Please select a child before proceeding with diagnosis',
         variant: 'destructive',
         duration: 3000,
       });
@@ -335,7 +335,7 @@ export function SmartDiagnosisClient({
                   <h3 className="font-medium">{user.name}</h3>
                   <div className="flex flex-wrap gap-1 justify-center">
                     {user.allergies.map((allergy, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
+                      <Badge key={index} variant="darkRed" className="text-xs">
                         {allergy}
                       </Badge>
                     ))}
@@ -354,7 +354,7 @@ export function SmartDiagnosisClient({
                 onClick={() => setSelectedUser(null)}
                 className="text-sm"
               >
-                Change User
+                Clear Selection
               </Button>
             </div>
           )}
