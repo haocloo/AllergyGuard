@@ -1047,8 +1047,8 @@ export function IngredientEntryClient() {
     }
     
     // Shellfish substitutions
-    else if ((allergenNames.includes('Shellfish') || allergenNames.includes('Shrimp')) && 
-             isRelatedToAllergen(lowerName, 'shellfish')) {
+    if ((allergenNames.includes('Shellfish') || allergenNames.includes('Shrimp')) && 
+        isRelatedToAllergen(lowerName, 'shellfish')) {
       // Specific shrimp substitutions
       if (lowerName.includes('shrimp') || lowerName.includes('prawn')) {
         substitutions.push(
