@@ -41,9 +41,16 @@ import {
 } from '@/services/store';
 import { useDiagnosisStore, EnhancedDiagnosis } from './store';
 import { get_diagnosis, DiagnosisResult } from './action';
+import { children } from '@/services/dummy-data';
 
 interface SmartDiagnosisClientProps {
   initialDiagnoses: TDiagnosis[];
+  initialChildren: {
+    id: string;
+    name: string;
+    photoUrl: string;
+    allergies: string[];
+  }[];
 }
 
 // Helper function to get color based on percentage match
@@ -69,29 +76,10 @@ const getLanguageEmoji = (languageCode: string): string => {
   }
 };
 
-// Mock users for selection
-const mockUsers = [
-  {
-    id: 'child_001',
-    name: 'Alice Smith',
-    photoUrl: '',
-    allergies: ['Peanuts', 'Dairy']
-  },
-  {
-    id: 'child_002',
-    name: 'Bob Johnson',
-    photoUrl: '',
-    allergies: ['Peanuts', 'Shrimp']
-  },
-  {
-    id: 'child_003',
-    name: 'Charlie',
-    photoUrl: '',
-    allergies: ['Shellfish']
-  }
-];
-
-export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientProps) {
+export function SmartDiagnosisClient({
+  initialDiagnoses,
+  initialChildren,
+}: SmartDiagnosisClientProps) {
   const [input, setInput] = useState('');
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -118,7 +106,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
 
   const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Validate if user is selected
     if (!selectedUser) {
       toast({
@@ -129,7 +117,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
       });
       return;
     }
-    
+
     setIsLoading(true);
     try {
       // validation
@@ -311,19 +299,20 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
         <div className="bg-primary/5 px-4 py-3 border-b border-primary/10">
           <h2 className="text-lg font-medium flex items-center gap-2">
             <User className="h-5 w-5 text-primary" />
-            Select User
+            Select Child
           </h2>
         </div>
         <div className="p-4 space-y-4">
           <p className="text-sm text-muted-foreground">
             Select a user to provide personalized diagnosis based on their medical history:
           </p>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {mockUsers.map((user) => (
-              <Card 
-                key={user.id}
-                className={cn(
+            {initialChildren.map((user) => {
+              return (
+                <Card
+                  key={user.id}
+                  className={cn(
                   `p-3 cursor-pointer transition-all hover:bg-primary/5`,
                   selectedUser === user.id ? 'ring-2 ring-primary bg-primary/5' : ''
                 )}
@@ -332,7 +321,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                 <div className="flex flex-col items-center text-center gap-2">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                     {user.photoUrl ? (
-                      <Image 
+                      <Image
                         src={user.photoUrl}
                         alt={user.name}
                         width={64}
@@ -351,16 +340,17 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
                       </Badge>
                     ))}
                   </div>
-                </div>
-              </Card>
-            ))}
+                  </div>
+                </Card>
+              );
+            })}
           </div>
-          
+
           {selectedUser && (
             <div className="flex justify-end">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setSelectedUser(null)}
                 className="text-sm"
               >

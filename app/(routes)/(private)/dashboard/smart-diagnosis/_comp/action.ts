@@ -7,7 +7,7 @@ import {
   utils_log_server_info,
 } from '@/services/server';
 import { DatabaseError } from 'pg';
-import { pediatricAllergies } from '@/services/dummy-data';
+import { children, pediatricAllergies } from '@/services/dummy-data';
 
 // Define a type for the diagnosis result
 export type DiagnosisResult = {
@@ -58,4 +58,26 @@ export async function get_diagnosis() {
     }
     return [];
   }
+}
+
+export async function get_children() {
+  try {
+    return children.map((child) => ({
+      id: child.id,
+      name: child.name,
+      photoUrl: child.photoUrl,
+      allergies: child.allergies.map((allergy) => allergy.allergen),
+    }));
+  } catch (error: any) {
+    if (error instanceof DatabaseError) {
+      await utils_log_db_error('get_diagnosis', error);
+    } else {
+      await utils_log_server_error('get_diagnosis', error.message);
+    }
+    return [];
+  }
+}
+
+export async function get_allergies() {
+  return pediatricAllergies;
 }
