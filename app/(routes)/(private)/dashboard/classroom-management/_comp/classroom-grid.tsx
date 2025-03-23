@@ -23,7 +23,7 @@ function AddClassroomButton({ onClick }: { onClick: () => void }) {
         'group relative overflow-hidden transition-all duration-300',
         'hover:shadow-lg hover:scale-[1.02] cursor-pointer',
         'flex items-center justify-center',
-        'border-2 border-dashed h-[160px]',
+        'border-2 border-dashed min-h-[160px] h-full',
         'bg-transparent hover:bg-muted/5'
       )}
     >

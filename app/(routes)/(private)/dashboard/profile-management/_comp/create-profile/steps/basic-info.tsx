@@ -92,7 +92,7 @@ export function BasicInfoForm({ onNext }: Props) {
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={triggerFileInput}
           className="relative overflow-hidden"

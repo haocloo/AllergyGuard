@@ -47,10 +47,10 @@ export function Steps({ steps, currentStep }: Props) {
                 'h-8 w-8 rounded-full border-2 flex items-center justify-center',
                 'transition-colors duration-500',
                 i === currentStep
-                  ? 'border-primary text-primary-foreground'
+                  ? '!bg-primary !border-primary !text-primary-foreground'
                   : i < currentStep
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-muted text-muted-foreground'
+                  ? '!bg-primary !border-primary !text-primary-foreground'
+                  : '!bg-muted !border-muted !text-muted-foreground'
               )}
             >
               {i < currentStep ? (

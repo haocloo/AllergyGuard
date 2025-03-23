@@ -3,6 +3,8 @@ import { ProfileClient } from './_comp/client';
 import { children } from '@/services/dummy-data';
 import type { Child } from './_comp/types';
 import type { RawChild } from '@/services/dummy-data';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export default async function ProfileManagementPage() {
   const breadcrumbItems = [
@@ -75,6 +77,13 @@ export default async function ProfileManagementPage() {
       <Breadcrumbs items={breadcrumbItems} />
       <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 max-w-full">
         <ProfileClient initialChildren={transformedChildren} />
+        <Link
+          href="/dashboard/profile-management/new"
+          className="z-1000 fixed bottom-20 right-4 size-12 rounded-full shadow-2xl bg-primary text-white flex items-center justify-center"
+        >
+          <Plus className="h-6 w-6" />
+          <span className="sr-only">Add Child Profile</span>
+        </Link>
       </div>
     </div>
   );

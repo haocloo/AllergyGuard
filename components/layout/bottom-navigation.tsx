@@ -52,7 +52,7 @@ export default function BottomNavigation({ user }: { user: User }) {
           icon: Book,
           role: ['admin', 'caretaker'],
         },
-      ]
+      ],
     },
     {
       title: 'Food List',
@@ -81,7 +81,7 @@ export default function BottomNavigation({ user }: { user: User }) {
   ];
 
   // Filter items based on user role
-  const mobileNavItems = allMobileNavItems.filter(item => 
+  const mobileNavItems = allMobileNavItems.filter((item) =>
     item.role.includes(user.role as T_role)
   );
 
@@ -121,12 +121,18 @@ export default function BottomNavigation({ user }: { user: User }) {
   // Determine the grid columns class based on number of items
   const getGridColsClass = () => {
     switch (mobileNavItems.length) {
-      case 1: return 'grid-cols-1';
-      case 2: return 'grid-cols-2';
-      case 3: return 'grid-cols-3';
-      case 4: return 'grid-cols-4';
-      case 5: return 'grid-cols-5';
-      default: return 'grid-cols-5';
+      case 1:
+        return 'grid-cols-1';
+      case 2:
+        return 'grid-cols-2';
+      case 3:
+        return 'grid-cols-3';
+      case 4:
+        return 'grid-cols-4';
+      case 5:
+        return 'grid-cols-5';
+      default:
+        return 'grid-cols-5';
     }
   };
 
@@ -140,7 +146,7 @@ export default function BottomNavigation({ user }: { user: User }) {
 
   // Check if any subitems are active
   const hasActiveSubItem = (item: MobileNavItem) => {
-    return item.subItems?.some(subItem => isPathActive(subItem.url));
+    return item.subItems?.some((subItem) => isPathActive(subItem.url));
   };
 
   // Handle mouse enter for submenu
@@ -164,17 +170,17 @@ export default function BottomNavigation({ user }: { user: User }) {
         {mobileNavItems.map((item) => {
           const isActive = isPathActive(item.url) || hasActiveSubItem(item);
           const hasSubItems = item.subItems && item.subItems.length > 0;
-          
+
           // Filter sub-items based on role if they exist
-          const filteredSubItems = item.subItems?.filter(subItem => 
+          const filteredSubItems = item.subItems?.filter((subItem) =>
             subItem.role.includes(user.role as T_role)
           );
 
           return (
-            <div 
-              key={item.title} 
+            <div
+              key={item.title}
               className="bottom-nav-item relative"
-              onMouseEnter={() => hasSubItems ? handleMouseEnter(item.title) : null}
+              onMouseEnter={() => (hasSubItems ? handleMouseEnter(item.title) : null)}
               onMouseLeave={hasSubItems ? handleMouseLeave : undefined}
             >
               {hasSubItems && filteredSubItems && filteredSubItems.length > 0 ? (
@@ -185,32 +191,32 @@ export default function BottomNavigation({ user }: { user: User }) {
                       setOpenSubMenu(openSubMenu === item.title ? null : item.title);
                     }}
                     className={cn(
-                      "w-full h-full flex flex-col items-center justify-center",
+                      'w-full h-full flex flex-col items-center justify-center',
                       isActive || openSubMenu === item.title
-                        ? "text-blue-600 dark:text-blue-400 font-medium" 
-                        : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+                        ? 'text-blue-600 dark:text-blue-400 font-medium'
+                        : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
                     )}
                   >
                     <item.icon className="w-5 h-5 mb-1" />
                     <span className="text-xs">{item.title}</span>
                   </button>
-                  
+
                   {/* Sub-menu that appears when clicked or hovered */}
                   {openSubMenu === item.title && filteredSubItems.length > 0 && (
-                    <div 
+                    <div
                       className="absolute bottom-16 left-0 right-0 bg-white dark:bg-slate-800 rounded-t-lg shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
                       onMouseEnter={() => handleMouseEnter(item.title)}
                       onMouseLeave={handleMouseLeave}
                     >
                       {filteredSubItems.map((subItem) => (
-                        <Link 
+                        <Link
                           key={subItem.url}
                           href={subItem.url}
                           className={cn(
-                            "flex items-center gap-2 px-4 py-3 text-xs font-medium",
+                            'flex items-center gap-2 px-4 py-3 text-xs font-medium',
                             isPathActive(subItem.url)
-                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                              : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                              : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
                           )}
                           onClick={() => setOpenSubMenu(null)}
                         >
@@ -225,10 +231,10 @@ export default function BottomNavigation({ user }: { user: User }) {
                 <Link
                   href={item.url}
                   className={cn(
-                    "flex flex-col items-center justify-center h-full",
-                    isActive 
-                      ? "text-blue-600 dark:text-blue-400 font-medium" 
-                      : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+                    'flex flex-col items-center justify-center h-full',
+                    isActive
+                      ? 'text-blue-600 dark:text-blue-400 font-medium'
+                      : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
                   )}
                 >
                   <item.icon className="w-5 h-5 mb-1" />
@@ -241,4 +247,4 @@ export default function BottomNavigation({ user }: { user: User }) {
       </div>
     </div>
   );
-} 
+}
