@@ -27,17 +27,15 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
   return (
     <div className="flex flex-col gap-6 w-full px-1 sm:px-4  mx-auto pb-20">
       {/* Header */}
-      <div className="flex justify-start items-center">
-        <div>
-          <h1 className="text-2xl sm:text-2xl font-bold text-primary">Allergy Ninja Game</h1>
-          <p className="text-sm text-muted-foreground">
+      <div className="space-y-1">
+        <h1 className="text-2xl sm:text-2xl font-bold text-primary">Allergy Ninja Game</h1>
+        <p className="text-sm text-muted-foreground">
             Slice safe foods, avoid your allergens, and become an Allergy Ninja Master!
-          </p>
-        </div>
+        </p>
       </div>
 
       {/* Game Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className=" grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Profile Selection and Game Controls */}
         <div className="lg:col-span-1 space-y-4">
           <div className="bg-gradient-to-br from-gray-50 to-white dark:from-slate-900 dark:to-slate-800 rounded-lg shadow-md p-4 border border-gray-100 dark:border-gray-700">

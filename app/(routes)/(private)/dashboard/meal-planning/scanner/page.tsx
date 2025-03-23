@@ -11,12 +11,7 @@ export default function ScannerPage() {
           { label: 'Ingredient Scanner', href: '/dashboard/meal-planning/scanner' },
         ]}
       />
-      <div className="flex flex-col items-center mx-auto mb-4 space-y-2">
-        <h1 className="text-xl sm:text-2xl font-bold text-primary">Ingredient Scanner</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Scan ingredients to get nutritional information
-        </p>
-      </div>
+    
       <ScannerClient />
     </div>
   );

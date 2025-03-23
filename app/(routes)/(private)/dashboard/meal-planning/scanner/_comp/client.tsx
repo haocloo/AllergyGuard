@@ -233,10 +233,16 @@ export function ScannerClient() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto h-[calc(100vh-8rem)] flex flex-col">
+    <div className="max-w-3xl mx-auto h-[calc(100vh-8rem)] flex flex-col px-6">
+      <div className="mb-4">
+        <h1 className="text-2xl sm:text-2xl font-bold text-primary">Ingredient Scanner</h1>
+        <p className="text-sm text-muted-foreground">
+          Scan ingredients to get nutritional information
+        </p>
+      </div>
       {/* Quick Guide Card - Improved UI with collapse functionality */}
       <Card className="mb-4 shadow-sm overflow-hidden transition-all duration-300">
-        <div 
+        <div
           className="flex items-center justify-between p-3 cursor-pointer bg-blue-50 border-b"
           onClick={() => setQuickGuideCollapsed(!quickGuideCollapsed)}
         >
@@ -248,10 +254,14 @@ export function ScannerClient() {
             <div className="text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">
               Tips for best results
             </div>
-            <ChevronRight className={`h-5 w-5 text-slate-500 transition-transform duration-300 ${quickGuideCollapsed ? 'rotate-90' : 'rotate-270'}`} />
+            <ChevronRight
+              className={`h-5 w-5 text-slate-500 transition-transform duration-300 ${
+                quickGuideCollapsed ? 'rotate-90' : 'rotate-270'
+              }`}
+            />
           </div>
         </div>
-        
+
         {!quickGuideCollapsed && (
           <div className="p-3">
             <div className="grid grid-cols-2 gap-3">
@@ -261,9 +271,7 @@ export function ScannerClient() {
                   className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100"
                 >
                   <div className="shrink-0 mt-0.5 bg-blue-100 p-1.5 rounded-full">
-                    <span className="flex h-4 w-4 text-blue-500">
-                      {instruction.icon}
-                    </span>
+                    <span className="flex h-4 w-4 text-blue-500">{instruction.icon}</span>
                   </div>
                   <div>
                     <h3 className="font-medium text-sm text-slate-800">{instruction.title}</h3>
@@ -305,13 +313,9 @@ export function ScannerClient() {
               <div className="w-full h-full max-h-[50vh] relative rounded-lg overflow-hidden border border-border bg-blue-50 flex items-center justify-center">
                 {image ? (
                   <div className="relative h-full w-full">
-                    <img
-                      src={image}
-                      alt="Captured food"
-                      className="w-full h-full object-contain"
-                    />
-                    <Button 
-                      variant="outline" 
+                    <img src={image} alt="Captured food" className="w-full h-full object-contain" />
+                    <Button
+                      variant="outline"
                       size="icon"
                       className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm"
                       onClick={() => setImage(null)}
@@ -323,8 +327,12 @@ export function ScannerClient() {
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-center p-6">
                       <Camera className="h-10 w-10 text-blue-500 mx-auto mb-4" />
-                      <p className="text-sm font-medium text-slate-800 mb-1">Take a photo or upload an image</p>
-                      <p className="text-xs text-slate-500 max-w-[250px] mx-auto">For best results, capture a clear image of the ingredient list</p>
+                      <p className="text-sm font-medium text-slate-800 mb-1">
+                        Take a photo or upload an image
+                      </p>
+                      <p className="text-xs text-slate-500 max-w-[250px] mx-auto">
+                        For best results, capture a clear image of the ingredient list
+                      </p>
                     </div>
                   </div>
                 )}
@@ -335,19 +343,11 @@ export function ScannerClient() {
             <div className="mt-4 space-y-3">
               {!image ? (
                 <div className="grid grid-cols-2 gap-3">
-                  <Button 
-                    variant="outline" 
-                    onClick={triggerCameraCapture}
-                    className="h-14"
-                  >
+                  <Button variant="outline" onClick={triggerCameraCapture} className="h-14">
                     <Camera className="h-5 w-5 mr-2" />
                     Take Photo
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={triggerFileUpload}
-                    className="h-14"
-                  >
+                  <Button variant="outline" onClick={triggerFileUpload} className="h-14">
                     <Upload className="h-5 w-5 mr-2" />
                     Upload Image
                   </Button>
@@ -355,11 +355,7 @@ export function ScannerClient() {
               ) : (
                 <div className="space-y-3">
                   {!hasScanned ? (
-                    <Button 
-                      className="w-full h-14" 
-                      onClick={handleScan} 
-                      disabled={isScanning}
-                    >
+                    <Button className="w-full h-14" onClick={handleScan} disabled={isScanning}>
                       {isScanning ? (
                         <>
                           <Scan className="h-5 w-5 mr-2 animate-pulse" />
@@ -373,21 +369,17 @@ export function ScannerClient() {
                       )}
                     </Button>
                   ) : (
-                    <Button 
-                      className="w-full h-14"
-                      variant="outline"
-                      onClick={resetScan}
-                    >
+                    <Button className="w-full h-14" variant="outline" onClick={resetScan}>
                       <Camera className="h-5 w-5 mr-2" />
                       Take a new photo
                     </Button>
                   )}
-                  
+
                   {/* View Previous Results Button - Only show if there are results and sheet is closed */}
                   {scanResults && !resultsSheetOpen && (
-                    <Button 
-                      variant={hasScanned ? "default" : "outline"}
-                      className="w-full" 
+                    <Button
+                      variant={hasScanned ? 'default' : 'outline'}
+                      className="w-full"
                       onClick={() => setResultsSheetOpen(true)}
                     >
                       <Eye className="h-5 w-5 mr-2" />
@@ -415,7 +407,7 @@ export function ScannerClient() {
               </Button>
             </div>
           </SheetHeader>
-          
+
           {scanResults && (
             <div className="overflow-y-auto h-[calc(100%-60px)]">
               <div className="p-4 space-y-4">
@@ -429,7 +421,7 @@ export function ScannerClient() {
                         <Badge
                           key={ingredient}
                           variant={
-                            scanResults.affected.some((child) => 
+                            scanResults.affected.some((child) =>
                               child.allergies.includes(ingredient)
                             )
                               ? 'destructive'
@@ -519,7 +511,7 @@ export function ScannerClient() {
                             <p className="text-sm text-muted-foreground mt-1">
                               {suggestion.description}
                             </p>
-                            
+
                             <div className="mt-3 space-y-2">
                               <div className="flex flex-wrap gap-1">
                                 {suggestion.safeFor.map((safety) => (
@@ -528,7 +520,7 @@ export function ScannerClient() {
                                   </Badge>
                                 ))}
                               </div>
-                              
+
                               <p className="text-xs text-muted-foreground mt-2">
                                 <span className="font-medium">Pro Tip: </span>
                                 {suggestion.tips}

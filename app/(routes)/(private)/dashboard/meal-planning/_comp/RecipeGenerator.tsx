@@ -66,7 +66,7 @@ export function RecipeGenerator() {
     <div className="space-y-6">
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle className="text-2xl flex items-center">
+          <CardTitle className="text-2xl flex items-center text-primary">
             <ChefHat className="w-6 h-6 mr-2" />
             Recipe Generator
           </CardTitle>

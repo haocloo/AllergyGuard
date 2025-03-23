@@ -280,9 +280,9 @@ export function SmartDiagnosisClient({
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col items-center w-full">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">Smart Medical Diagnosis</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+          <div>
+            <h1 className="text-2xl sm:text-2xl font-bold text-primary">Smart Medical Diagnosis</h1>
+            <p className="text-sm text-muted-foreground">
               Get quick medical guidance for emergency situations
             </p>
           </div>

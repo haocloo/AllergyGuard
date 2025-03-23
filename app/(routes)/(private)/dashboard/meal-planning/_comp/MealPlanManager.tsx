@@ -228,10 +228,10 @@ export function MealPlanManager() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold flex items-center">
+          <h1 className="text-2xl sm:text-2xl font-bold text-primary flex items-center">
             <Utensils className="w-6 h-6 mr-2" />
             Meal Plans
-          </h2>
+          </h1>
           <p className="text-gray-500">Create and manage allergy-safe meal plans</p>
         </div>
 
