@@ -255,11 +255,13 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
     <div className="space-y-6">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Your Recipes</h1>
-          <p className="text-sm text-muted-foreground mt-1">Click on any recipe to view details</p>
+        <div className="flex flex-col items-start ">
+          <h1 className="text-xl sm:text-2xl font-bold text-primary">Your Recipes</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Click on any recipe to view details
+          </p>
         </div>
-        
+
         <Link href="/dashboard/meal-planning/recipes/new">
           <Button className="sm:h-10 gap-2">
             <PlusCircle className="h-4 w-4" />
@@ -272,16 +274,16 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
       <div className="flex items-center gap-3 max-w-2xl mb-6">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            type="search" 
-            placeholder="Search your recipes..." 
+          <Input
+            type="search"
+            placeholder="Search your recipes..."
             className="pl-10 h-11 border-gray-200 focus:border-primary focus:ring-primary"
             value={searchQuery}
             onChange={handleSearchChange}
           />
         </div>
-        <Button 
-          variant={selectedUsers.length > 0 ? "default" : "outline"}
+        <Button
+          variant={selectedUsers.length > 0 ? 'default' : 'outline'}
           size="icon"
           onClick={handleFilterClick}
           disabled={isLoading}
@@ -318,7 +320,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
           // Recipe cards with animation
           filteredRecipes.map((recipe, index) => {
             const safetyInfo = getRecipeSafetyInfo(recipe);
-            
+
             return (
               <motion.div
                 key={recipe.id}
@@ -331,10 +333,10 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                     {/* Recipe Image */}
                     <div className="relative h-40">
                       {recipe.imageUrl ? (
-                        <Image 
-                          src={recipe.imageUrl} 
-                          alt={recipe.name} 
-                          fill 
+                        <Image
+                          src={recipe.imageUrl}
+                          alt={recipe.name}
+                          fill
                           className="object-cover"
                         />
                       ) : (
@@ -342,7 +344,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                           <ChefHat className="w-10 h-10" />
                         </div>
                       )}
-                      
+
                       {/* Safety Badge */}
                       <div className="absolute top-2 right-2">
                         <Badge className={`${safetyInfo.badgeClass} flex items-center`}>
@@ -351,12 +353,14 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                         </Badge>
                       </div>
                     </div>
-                    
+
                     {/* Recipe Details */}
                     <CardContent className="p-4">
                       <h3 className="font-medium text-lg tracking-tight">{recipe.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 h-10 mt-1">{recipe.description}</p>
-                      
+                      <p className="text-sm text-muted-foreground line-clamp-2 h-10 mt-1">
+                        {recipe.description}
+                      </p>
+
                       {/* Ingredients Preview */}
                       <div className="mt-3 flex flex-wrap gap-1">
                         {recipe.ingredients?.slice(0, 3).map((ing, idx) => (
@@ -370,19 +374,31 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                           </Badge>
                         )}
                       </div>
-                      
+
                       {/* Allergen Warnings - with improved display */}
                       {recipe.allergensFound && recipe.allergensFound.length > 0 && (
                         <div className="mt-2">
-                          <p className={`text-xs font-medium ${safetyInfo.notSafeFor.length > 0 ? 'text-red-500' : 'text-amber-500'}`}>
-                            {safetyInfo.notSafeFor.length > 0 ? 'Contains allergens:' : 'Contains (but safe):'}
+                          <p
+                            className={`text-xs font-medium ${
+                              safetyInfo.notSafeFor.length > 0 ? 'text-red-500' : 'text-amber-500'
+                            }`}
+                          >
+                            {safetyInfo.notSafeFor.length > 0
+                              ? 'Contains allergens:'
+                              : 'Contains (but safe):'}
                           </p>
                           <div className="flex flex-wrap gap-1 mt-1">
                             {recipe.allergensFound.map((allergen, idx) => (
-                              <Badge 
-                                key={idx} 
-                                variant={safetyInfo.notSafeFor.length > 0 ? "destructive" : "outline"}
-                                className={safetyInfo.notSafeFor.length === 0 ? "text-amber-600 border-amber-300 bg-amber-50" : ""}
+                              <Badge
+                                key={idx}
+                                variant={
+                                  safetyInfo.notSafeFor.length > 0 ? 'destructive' : 'outline'
+                                }
+                                className={
+                                  safetyInfo.notSafeFor.length === 0
+                                    ? 'text-amber-600 border-amber-300 bg-amber-50'
+                                    : ''
+                                }
                               >
                                 {allergen}
                               </Badge>
@@ -391,7 +407,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                         </div>
                       )}
                     </CardContent>
-                    
+
                     <CardFooter className="pt-0 px-4 pb-4">
                       <Button variant="secondary" className="w-full">
                         View Recipe
@@ -407,8 +423,8 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
           <div className="col-span-full text-center py-12 border border-dashed rounded-lg">
             <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-muted-foreground">
-              {selectedUsers.length > 0 
-                ? "No allergen-safe recipes found for selected family members" 
+              {selectedUsers.length > 0
+                ? 'No allergen-safe recipes found for selected family members'
                 : "You haven't saved any recipes yet"}
             </p>
             <Link href="/dashboard/meal-planning/recipes/new">
@@ -419,7 +435,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
           </div>
         )}
       </div>
-      
+
       {/* Filter Sheet/Modal */}
       <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
         <SheetContent side="bottom" className="h-[90vh] sm:h-[70vh] p-0 rounded-t-xl">
@@ -429,17 +445,32 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                 <X className="h-4 w-4" />
               </Button>
               <SheetTitle className="text-center flex-1">Filter Options</SheetTitle>
-              <Button variant="ghost" className="text-sm font-normal hover:text-red-500 transition-colors" onClick={resetFilters}>
+              <Button
+                variant="ghost"
+                className="text-sm font-normal hover:text-red-500 transition-colors"
+                onClick={resetFilters}
+              >
                 Reset
               </Button>
             </div>
           </SheetHeader>
-          
+
           <div className="overflow-y-auto h-[calc(100%-120px)] pb-20 bg-gray-50">
             {/* Sort By Section */}
             <div className="p-4 border-b bg-white mb-2">
               <h3 className="font-medium mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
                   <path d="M11 5h10"></path>
                   <path d="M11 9h7"></path>
                   <path d="M11 13h4"></path>
@@ -453,35 +484,54 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
               <RadioGroup value={sortOption} onValueChange={setSortOption} className="space-y-1">
                 <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="recommended" className="flex-1 cursor-pointer">Recommended</Label>
+                    <Label htmlFor="recommended" className="flex-1 cursor-pointer">
+                      Recommended
+                    </Label>
                   </div>
                   <RadioGroupItem value="recommended" id="recommended" />
                 </div>
                 <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="allergen-free" className="flex-1 cursor-pointer">Allergen-Free First</Label>
+                    <Label htmlFor="allergen-free" className="flex-1 cursor-pointer">
+                      Allergen-Free First
+                    </Label>
                   </div>
                   <RadioGroupItem value="allergen-free" id="allergen-free" />
                 </div>
                 <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="popularity" className="flex-1 cursor-pointer">Popularity</Label>
+                    <Label htmlFor="popularity" className="flex-1 cursor-pointer">
+                      Popularity
+                    </Label>
                   </div>
                   <RadioGroupItem value="popularity" id="popularity" />
                 </div>
                 <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
-                    <Label htmlFor="rating" className="flex-1 cursor-pointer">Rating</Label>
+                    <Label htmlFor="rating" className="flex-1 cursor-pointer">
+                      Rating
+                    </Label>
                   </div>
                   <RadioGroupItem value="rating" id="rating" />
                 </div>
               </RadioGroup>
             </div>
-            
+
             {/* Family Members Section - Select who will be eating */}
             <div className="p-4 border-b bg-white mb-2">
               <h3 className="font-medium mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                   <circle cx="9" cy="7" r="4"></circle>
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -489,48 +539,79 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                 </svg>
                 Safe For Family Members
               </h3>
-              
+
               <div className="space-y-2">
-                <div 
-                  className={`flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors ${selectedUsers.length === 0 ? 'bg-primary/10' : 'hover:bg-gray-50'}`}
+                <div
+                  className={`flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors ${
+                    selectedUsers.length === 0 ? 'bg-primary/10' : 'hover:bg-gray-50'
+                  }`}
                   onClick={() => setSelectedUsers([])}
                 >
                   <Label className="flex-1 cursor-pointer font-medium">All (No restrictions)</Label>
-                  <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${selectedUsers.length === 0 ? 'bg-primary border-primary text-primary-foreground' : 'border-gray-300'}`}>
+                  <div
+                    className={`h-5 w-5 rounded-full border flex items-center justify-center ${
+                      selectedUsers.length === 0
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : 'border-gray-300'
+                    }`}
+                  >
                     {selectedUsers.length === 0 && <Check className="h-3 w-3" />}
                   </div>
                 </div>
-                
-                {familyMembers.map(member => (
-                  <div 
+
+                {familyMembers.map((member) => (
+                  <div
                     key={member.id}
-                    className={`flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors ${selectedUsers.includes(member.id) ? 'bg-primary/10' : 'hover:bg-gray-50'}`}
+                    className={`flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors ${
+                      selectedUsers.includes(member.id) ? 'bg-primary/10' : 'hover:bg-gray-50'
+                    }`}
                     onClick={() => toggleUserSelection(member.id)}
                   >
                     <div>
                       <Label className="cursor-pointer">{member.name}</Label>
                       {member.allergies.length > 0 && (
                         <div className="flex gap-1 mt-1 flex-wrap">
-                          {member.allergies.map(allergy => (
-                            <Badge key={allergy} variant="outline" className="text-xs py-0 px-1 bg-red-50 text-red-700 border-red-200">
+                          {member.allergies.map((allergy) => (
+                            <Badge
+                              key={allergy}
+                              variant="outline"
+                              className="text-xs py-0 px-1 bg-red-50 text-red-700 border-red-200"
+                            >
                               {allergy}
                             </Badge>
                           ))}
                         </div>
                       )}
                     </div>
-                    <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${selectedUsers.includes(member.id) ? 'bg-primary border-primary text-primary-foreground' : 'border-gray-300'}`}>
+                    <div
+                      className={`h-5 w-5 rounded-full border flex items-center justify-center ${
+                        selectedUsers.includes(member.id)
+                          ? 'bg-primary border-primary text-primary-foreground'
+                          : 'border-gray-300'
+                      }`}
+                    >
                       {selectedUsers.includes(member.id) && <Check className="h-3 w-3" />}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            
+
             {/* Promo Options Section */}
             <div className="p-4 border-b bg-white mb-2">
               <h3 className="font-medium mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
                   <path d="M5 12H3v9h18v-9h-2"></path>
                   <path d="M7 8c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
                   <path d="M15 2v8h5"></path>
@@ -539,36 +620,68 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
               </h3>
               <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                 <Label htmlFor="promo" className="cursor-pointer flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-amber-500">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mr-2 text-amber-500"
+                  >
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                   </svg>
                   Featured Recipes Only
                 </Label>
-                <Checkbox 
-                  id="promo" 
-                  checked={showPromoOnly} 
-                  onCheckedChange={(checked) => setShowPromoOnly(checked as boolean)} 
+                <Checkbox
+                  id="promo"
+                  checked={showPromoOnly}
+                  onCheckedChange={(checked) => setShowPromoOnly(checked as boolean)}
                 />
               </div>
             </div>
-            
+
             {/* Mode Section */}
             <div className="p-4 border-b bg-white">
               <h3 className="font-medium mb-3 flex items-center text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
                   <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
                 </svg>
                 View Mode
               </h3>
               <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
                 <TabsList className="grid grid-cols-2 w-full">
-                  <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-white">All Recipes</TabsTrigger>
-                  <TabsTrigger value="safe" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Safe Recipes Only</TabsTrigger>
+                  <TabsTrigger
+                    value="all"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-white"
+                  >
+                    All Recipes
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="safe"
+                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white"
+                  >
+                    Safe Recipes Only
+                  </TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
           </div>
-          
+
           {/* Apply Button - Fixed at bottom */}
           <SheetFooter className="p-4 border-t absolute bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
             <Button className="w-full h-12 text-base font-medium" onClick={applyFilters}>

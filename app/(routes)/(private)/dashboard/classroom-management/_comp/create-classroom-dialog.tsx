@@ -153,6 +153,7 @@ export function CreateClassroomDialog({ open, onOpenChange }: Props) {
       toast({
         title: 'Success',
         description: 'Classroom created successfully',
+        variant: 'success',
       });
     } catch (error) {
       console.error('Error creating classroom:', error);

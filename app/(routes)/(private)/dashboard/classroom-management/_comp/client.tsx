@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,6 @@ interface ClassroomClientProps {
 }
 
 export function ClassroomClient({ initialClassrooms }: ClassroomClientProps) {
-  const router = useRouter();
   const { classrooms, isCreateDialogOpen, setClassrooms, setCreateDialogOpen } =
     useClassroomStore();
 
