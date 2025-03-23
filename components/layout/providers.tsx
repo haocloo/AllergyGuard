@@ -10,7 +10,7 @@ export default function Providers({
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="light"
       enableSystem
     >
       {children}
