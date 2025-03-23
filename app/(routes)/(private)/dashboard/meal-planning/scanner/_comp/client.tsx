@@ -24,6 +24,10 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/cn';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 
+// Import mock data from the correct location
+import { familyMembers, childAllergies } from '../../_comp/mock-data';
+import { Allergen } from '../../_comp/store';
+
 // Allergen icons and info
 const ALLERGEN_INFO = {
   Peanuts: { icon: '🥜', description: 'Common in snacks and Asian cuisine' },
@@ -42,7 +46,7 @@ const ALLERGEN_INFO = {
 const FOOD_SUGGESTIONS = [
   {
     name: 'Oat Milk',
-    replaces: 'Milk',
+    replaces: 'Dairy',
     description: 'Creamy dairy-free milk alternative made from whole grain oats',
     safeFor: ['Dairy allergies', 'Lactose intolerance', 'Nut allergies'],
     nutritionInfo: 'Rich in fiber, beta-glucans, and fortified with calcium & vitamin D',
@@ -52,7 +56,7 @@ const FOOD_SUGGESTIONS = [
   },
   {
     name: 'Sunflower Seed Butter',
-    replaces: 'Peanut Butter',
+    replaces: 'Peanut',
     description: 'Creamy spread made from roasted sunflower seeds',
     safeFor: ['Peanut allergies', 'Tree nut allergies', 'Soy allergies'],
     nutritionInfo: 'High in vitamin E, protein, and healthy fats',
@@ -62,7 +66,7 @@ const FOOD_SUGGESTIONS = [
   },
   {
     name: 'Cassava Flour',
-    replaces: 'Wheat Flour',
+    replaces: 'Wheat',
     description: 'Grain-free flour that works as a 1:1 replacement in most recipes',
     safeFor: ['Gluten allergies', 'Wheat allergies', 'Grain allergies'],
     nutritionInfo: 'Naturally gluten-free, good source of resistant starch',
@@ -72,7 +76,7 @@ const FOOD_SUGGESTIONS = [
   },
   {
     name: 'Coconut Aminos',
-    replaces: 'Soy Sauce',
+    replaces: 'Soy',
     description: 'Soy-free savory sauce made from coconut tree sap',
     safeFor: ['Soy allergies', 'Gluten allergies', 'Wheat allergies'],
     nutritionInfo: '73% less sodium than soy sauce, contains 17 amino acids',
@@ -82,7 +86,7 @@ const FOOD_SUGGESTIONS = [
   },
   {
     name: 'Aquafaba',
-    replaces: 'Eggs',
+    replaces: 'Egg',
     description: 'Chickpea liquid that works as an egg replacer in many recipes',
     safeFor: ['Egg allergies', 'Dairy allergies'],
     nutritionInfo: 'Low calorie, naturally cholesterol-free',
@@ -92,7 +96,7 @@ const FOOD_SUGGESTIONS = [
   },
   {
     name: 'Hemp Milk',
-    replaces: 'Milk',
+    replaces: 'Dairy',
     description: 'Plant-based milk rich in omega-3 fatty acids',
     safeFor: ['Dairy allergies', 'Nut allergies', 'Soy allergies'],
     nutritionInfo: 'Complete protein source, rich in omega-3 and omega-6',
@@ -138,44 +142,20 @@ const DETECTED_INGREDIENTS = [
   'Shellfish',
 ];
 
-// Update affected children with real-life photos
-const AFFECTED_CHILDREN = [
-  {
-    id: 'c1',
-    name: 'Alice Brown',
-    allergies: ['Peanuts', 'Eggs'],
-    photoUrl:
-      'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'c2',
-    name: 'Bob Wilson',
-    allergies: ['Milk'],
-    photoUrl:
-      'https://images.unsplash.com/photo-1521146764736-56c929d59c83?q=80&w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'c3',
-    name: 'Emma Davis',
-    allergies: ['Shellfish', 'Fish'],
-    photoUrl:
-      'https://images.unsplash.com/photo-1519457431-44ccd64a579b?q=80&w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'c4',
-    name: 'Michael Chen',
-    allergies: ['Peanuts', 'Tree Nuts'],
-    photoUrl:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=100&h=100&fit=crop&crop=faces',
-  },
-  {
-    id: 'c5',
-    name: 'Sofia Garcia',
-    allergies: ['Soy', 'Wheat'],
-    photoUrl:
-      'https://images.unsplash.com/photo-1521146764736-56c929d59c83?q=80&w=100&h=100&fit=crop&crop=faces',
-  },
-];
+// Convert familyMembers to the format expected by the component
+type AffectedChild = {
+  id: string;
+  name: string;
+  allergies: string[];
+  photoUrl: string;
+};
+
+const AFFECTED_CHILDREN: AffectedChild[] = familyMembers.map((member: {id: string; name: string; allergies: string[]}) => ({
+  id: member.id,
+  name: member.name,
+  allergies: member.allergies,
+  photoUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.name.replace(/\s+/g, '')}&backgroundColor=b6e3f4,c0aede,d1d4f9&radius=50`,
+}));
 
 export function ScannerClient() {
   const [image, setImage] = useState<string | null>(null);
@@ -217,9 +197,15 @@ export function ScannerClient() {
     setIsScanning(true);
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    const detectedIngredients = ['Peanuts', 'Milk', 'Eggs', 'Wheat']; 
-    const affectedChildren = AFFECTED_CHILDREN.filter((child) =>
-      child.allergies.some((allergy) => detectedIngredients.includes(allergy))
+    // Use a mix of allergens from the childAllergies list
+    const detectedIngredients: string[] = childAllergies.map((allergen: Allergen) => allergen.name).slice(0, 4);
+    
+    // Filter affected children based on the detected ingredients
+    const affectedChildren = AFFECTED_CHILDREN.filter((child: AffectedChild) =>
+      child.allergies.some((allergy: string) => 
+        detectedIngredients.some((ingredient: string) => 
+          ingredient.toLowerCase() === allergy.toLowerCase())
+      )
     );
 
     setScanResults({
