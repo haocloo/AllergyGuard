@@ -108,10 +108,11 @@ export function AnalysisClient() {
           <h2 className="text-xl font-semibold">{recipeData.recipeName}</h2>
           {recipeData.recipeImage && (
             <div className="relative w-full h-48 rounded-lg overflow-hidden">
-              <Image
+              <img
                 src={recipeData.recipeImage}
                 alt={recipeData.recipeName}
-                fill
+                width={64}
+                height={64}
                 className="object-cover"
               />
             </div>

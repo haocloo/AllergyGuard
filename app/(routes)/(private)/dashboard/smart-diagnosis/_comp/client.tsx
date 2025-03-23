@@ -321,7 +321,7 @@ export function SmartDiagnosisClient({
                   <div className="flex flex-col items-center text-center gap-2">
                     <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                       {user.photoUrl ? (
-                        <Image
+                        <img
                           src={user.photoUrl}
                           alt={user.name}
                           width={64}
@@ -406,24 +406,22 @@ export function SmartDiagnosisClient({
               >
                 {isListening ? (
                   <div className="relative  size-8 rounded-full overflow-hidden">
-                    <Image
+                    <img
                       src="/voice-assistant/voice-animation-start.gif"
                       width={24}
                       height={24}
                       alt="Voice recording Start"
                       className="w-full h-full object-cover rounded-full"
-                      priority
                     />
                   </div>
                 ) : (
                   <div className="relative size-8 rounded-full overflow-hidden">
-                    <Image
+                    <img
                       src="/voice-assistant/voice-animation-stop.png"
                       width={24}
                       height={24}
                       alt="Voice recording Stop"
                       className="w-full h-full  object-cover rounded-full"
-                      priority
                     />
                   </div>
                 )}

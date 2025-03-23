@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Search, Filter, ChefHat, BookOpen, PlusCircle, X, Check, Users, AlertTriangle } from 'lucide-react';
+import {
+  Search,
+  Filter,
+  ChefHat,
+  BookOpen,
+  PlusCircle,
+  X,
+  Check,
+  Users,
+  AlertTriangle,
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
@@ -29,17 +39,18 @@ interface Props {
 }
 
 export function FoodListClient({ initialFoodRecipes }: Props) {
-  const { foodRecipes, setFoodRecipes, searchQuery, setSearchQuery, isLoading, setIsLoading } = useFoodListStore();
+  const { foodRecipes, setFoodRecipes, searchQuery, setSearchQuery, isLoading, setIsLoading } =
+    useFoodListStore();
   const [filteredRecipes, setFilteredRecipes] = useState<FoodRecipe[]>([]);
   const [initialized, setInitialized] = useState(false);
-  
+
   // Filter states
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [sortOption, setSortOption] = useState('recommended');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showPromoOnly, setShowPromoOnly] = useState(false);
   const [viewMode, setViewMode] = useState('all');
-  
+
   // Get allergies from meal planning store (using sample data for now)
   const { childAllergies } = useMealPlanningStore();
 
@@ -49,22 +60,20 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
 
     // Get current store recipes
     const storeRecipes = useFoodListStore.getState().foodRecipes;
-    
+
     // Create a map of initial recipes by ID for faster lookup
-    const initialRecipesMap = new Map(
-      initialFoodRecipes.map(recipe => [recipe.id, recipe])
-    );
-    
+    const initialRecipesMap = new Map(initialFoodRecipes.map((recipe) => [recipe.id, recipe]));
+
     // Create a combined recipe list with no duplicates
     const combinedRecipes = [...initialFoodRecipes];
-    
+
     // Add any recipes from the store that aren't in initial recipes
-    storeRecipes.forEach(storeRecipe => {
+    storeRecipes.forEach((storeRecipe) => {
       if (!initialRecipesMap.has(storeRecipe.id)) {
         combinedRecipes.push(storeRecipe);
       }
     });
-    
+
     // Update the store with all recipes
     setFoodRecipes(combinedRecipes);
     setFilteredRecipes(combinedRecipes);
@@ -75,59 +84,66 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
   // Filter recipes based on search query and selected users
   useEffect(() => {
     if (!foodRecipes) return;
-    
+
     let filtered = [...foodRecipes];
-    
+
     // Apply search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(recipe => 
-        recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        recipe.description.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (recipe) =>
+          recipe.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          recipe.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
+
     // Apply user allergen filter
     if (selectedUsers.length > 0) {
-      filtered = filtered.filter(recipe => {
+      filtered = filtered.filter((recipe) => {
         // Check if recipe is safe for all selected family members
-        const isSafeForSelected = selectedUsers.every(userId => {
+        const isSafeForSelected = selectedUsers.every((userId) => {
           // Find the user
-          const member = familyMembers.find(m => m.id === userId);
+          const member = familyMembers.find((m) => m.id === userId);
           if (!member) return true;
-          
+
           // If the recipe has no allergens, it's safe for everyone
-          if (!recipe.allergensFound || !Array.isArray(recipe.allergensFound) || recipe.allergensFound.length === 0) {
+          if (
+            !recipe.allergensFound ||
+            !Array.isArray(recipe.allergensFound) ||
+            recipe.allergensFound.length === 0
+          ) {
             return true;
           }
-          
+
           // If the member has no allergies, they can eat anything
           if (member.allergies.length === 0) return true;
-          
+
           // Check if any of the member's allergies are in the recipe
-          return !member.allergies.some(allergy => 
-            recipe.allergensFound?.includes(allergy)
-          );
+          return !member.allergies.some((allergy) => recipe.allergensFound?.includes(allergy));
         });
-        
+
         return isSafeForSelected;
       });
     }
-    
+
     // Apply view mode filter
     if (viewMode === 'safe') {
-      filtered = filtered.filter(recipe => {
+      filtered = filtered.filter((recipe) => {
         // If no allergens in recipe, it's safe for everyone
-        if (!recipe.allergensFound || !Array.isArray(recipe.allergensFound) || recipe.allergensFound.length === 0) {
+        if (
+          !recipe.allergensFound ||
+          !Array.isArray(recipe.allergensFound) ||
+          recipe.allergensFound.length === 0
+        ) {
           return true;
         }
-        
+
         // If any family member has allergies that match recipe allergens, it's not universally safe
-        return !familyMembers.some(member => 
-          member.allergies.some(allergy => recipe.allergensFound?.includes(allergy))
+        return !familyMembers.some((member) =>
+          member.allergies.some((allergy) => recipe.allergensFound?.includes(allergy))
         );
       });
     }
-    
+
     // Apply sort option
     if (sortOption === 'rating') {
       // Sort by a simulated rating (could be a real property in production)
@@ -143,7 +159,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
         return aHasAllergens - bHasAllergens;
       });
     }
-    
+
     setFilteredRecipes(filtered);
   }, [searchQuery, foodRecipes, selectedUsers, sortOption, viewMode]);
 
@@ -156,24 +172,24 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
   const handleFilterClick = () => {
     setFilterSheetOpen(true);
   };
-  
+
   // Toggle user selection
   const toggleUserSelection = (userId: string) => {
-    setSelectedUsers(prev => {
+    setSelectedUsers((prev) => {
       if (prev.includes(userId)) {
-        return prev.filter(id => id !== userId);
+        return prev.filter((id) => id !== userId);
       } else {
         return [...prev, userId];
       }
     });
   };
-  
+
   // Apply filters and close the sheet
   const applyFilters = () => {
     setFilterSheetOpen(false);
     // Filtering is already handled by the useEffect
   };
-  
+
   // Reset all filters
   const resetFilters = () => {
     setSelectedUsers([]);
@@ -185,68 +201,67 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
   // Helper function to determine recipe safety
   const getRecipeSafetyInfo = (recipe: FoodRecipe) => {
     // Check if we have allergens to display
-    const hasAllergens = recipe.allergensFound && 
-      Array.isArray(recipe.allergensFound) && 
+    const hasAllergens =
+      recipe.allergensFound &&
+      Array.isArray(recipe.allergensFound) &&
       recipe.allergensFound.length > 0;
-    
+
     // If no allergens, it's safe for everyone
     if (!hasAllergens) {
       return {
         isSafe: true,
         safeFor: familyMembers,
         notSafeFor: [],
-        status: "allergen-free",
-        label: "Allergen-free",
-        badgeClass: "bg-green-100 text-green-800 border-green-200",
-        icon: <Users className="h-3 w-3 mr-1" />
+        status: 'allergen-free',
+        label: 'Allergen-free',
+        badgeClass: 'bg-green-100 text-green-800 border-green-200',
+        icon: <Users className="h-3 w-3 mr-1" />,
       };
     }
-    
+
     // Find who can safely consume this recipe
-    const safeFor = familyMembers.filter(member => {
+    const safeFor = familyMembers.filter((member) => {
       // If member has no allergies, they can eat everything
       if (member.allergies.length === 0) return true;
-      
+
       // Check if any of the member's allergies are in the recipe
-      return !member.allergies.some(allergy => 
-        recipe.allergensFound?.includes(allergy)
-      );
+      return !member.allergies.some((allergy) => recipe.allergensFound?.includes(allergy));
     });
-    
+
     const notSafeFor = familyMembers.filter(
-      member => !safeFor.some(safe => safe.id === member.id)
+      (member) => !safeFor.some((safe) => safe.id === member.id)
     );
-    
+
     // Determine status
     if (safeFor.length === familyMembers.length) {
       return {
         isSafe: true,
         safeFor,
         notSafeFor,
-        status: "safe-for-all",
-        label: "Safe for family",
-        badgeClass: "bg-blue-100 text-blue-800 border-blue-200",
-        icon: <Users className="h-3 w-3 mr-1" />
+        status: 'safe-for-all',
+        label: 'Safe for family',
+        badgeClass: 'bg-blue-100 text-blue-800 border-blue-200',
+        icon: <Users className="h-3 w-3 mr-1" />,
       };
     } else if (safeFor.length > 0) {
       return {
         isSafe: true,
         safeFor,
         notSafeFor,
-        status: "safe-for-some",
+        status: 'safe-for-some',
         label: `Safe for ${safeFor.length}/${familyMembers.length}`,
-        badgeClass: "bg-amber-100 text-amber-800 border-amber-200",
-        icon: <Users className="h-3 w-3 mr-1" />
+        badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
+        icon: <Users className="h-3 w-3 mr-1" />,
       };
     } else {
       return {
         isSafe: false,
         safeFor,
         notSafeFor,
-        status: "not-safe",
-        label: "Not safe for family",
-        badgeClass: "bg-red-100 text-red-800 border-red-200",
-        icon: <AlertTriangle className="h-3 w-3 mr-1" />
+        status: 'not-safe',
+        label: 'Not safe for family',
+        badgeClass: 'bg-red-100 text-red-800 border-red-200',
+        icon: <AlertTriangle className="h-3 w-3 mr-1" />,
       };
     }
   };
@@ -329,13 +344,14 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                 <Link href={`/dashboard/meal-planning/recipes/${recipe.id}`}>
                   <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer">
                     {/* Recipe Image */}
-                    <div className="relative h-40">
+                    <div className="relative h-40 w-full">
                       {recipe.imageUrl ? (
-                        <Image
+                        <img
                           src={recipe.imageUrl}
                           alt={recipe.name}
-                          fill
-                          className="object-cover"
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <div className="h-full flex items-center justify-center bg-gray-100 text-gray-400">
@@ -690,4 +706,4 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
       </Sheet>
     </div>
   );
-} 
+}
