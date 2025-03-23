@@ -9,7 +9,6 @@ import { familyMembers } from '../../meal-planning/_comp/mock-data';
 // Map familyMembers data to ChildProfile type
 const SAMPLE_CHILDREN: ChildProfile[] = familyMembers.map((member) => {
   const childData = children.find((c) => c.id === member.id);
-
   return {
     id: member.id,
     name: member.name,

@@ -4,6 +4,7 @@ export type ChildProfile = {
   age: number;
   allergies: string[]; // IDs of allergies
   avatar: string;
+  photoURL?: string; // Add optional photoURL field
   createdAt: string;
 };
 
@@ -14,7 +15,14 @@ export type Allergy = {
   category: AllergyCategory;
 };
 
-export type AllergyCategory = 'dairy' | 'nuts' | 'seafood' | 'grains' | 'fruits' | 'vegetables' | 'others';
+export type AllergyCategory =
+  | 'dairy'
+  | 'nuts'
+  | 'seafood'
+  | 'grains'
+  | 'fruits'
+  | 'vegetables'
+  | 'others';
 
 export type FoodItem = {
   id: string;
