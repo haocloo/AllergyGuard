@@ -10,7 +10,11 @@ export default async function Layout({ children }: { children: React.ReactNode }
   }
   return (
     <AuthProvider user={user}>
-      <Index user={user}>{children}</Index>
+      <Index user={user}>
+        <div className="pb-16 md:pb-0">
+          {children}
+        </div>
+      </Index>
     </AuthProvider>
   );
 }
