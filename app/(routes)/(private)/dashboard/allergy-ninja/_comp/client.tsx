@@ -52,10 +52,9 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
             {/* Ninja Selection Cards */}
             <div className="space-y-3">
               {childProfiles.map((profile) => {
-                // Find this ninja's allergies to display as weaknesses
-                const profileAllergies = allergies.filter(allergy => 
-                  profile.allergies?.includes(allergy.id)
-                );
+                // Updated: Map allergies correctly using allergies from profile directly
+                // instead of trying to match by ID which doesn't work with our new structure
+                const profileAllergies = profile.allergies || [];
                 
                 return (
                   <div 
@@ -84,19 +83,10 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                         <div className="flex-wrap flex gap-1.5 mr-2">
                           {profileAllergies.length > 0 
                             ? (
-                                profileAllergies.map(a => (
-                                  // Split combined entries like "Milk & Dairy" into separate circles
-                                  a.name.includes('&') 
-                                  ? a.name.split('&').map((part, idx) => (
-                                      <span key={`${a.id}-${idx}`} className="text-sm font-bold bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 px-2.5 py-1 rounded-full whitespace-nowrap">
-                                        {part.trim()}
-                                      </span>
-                                    ))
-                                  : (
-                                    <span key={a.id} className="text-sm font-bold bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 px-2.5 py-1 rounded-full whitespace-nowrap">
-                                      {a.name}
-                                    </span>
-                                  )
+                                profileAllergies.map((allergyName, index) => (
+                                  <span key={`${profile.id}-${index}`} className="text-sm font-bold bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 px-2.5 py-1 rounded-full whitespace-nowrap">
+                                    {allergyName}
+                                  </span>
                                 ))
                             ) 
                             : <span className="text-sm font-medium text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2.5 py-1 rounded-full">None</span>
@@ -152,14 +142,17 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                 <p className="text-gray-200 mb-4">Your ninja is trained to avoid:</p>
                 
                 <div className="flex flex-wrap gap-2 justify-center mb-4 max-w-sm">
-                  {allergies
-                    .filter(allergy => childProfiles.find(p => p.id === selectedChildId)?.allergies?.includes(allergy.id))
-                    .map(allergy => (
-                      <span key={allergy.id} className="px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 rounded-full text-xs font-medium">
-                        {allergy.name}
+                  {(childProfiles.find(p => p.id === selectedChildId)?.allergies || []).length > 0 ? (
+                    (childProfiles.find(p => p.id === selectedChildId)?.allergies || []).map((allergyName, index) => (
+                      <span key={`${selectedChildId}-${index}`} className="px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 rounded-full text-xs font-medium">
+                        {allergyName}
                       </span>
                     ))
-                  }
+                  ) : (
+                    <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200 rounded-full text-xs font-medium">
+                      No Allergies
+                    </span>
+                  )}
                 </div>
                 
                 <button

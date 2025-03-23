@@ -94,7 +94,7 @@ export const initialFoodItems: FoodItem[] = [
     id: 'food-1',
     name: 'Nasi Lemak',
     image: '/images/foods/nasi-lemak.png',
-    allergens: ['nuts'], // Contains peanuts
+    allergens: ['Peanuts', 'Nuts'], // Contains peanuts
     isMalaysianCuisine: true,
     category: 'main',
   },
@@ -102,7 +102,7 @@ export const initialFoodItems: FoodItem[] = [
     id: 'food-2',
     name: 'Roti Canai',
     image: '/images/foods/roti-canai.png',
-    allergens: ['grains', 'dairy'], // Contains wheat and sometimes ghee
+    allergens: ['Wheat', 'Dairy'], // Contains wheat and sometimes ghee
     isMalaysianCuisine: true,
     category: 'main',
   },
@@ -124,7 +124,7 @@ export const initialFoodItems: FoodItem[] = [
     id: 'food-5',
     name: 'Satay',
     image: '/images/foods/satay.png',
-    allergens: ['nuts'], // Peanut sauce
+    allergens: ['Peanuts', 'Nuts'], // Peanut sauce
     isMalaysianCuisine: true,
     category: 'main',
   },
@@ -132,7 +132,7 @@ export const initialFoodItems: FoodItem[] = [
     id: 'food-6',
     name: 'Laksa',
     image: '/images/foods/laksa.png',
-    allergens: ['seafood', 'grains'], // Contains shrimp and noodles
+    allergens: ['Seafood', 'Shellfish', 'Shrimp', 'Wheat'], // Contains shrimp and noodles
     isMalaysianCuisine: true,
     category: 'main',
   },
@@ -147,7 +147,7 @@ export const initialFoodItems: FoodItem[] = [
     id: 'food-8',
     name: 'Donut',
     image: '/images/foods/donut.png',
-    allergens: ['grains', 'dairy'],
+    allergens: ['Wheat', 'Dairy'],
     category: 'dessert',
   },
   // Add more dairy/milk items
@@ -155,56 +155,56 @@ export const initialFoodItems: FoodItem[] = [
     id: 'food-9',
     name: 'Milk',
     image: '/images/foods/milk.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'drink',
   },
   {
     id: 'food-10',
     name: 'Cheese',
     image: '/images/foods/cheese.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'snack',
   },
   {
     id: 'food-11',
     name: 'Ice Cream',
     image: '/images/foods/ice-cream.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'dessert',
   },
   {
     id: 'food-12',
     name: 'Yogurt',
     image: '/images/foods/yogurt.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'snack',
   },
   {
     id: 'food-13',
     name: 'Butter',
     image: '/images/foods/butter.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'snack',
   },
   {
     id: 'food-14',
     name: 'Chocolate Milk',
     image: '/images/foods/chocolate-milk.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'drink',
   },
   {
     id: 'food-15',
     name: 'Whipped Cream',
     image: '/images/foods/whipped-cream.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'dessert',
   },
   {
     id: 'food-16',
     name: 'Milkshake',
     image: '/images/foods/milkshake.png',
-    allergens: ['dairy'],
+    allergens: ['Dairy', 'Milk'],
     category: 'drink',
   },
   // Add more non-dairy foods

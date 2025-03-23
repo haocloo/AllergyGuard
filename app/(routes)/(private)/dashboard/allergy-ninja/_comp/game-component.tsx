@@ -39,12 +39,22 @@ export function GameComponent({ childId, onGameEnd }: GameComponentProps) {
   // Find current child profile
   const childProfile = childProfiles.find(profile => profile.id === childId);
   
-  // Get child allergies - default to milk allergy for now
-  const childAllergiesIds = childProfile ? childProfile.allergies : ['dairy'];
-  // If the profile has no allergies, assign milk allergy for the demo
-  if (childAllergiesIds.length === 0) {
-    childAllergiesIds.push('dairy');
-  }
+  // Get child allergies and convert to lowercase for case-insensitive matching
+  const childAllergies = childProfile ? childProfile.allergies.map(a => a.toLowerCase()) : ['dairy'];
+  
+  // If the profile has no allergies, assign a default for the demo
+  const childAllergiesIds = childAllergies.length > 0 ? childAllergies : ['dairy'];
+
+  // Helper function to check if an item contains an allergen
+  const containsAllergen = (foodItem: any) => {
+    // Check if any of the allergen categories match the child's allergies
+    return foodItem.allergens.some((allergen: string) => 
+      childAllergiesIds.some(allergyCat => 
+        allergen.toLowerCase().includes(allergyCat) || 
+        allergyCat.includes(allergen.toLowerCase())
+      )
+    );
+  };
 
   // Set up game foods
   useEffect(() => {
@@ -386,9 +396,7 @@ export function GameComponent({ childId, onGameEnd }: GameComponentProps) {
     const food = foodItems[randomIndex];
     
     // Check if this food has any allergens that the child is allergic to
-    const isAllergen = food.allergens.some(allergen => 
-      childAllergiesIds.includes(allergen)
-    );
+    const isAllergen = containsAllergen(food);
     
     const size = 1.5 + Math.random() * 0.5; // Increased size from 0.8 to 1.5 (nearly double)
     
