@@ -341,10 +341,11 @@ export function RecipeDetailClient({ serverRecipe, recipeId }: Props) {
         {/* Recipe Image */}
         <div className="rounded-lg overflow-hidden h-[320px] relative">
           {recipe.imageUrl ? (
-            <Image
+            <img
               src={recipe.imageUrl}
               alt={recipe.name}
-              fill
+              width={64}
+              height={64}
               className="object-cover"
             />
           ) : (

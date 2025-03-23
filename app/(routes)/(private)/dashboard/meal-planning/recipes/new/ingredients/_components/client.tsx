@@ -1371,10 +1371,11 @@ export function IngredientEntryClient() {
                 />
                 {recipeImage ? (
                   <div className="relative w-full h-full">
-                    <Image
+                    <img
                       src={recipeImage}
                       alt="Recipe"
-                      fill
+                      width={64}
+                      height={64}
                       className="object-cover"
                     />
                     <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">

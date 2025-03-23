@@ -331,10 +331,11 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                     {/* Recipe Image */}
                     <div className="relative h-40">
                       {recipe.imageUrl ? (
-                        <Image
+                        <img
                           src={recipe.imageUrl}
                           alt={recipe.name}
-                          fill
+                          width={64}
+                          height={64}
                           className="object-cover"
                         />
                       ) : (
