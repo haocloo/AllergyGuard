@@ -43,8 +43,8 @@ export function Android({ width = 433, height = 882, src, videoSrc, ...props }: 
       <circle cx="189" cy="28" r="9" className="fill-white dark:fill-[#262626]" />
       <circle cx="189" cy="28" r="4" className="fill-[#E5E5E5] dark:fill-[#404040]" />
       {src && (
-        <img
-          src={src}
+        <image
+          href={src}
           width="360"
           height="800"
           className="size-full object-cover"
