@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'AllergyGuard',
     description:
-      'AllergyGuard is a mobile web-based app that helps manage children\'s food allergies. It centralizes allergy profiles, detects allergens in real time, plans safe meals, and supports emergency care using AI.',
+      "AllergyGuard is a mobile web-based app that helps manage children's food allergies. It centralizes allergy profiles, detects allergens in real time, plans safe meals, and supports emergency care using AI.",
     keywords: [
       'allergy management',
       'food allergies',
@@ -36,12 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'childcare safety',
       'healthcare technology',
     ],
-    authors: [
-      { name: 'Lim Ting Juin' },
-      { name: 'Loo Chi Hao' },
-      { name: 'Goh Jia Wei' },
-      { name: 'Lee Ying Shen' },
-    ],
+    authors: [{ name: 'Team Apex' }],
     openGraph: {
       title: 'AllergyGuard - AI-Powered Allergy Management Platform',
       description:
@@ -60,7 +55,17 @@ export async function generateMetadata(): Promise<Metadata> {
       width: 'device-width',
       initialScale: 1,
       maximumScale: 1,
+      userScalable: false,
+      viewportFit: 'cover',
     },
+    themeColor: '#8936FF',
+    appleWebApp: {
+      capable: true,
+      title: 'AllergyGuard',
+      statusBarStyle: 'black-translucent',
+    },
+    applicationName: 'AllergyGuard',
+    manifest: '/manifest.json',
     robots: {
       index: true,
       follow: true,

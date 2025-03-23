@@ -1,10 +1,35 @@
 import createNextIntlPlugin from 'next-intl/plugin';
 import { withAxiom } from 'next-axiom';
+import withPWA from 'next-pwa';
 
 const withNextIntl = createNextIntlPlugin('./lib/i18n/index.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // PWA
+  pwa: {
+    dest: 'public',
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === 'development',
+    // Force SW to be generated in production
+    buildExcludes: [/middleware-manifest\.json$/],
+    // Include manifest explicitly if it exists
+    importScripts: ['/pwa/workbox-*.js'],
+    runtimeCaching: [
+      {
+        urlPattern: /^https:\/\/allergy-guard\.vercel\.app\/.*/,
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'allergy-guard-cache',
+          expiration: {
+            maxEntries: 200,
+            maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+          },
+        },
+      },
+    ],
+  },
   output: 'standalone',
   experimental: {
     serverComponentsExternalPackages: ['@smithy', 'util-stream'],
@@ -75,7 +100,7 @@ const nextConfig = {
 };
 
 /** Array of Plugins to Apply */
-const plugins = [withAxiom, withNextIntl];
+const plugins = [withPWA, withAxiom, withNextIntl];
 
 /** Apply Plugins Sequentially */
 const composedConfig = plugins.reduce((acc, plugin) => plugin(acc), nextConfig);
