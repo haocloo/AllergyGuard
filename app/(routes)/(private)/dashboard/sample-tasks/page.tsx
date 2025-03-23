@@ -1,9 +1,16 @@
+// this page is for coding reference only
+
 import Breadcrumbs from '@/components/layout/breadcrumb';
 import { TasksClient } from './_comp/client';
 import { get_tasks, getFirestoreTasks } from './_comp/actions';
 import type { Task } from './_comp/types';
+import { redirect } from 'next/navigation';
 
 export default async function TasksPage() {
+  if (process.env.NEXT_PUBLIC_APP_URL !== 'http://localhost:3000') {
+    redirect('/dashboard');
+  }
+
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard' },
     { label: 'Tasks Management' },

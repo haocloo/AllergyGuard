@@ -26,11 +26,9 @@ export default async function AllergyNinjaPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full overflow-hidden">
+    <div className="flex flex-col w-full px-5 overflow-y-auto">
       <Breadcrumbs items={breadcrumbItems} />
-      <div className="flex-grow flex flex-col px-3 sm:px-6 overflow-y-auto pt-1 pb-5 max-w-full">
-        <GameClient initialChildProfiles={childProfiles} initialAllergies={allergies} />
-      </div>
+      <GameClient initialChildProfiles={childProfiles} initialAllergies={allergies} />
     </div>
   );
-} 
+}
