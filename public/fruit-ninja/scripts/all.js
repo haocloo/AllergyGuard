@@ -1,6 +1,4 @@
-﻿
-
-void function(global){
+﻿void function(global){
 	var mapping = {}, cache = {};
 	global.startModule = function(m){
 		require(m).start();
@@ -242,14 +240,25 @@ define("scripts/game.js", function(exports){
 	
 	    if( state( "game-state" ).isnot( "playing" ) )
 	        return;
+	    
+	    // Check if the fruit is a dairy allergen
+	    var dairyItems = ["milk", "cheese", "icecream", "cake", "yoghurt"];
+	    var isDairy = dairyItems.indexOf(fruit.type) > -1;
 	
-	    if( fruit.type != "boom" ){
+	    if( fruit.type != "boom" && !isDairy ){
 	        fruit.broken( angle );
 	        if( index = fruits.indexOf( fruit ) )
 	            fruits.splice( index, 1 );
 	        score.number( ++ scoreNumber );
 	        this.applyScore( scoreNumber );
-	    }else{
+	    } else if (isDairy) {
+	        // Deduct life when dairy item is cut
+	        fruit.broken( angle );
+	        if( index = fruits.indexOf( fruit ) )
+	            fruits.splice( index, 1 );
+	        lose.showLoseAt( fruit.originX );
+	    } else {
+	        // It's a bomb
 	        boomSnd.play();
 	        this.pauseAllFruit();
 	        background.wobble();
@@ -279,8 +288,13 @@ define("scripts/game.js", function(exports){
 	    if( state( "game-state" ).isnot( "playing" ) )
 	        return ;
 	
-	    if( fruit.type != "boom" )
+	    // Define dairy items that shouldn't deduct a life when falling off the screen
+	    var dairyItems = ["milk", "cheese", "icecream", "cake", "yoghurt"];
+	    
+	    // Only deduct a life if it's not a bomb and not a dairy item
+	    if( fruit.type != "boom" && dairyItems.indexOf(fruit.type) === -1 )
 	        lose.showLoseAt( fruit.originX );
+	    // If it's a dairy item falling out, we don't deduct a life (doing nothing)
 	});
 	
 	message.addEventListener("game.over", function(){
@@ -1125,11 +1139,16 @@ define("scripts/factory/fruit.js", function(exports){
 		sandia: [ "images/fruit/sandia.png", 98, 85, 38, -100, 0, "#c00" ],
 		apple: [ "images/fruit/apple.png", 66, 66, 31, -54, 0, "#c8e925" ],
 		banana: [ "images/fruit/banana.png", 126, 50, 43, 90, 0, null ],
-		basaha: [ "images/fruit/basaha.png", 68, 72, 32, -135, 0, "#c00" ]
+		basaha: [ "images/fruit/basaha.png", 68, 72, 32, -135, 0, "#c00" ],
+		milk: [ "images/allergens/dairy/milk.png", 100, 100, 48, -54, 0, "#fff" ],
+		cheese: [ "images/allergens/dairy/cheese.png", 100, 100, 48, -54, 0, "#f7d06b" ],
+		icecream: [ "images/allergens/dairy/icecream.png", 100, 100, 48, -54, 0, "#fff" ],
+		cake: [ "images/allergens/dairy/cake.png", 100, 100, 48, -54, 0, "#f9e8d4" ],
+		yoghurt: [ "images/allergens/dairy/yoghurt.png", 100, 100, 48, -54, 0, "#fff" ] 
 	};
 	
 
-	var types = [ "peach", "sandia", "apple", "banana", "basaha" ];
+	var types = [ "peach", "sandia", "apple", "banana", "basaha", "milk", "cheese", "icecream", "cake", "yoghurt" ];
 	// var types = [ "sandia", "boom" ];
 	var rotateSpeed = [ 60, 50, 40, -40, -50, -60 ];
 	
@@ -1461,7 +1480,7 @@ define("scripts/factory/fruit.js", function(exports){
 		if( random( 8 ) == 4 )
 		    return "boom";
 		else
-	    	return types[ random( 5 ) ];
+	    	return types[ random( types.length ) ];
 	};
 
 	return exports;

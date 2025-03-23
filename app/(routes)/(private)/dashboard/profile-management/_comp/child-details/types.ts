@@ -44,10 +44,9 @@ export interface TempCaretaker {
   type: 'personal' | 'center';
   name: string;
   email: string;
-  role: string;
   phone: string;
+  role: string;
   notes?: string;
-  createdAt: string;
 }
 
 export interface EditCaretakerDialogProps {

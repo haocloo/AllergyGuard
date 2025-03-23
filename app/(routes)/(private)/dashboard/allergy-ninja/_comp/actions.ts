@@ -5,34 +5,25 @@ import { z } from 'zod';
 import { schema_save_game_result, schema_update_badges } from './validation';
 import { GameResult, ChildProfile, Allergy, LeaderboardEntry } from './types';
 
-// Sample data aligned with our profile selector
-const SAMPLE_CHILDREN: ChildProfile[] = [
-  {
-    id: 'profile-milk',
-    name: 'Amira',
-    age: 8,
-    allergies: ['dairy'],
-    avatar: '/images/avatars/child-1.png',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'profile-nuts',
-    name: 'Zack',
-    age: 6,
-    allergies: ['nuts'],
-    avatar: '/images/avatars/child-2.png',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: 'profile-seafood',
-    name: 'Lina',
-    age: 7,
-    allergies: ['seafood'],
-    avatar: '/images/avatars/child-3.png',
-    createdAt: new Date().toISOString(),
-  },
-];
+// Import data from meal-planning component and dummy-data
+import { children } from '@/services/dummy-data';
+import { familyMembers } from '../../meal-planning/_comp/mock-data';
 
+// Map familyMembers data to ChildProfile type
+const SAMPLE_CHILDREN: ChildProfile[] = familyMembers.map((member) => {
+  const childData = children.find(c => c.id === member.id);
+  
+  return {
+    id: member.id,
+    name: member.name,
+    age: childData?.dob ? new Date().getFullYear() - new Date(childData.dob).getFullYear() : Math.floor(Math.random() * 5) + 5,
+    allergies: member.allergies,
+    avatar: childData?.photoUrl || `/images/avatars/child-${Math.floor(Math.random() * 3) + 1}.png`,
+    createdAt: new Date().toISOString(),
+  };
+});
+
+// Create allergies data based on the family members allergies
 const SAMPLE_ALLERGIES: Allergy[] = [
   {
     id: 'dairy',
@@ -52,6 +43,18 @@ const SAMPLE_ALLERGIES: Allergy[] = [
     severity: 'severe',
     category: 'seafood',
   },
+  {
+    id: 'shellfish',
+    name: 'Shellfish',
+    severity: 'severe', 
+    category: 'seafood',
+  },
+  {
+    id: 'shrimp',
+    name: 'Shrimp',
+    severity: 'moderate',
+    category: 'seafood',
+  }
 ];
 
 // Game results storage (in-memory for demo)
@@ -60,15 +63,13 @@ let childBadges: Record<string, string[]> = {}; // childId -> badgeIds[]
 
 // Fetch children profiles
 export async function getChildrenProfiles(): Promise<ChildProfile[]> {
-  // In a real app, fetch from your database
-  // For demo, return sample data
+  // Return our mapped child profiles that use the same user data
   return SAMPLE_CHILDREN;
 }
 
 // Fetch allergies
 export async function getAllergies(): Promise<Allergy[]> {
-  // In a real app, fetch from your database
-  // For demo, return sample data
+  // Return our sample allergies
   return SAMPLE_ALLERGIES;
 }
 

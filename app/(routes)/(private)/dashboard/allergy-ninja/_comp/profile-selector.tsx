@@ -100,9 +100,35 @@ export function ProfileSelector({ onSelectProfile }: ProfileSelectorProps) {
     }
   }, [selectedProfileId, setValue]);
 
+  // Initialize selectedProfileId when childProfiles are loaded
+  useEffect(() => {
+    if (childProfiles.length > 0 && !selectedProfileId) {
+      setSelectedProfileId(childProfiles[0].id);
+    }
+  }, [childProfiles, selectedProfileId]);
+
   const onSubmit = (data: T_schema_select_profile) => {
     onSelectProfile(data.childId);
     setDifficulty(data.difficulty || 'medium');
+  };
+
+  // Helper function to get allergy names for display
+  const getAllergyNames = (allergyIds: string[]) => {
+    return allergyIds.map(id => {
+      // First try to find an exact match in our allergies array
+      const allergy = allergies.find(a => a.id.toLowerCase() === id.toLowerCase());
+      
+      // If not found by ID, try to match by name (since our data structure may have names as IDs)
+      if (!allergy) {
+        const allergyByName = allergies.find(a => 
+          a.name.toLowerCase().includes(id.toLowerCase()) || 
+          id.toLowerCase().includes(a.name.toLowerCase())
+        );
+        return allergyByName?.name || id;
+      }
+      
+      return allergy.name;
+    }).join(', ');
   };
 
   return (
@@ -121,7 +147,7 @@ export function ProfileSelector({ onSelectProfile }: ProfileSelectorProps) {
             <option value="">Select a profile</option>
             {childProfiles.map((profile) => (
               <option key={profile.id} value={profile.id}>
-                {profile.name} ({profile.age} yrs) - {allergies.find(a => profile.allergies.includes(a.id))?.name || 'No allergies'}
+                {profile.name} ({profile.age} yrs) - {profile.allergies.length > 0 ? profile.allergies.join(', ') : 'No allergies'}
               </option>
             ))}
           </select>
@@ -160,10 +186,6 @@ export function ProfileSelector({ onSelectProfile }: ProfileSelectorProps) {
         {childProfiles.length > 0 && selectedProfileId && (
           <div className="mt-6 space-y-4">
             {childProfiles.map((profile) => {
-              const profileAllergies = allergies.filter(allergy => 
-                profile.allergies.includes(allergy.id)
-              );
-              
               return profile.id === selectedProfileId ? (
                 <div key={profile.id} className="p-4 bg-gray-50 dark:bg-slate-700 rounded-md">
                   <div className="flex items-center mb-2">
@@ -184,25 +206,27 @@ export function ProfileSelector({ onSelectProfile }: ProfileSelectorProps) {
                     </div>
                   </div>
                   
-                  {profileAllergies.length > 0 ? (
+                  {profile.allergies.length > 0 ? (
                     <div>
                       <h5 className="text-sm font-medium mb-1">Allergies:</h5>
                       <div className="flex flex-wrap gap-1">
-                        {profileAllergies.map((allergy) => (
+                        {profile.allergies.map((allergyName) => (
                           <span 
-                            key={allergy.id} 
+                            key={allergyName} 
                             className="px-2 py-1 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 text-xs rounded-full"
                           >
-                            {allergy.name}
+                            {allergyName}
                           </span>
                         ))}
                       </div>
                       <p className="text-xs mt-2 italic text-amber-600 dark:text-amber-400">
-                        {profile.allergies.includes('dairy') ? 
+                        {profile.allergies.some(a => a.toLowerCase().includes('dairy') || a.toLowerCase().includes('milk')) ? 
                           "Avoid all dairy products including milk, cheese, yogurt, and ice cream!" : 
-                          profile.allergies.includes('nuts') ? 
+                          profile.allergies.some(a => a.toLowerCase().includes('nut') || a.toLowerCase().includes('peanut')) ? 
                           "Avoid all nuts, peanuts, and foods containing nut extracts!" : 
-                          "Avoid all seafood including fish, shrimp, and other shellfish!"}
+                          profile.allergies.some(a => a.toLowerCase().includes('seafood') || a.toLowerCase().includes('shellfish') || a.toLowerCase().includes('shrimp')) ?
+                          "Avoid all seafood including fish, shrimp, and other shellfish!" :
+                          `Avoid foods containing: ${profile.allergies.join(', ')}`}
                       </p>
                     </div>
                   ) : (
