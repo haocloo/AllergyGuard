@@ -1,10 +1,10 @@
 import Breadcrumbs from '@/components/layout/breadcrumb';
 import { SmartDiagnosisClient } from './_comp/client';
-import { pediatricAllergies } from '@/services/dummy-data';
+import { get_children, get_allergies } from './_comp/action';
 
-export default function SmartDiagnosisPage() {
+export default async function SmartDiagnosisPage() {
   // Server side data fetching
-  const allDiagnoses = pediatricAllergies;
+  const [children, allDiagnoses] = await Promise.all([get_children(), get_allergies()]);
 
   return (
     <div className="flex flex-col w-full px-4 overflow-y-auto">
@@ -14,7 +14,7 @@ export default function SmartDiagnosisPage() {
           { label: 'Smart Diagnosis', href: '/dashboard/smart-diagnosis' },
         ]}
       />
-      <SmartDiagnosisClient initialDiagnoses={allDiagnoses} />
+      <SmartDiagnosisClient initialDiagnoses={allDiagnoses} initialChildren={children} />
     </div>
   );
 }

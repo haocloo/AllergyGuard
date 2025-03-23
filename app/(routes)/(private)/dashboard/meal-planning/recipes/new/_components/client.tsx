@@ -23,6 +23,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
+// Import familyMembers from mock-data
+import { familyMembers } from '../../../_comp/mock-data';
+
 // Store for allergens (in a real app, we would fetch these from the API)
 const commonAllergens = [
   'Peanut', 
@@ -34,16 +37,6 @@ const commonAllergens = [
   'Fish', 
   'Shellfish',
   'Sesame'
-];
-
-// Store for family members (in a real app, we would fetch these from the API)
-const people = [
-  { id: '1', name: 'John' },
-  { id: '2', name: 'Mary' },
-  { id: '3', name: 'Emma' },
-  { id: '4', name: 'Lucas' },
-  { id: '5', name: 'Sarah' },
-  { id: '6', name: 'Michael' },
 ];
 
 export function MealPrepFormClient() {
@@ -67,7 +60,7 @@ export function MealPrepFormClient() {
     selectedPeople: [] as string[],
     additionalAllergies: [] as string[],
     customAllergen: '',
-    mealIdea: 'spicy egg noodle',  // Prefilled for demo
+    mealIdea: '',  // Prefilled for demo
   });
 
   // Add new state for ingredient preview
@@ -179,7 +172,30 @@ export function MealPrepFormClient() {
 
   // Handle next button click
   const handleNextClick = () => {
+    // Still check required fields as a safeguard
+    if (!areRequiredFieldsFilled()) {
+      return;
+    }
+    
     setIsLoading(true);
+    
+    // Store user selections in localStorage for the ingredients page
+    const selectedPeopleAllergies = Array.from(new Set(
+      formData.selectedPeople
+        .map(personId => familyMembers.find(p => p.id === personId)?.allergies || [])
+        .flat()
+    ));
+    
+    // Combine allergies from selected people and additional allergies
+    const allAllergensToAvoid = Array.from(new Set([...selectedPeopleAllergies, ...formData.additionalAllergies]));
+    
+    // Save user selections to localStorage
+    localStorage.setItem('userSelections', JSON.stringify({
+      selectedPeople: formData.selectedPeople,
+      allergensToAvoid: allAllergensToAvoid,
+      servings: formData.servings,
+      mealIdea: formData.mealIdea
+    }));
     
     // Simulate API call delay
     setTimeout(() => {
@@ -290,7 +306,12 @@ export function MealPrepFormClient() {
 
   // Handle recipe generation
   const handleRecipeGeneration = () => {
-    // First check if we have enough information
+    // Still check required fields as a safeguard
+    if (!areRequiredFieldsFilled()) {
+      return;
+    }
+    
+    // Check if meal idea is provided
     if (!formData.mealIdea.trim()) {
       toast.error("Please describe your meal idea first");
       return;
@@ -308,8 +329,23 @@ export function MealPrepFormClient() {
       // In a real app, this would call an API endpoint
       // For our demo, we'll create a mock recipe based on the form data
       
-      // Get allergens to avoid from form data
-      const allergensToAvoid = formData.additionalAllergies.map(a => a.toLowerCase());
+      // Get allergies from selected people
+      const selectedPeopleAllergies = Array.from(new Set(
+        formData.selectedPeople
+          .map(personId => familyMembers.find(p => p.id === personId)?.allergies || [])
+          .flat()
+      ));
+      
+      // Combine allergies from selected people and additional allergies
+      const allergensToAvoid = Array.from(new Set([...selectedPeopleAllergies, ...formData.additionalAllergies]));
+      
+      // Save user selections to localStorage - similar to handleNextClick
+      localStorage.setItem('userSelections', JSON.stringify({
+        selectedPeople: formData.selectedPeople,
+        allergensToAvoid: allergensToAvoid,
+        servings: formData.servings,
+        mealIdea: formData.mealIdea
+      }));
       
       // Extract some keywords from the meal idea to guide the recipe generation
       const mealIdea = formData.mealIdea.toLowerCase();
@@ -496,6 +532,23 @@ export function MealPrepFormClient() {
     }
   };
 
+  // Check if required fields are filled
+  const areRequiredFieldsFilled = () => {
+    const isServingsFilled = formData.servings !== '' && formData.servings !== '0';
+    const isPeopleSelected = formData.selectedPeople.length > 0;
+    
+    if (!isServingsFilled || !isPeopleSelected) {
+      if (!isServingsFilled) {
+        toast.error("Please specify the number of servings");
+      } else if (!isPeopleSelected) {
+        toast.error("Please select at least one person you're serving");
+      }
+      return false;
+    }
+    
+    return true;
+  };
+
   return (
     <div className="space-y-6 max-w-md mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -521,7 +574,10 @@ export function MealPrepFormClient() {
           <form className="space-y-8">
             {/* Question 1: Servings */}
             <div className="space-y-2">
-              <Label htmlFor="servings" className="text-base font-medium">1) How many servings?</Label>
+              <Label htmlFor="servings" className="text-base font-medium">1) How many servings? <span className="text-red-500">*</span></Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Required: Enter the number of people this meal is for.
+              </p>
               <Input
                 id="servings"
                 name="servings"
@@ -535,7 +591,10 @@ export function MealPrepFormClient() {
             
             {/* Question 2: Who are you serving - Multi-select Dropdown */}
             <div className="space-y-2">
-              <Label className="text-base font-medium">2) Who are you serving?</Label>
+              <Label className="text-base font-medium">2) Who are you serving? <span className="text-red-500">*</span></Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Required: Select at least one person you're preparing this meal for.
+              </p>
               <Popover open={isOpen} onOpenChange={setIsOpen}>
                 <PopoverTrigger asChild>
                   <Button
@@ -550,7 +609,7 @@ export function MealPrepFormClient() {
                       <div className="flex gap-1 flex-wrap">
                         {formData.selectedPeople.length <= 2 ? (
                           formData.selectedPeople.map(id => 
-                            people.find(p => p.id === id)?.name
+                            familyMembers.find(p => p.id === id)?.name
                           ).join(', ')
                         ) : (
                           `${formData.selectedPeople.length} people selected`
@@ -572,7 +631,7 @@ export function MealPrepFormClient() {
                       />
                     </div>
                     <div className="max-h-64 overflow-auto space-y-1">
-                      {people.map((person) => (
+                      {familyMembers.map((person) => (
                         <div
                           key={person.id}
                           className="flex items-center gap-2 cursor-pointer p-2 hover:bg-muted rounded-sm"
@@ -590,7 +649,14 @@ export function MealPrepFormClient() {
                               <Check className="h-3 w-3" />
                             )}
                           </div>
-                          {person.name}
+                          <div className="flex flex-col">
+                            <span>{person.name}</span>
+                            {person.allergies && person.allergies.length > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                Allergies: {person.allergies.join(', ')}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -602,19 +668,24 @@ export function MealPrepFormClient() {
               {formData.selectedPeople.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {formData.selectedPeople.map(personId => {
-                    const person = people.find(p => p.id === personId);
+                    const person = familyMembers.find(p => p.id === personId);
                     return (
                       <Badge 
-                        key={personId} 
+                        key={person?.id || personId} 
                         variant="secondary"
                         className="flex items-center gap-1 px-3 py-1 text-sm"
                       >
-                        {person?.name}
+                        <span>{person?.name || personId}</span>
+                        {person?.allergies && person.allergies.length > 0 && (
+                          <span className="inline-flex items-center ml-1 text-xs text-amber-600 bg-amber-100 px-1 rounded">
+                            {person.allergies.length} {person.allergies.length === 1 ? 'allergy' : 'allergies'}
+                          </span>
+                        )}
                         <button
                           type="button"
-                          className="ml-1 rounded-full h-4 w-4 inline-flex items-center justify-center hover:bg-muted"
+                          className="ml-1 rounded-full hover:bg-gray-200 h-4 w-4 inline-flex items-center justify-center"
                           onClick={(e) => {
-                            e.preventDefault();
+                            e.stopPropagation();
                             handlePersonSelection(personId);
                           }}
                         >
@@ -625,11 +696,52 @@ export function MealPrepFormClient() {
                   })}
                 </div>
               )}
+              
+              {/* Consolidated allergen box - show all allergies from selected people */}
+              {formData.selectedPeople.length > 0 && (
+                <div className="mt-3 bg-blue-50 border border-blue-100 rounded-md p-3">
+                  <div className="flex items-center mb-2">
+                    <AlertTriangle className="text-blue-500 h-4 w-4 mr-2" />
+                    <h4 className="text-sm font-medium text-blue-700">Allergies from selected people:</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-1">
+                    {/* Get unique allergies from all selected people */}
+                    {Array.from(new Set(
+                      formData.selectedPeople
+                        .map(personId => familyMembers.find(p => p.id === personId)?.allergies || [])
+                        .flat()
+                    )).map((allergen, index) => (
+                      <Badge 
+                        key={index} 
+                        variant="outline"
+                        className="bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200"
+                      >
+                        {allergen}
+                      </Badge>
+                    ))}
+                    {/* If no allergies found, show message */}
+                    {!formData.selectedPeople
+                      .some(personId => {
+                        const person = familyMembers.find(p => p.id === personId);
+                        return person?.allergies && person.allergies.length > 0;
+                      }) && (
+                      <p className="text-sm text-blue-700">No allergies for selected people.</p>
+                    )}
+                  </div>
+                  <div className="mt-2 text-xs text-blue-600">
+                    These allergies will automatically be avoided in your recipe.
+                    Add any additional allergies in the section below.
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Question 3: Additional Allergies */}
             <div className="space-y-2">
               <Label className="text-base font-medium">3) Any additional allergies?</Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Add any allergies not already listed above.
+              </p>
               
               {/* Display already added allergies */}
               <div className="flex flex-wrap gap-1 mb-2">
@@ -728,6 +840,9 @@ export function MealPrepFormClient() {
             {/* Question 4: Meal Idea */}
             <div className="space-y-2">
               <Label className="text-base font-medium">4) What kind of meal would you like to make?</Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Describe your meal idea. This helps with recipe suggestions.
+              </p>
               <Textarea
                 name="mealIdea"
                 placeholder="Describe your meal idea"
@@ -742,6 +857,7 @@ export function MealPrepFormClient() {
                   type="button" 
                   className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white flex items-center justify-center gap-2 h-12 transition-all"
                   onClick={handleRecipeGeneration}
+                  disabled={!areRequiredFieldsFilled()}
                 >
                   <Sparkles className="h-5 w-5" />
                   <span className="font-medium">Generate Recipe with AI</span>
@@ -781,7 +897,7 @@ export function MealPrepFormClient() {
               <Button
                 type="button"
                 onClick={handleNextClick}
-                disabled={isLoading}
+                disabled={isLoading || !areRequiredFieldsFilled()}
                 className="px-8 py-2"
               >
                 {isLoading ? "Processing..." : "Next"}

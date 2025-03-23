@@ -14,6 +14,7 @@ import {
   Zap,
   Sparkles,
   Globe,
+  User,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,9 +41,16 @@ import {
 } from '@/services/store';
 import { useDiagnosisStore, EnhancedDiagnosis } from './store';
 import { get_diagnosis, DiagnosisResult } from './action';
+import { children } from '@/services/dummy-data';
 
 interface SmartDiagnosisClientProps {
   initialDiagnoses: TDiagnosis[];
+  initialChildren: {
+    id: string;
+    name: string;
+    photoUrl: string;
+    allergies: string[];
+  }[];
 }
 
 // Helper function to get color based on percentage match
@@ -68,9 +76,13 @@ const getLanguageEmoji = (languageCode: string): string => {
   }
 };
 
-export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientProps) {
+export function SmartDiagnosisClient({
+  initialDiagnoses,
+  initialChildren,
+}: SmartDiagnosisClientProps) {
   const [input, setInput] = useState('');
   const [isChangingLanguage, setIsChangingLanguage] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const { text, isListening, resetTranscript, selectedLanguage, setSelectedLanguage } =
     useVoiceRecognitionStore();
   const { handleRecording, permissionState } = useInterviewSessionSpeechStore();
@@ -94,6 +106,18 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
 
   const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Validate if user is selected
+    if (!selectedUser) {
+      toast({
+        title: 'User selection required',
+        description: 'Please select a child before proceeding with diagnosis',
+        variant: 'destructive',
+        duration: 3000,
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       // validation
@@ -159,6 +183,7 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
     setSelectedDiagnosis(null);
     setFilteredDiagnoses(initialDiagnoses.slice(0, 3));
     setHasSearched(false);
+    setSelectedUser(null); // Reset selected user
 
     toast({
       title: 'Input cleared',
@@ -268,6 +293,73 @@ export function SmartDiagnosisClient({ initialDiagnoses }: SmartDiagnosisClientP
           )}
         </div>
       </div>
+
+      {/* User Selection Card */}
+      <Card className="border-primary/20 overflow-hidden">
+        <div className="bg-primary/5 px-4 py-3 border-b border-primary/10">
+          <h2 className="text-lg font-medium flex items-center gap-2">
+            <User className="h-5 w-5 text-primary" />
+            Select Child
+          </h2>
+        </div>
+        <div className="p-4 space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Select a user to provide personalized diagnosis based on their medical history:
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {initialChildren.map((user) => {
+              return (
+                <Card
+                  key={user.id}
+                  className={cn(
+                  `p-3 cursor-pointer transition-all hover:bg-primary/5`,
+                  selectedUser === user.id ? 'ring-2 ring-primary bg-primary/5' : ''
+                )}
+                onClick={() => setSelectedUser(user.id)}
+              >
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                    {user.photoUrl ? (
+                      <Image
+                        src={user.photoUrl}
+                        alt={user.name}
+                        width={64}
+                        height={64}
+                        className="rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-8 h-8 text-primary" />
+                    )}
+                  </div>
+                  <h3 className="font-medium">{user.name}</h3>
+                  <div className="flex flex-wrap gap-1 justify-center">
+                    {user.allergies.map((allergy, index) => (
+                      <Badge key={index} variant="darkRed" className="text-xs">
+                        {allergy}
+                      </Badge>
+                    ))}
+                  </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+
+          {selectedUser && (
+            <div className="flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedUser(null)}
+                className="text-sm"
+              >
+                Clear Selection
+              </Button>
+            </div>
+          )}
+        </div>
+      </Card>
 
       {/* Step 1: Symptom Input */}
       <Card className="border-primary/20 overflow-hidden">

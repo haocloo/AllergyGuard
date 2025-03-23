@@ -27,6 +27,7 @@ import {
 import Company from '@/components/layout/company';
 import { UserNav } from '@/components/layout/user';
 import { GoogleLogin } from '@/components/layout/google-login';
+import BottomNavigation from '@/components/layout/bottom-navigation';
 
 // services
 import type { User } from '@/lib/lucia/auth';
@@ -97,6 +98,7 @@ export default function Index({ user, children }: Props) {
         <SidebarRail />
       </Sidebar>
       <SidebarInset>{children}</SidebarInset>
+      <BottomNavigation user={user} />
     </SidebarProvider>
   );
 }

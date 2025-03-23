@@ -1,8 +1,7 @@
 import Breadcrumbs from '@/components/layout/breadcrumb';
 import { ProfileClient } from './_comp/client';
 import { children } from '@/services/dummy-data';
-import type { Child, Allergy } from './_comp/types';
-import type { RawAllergy } from '@/services/dummy-data';
+import type { Child } from './_comp/types';
 import type { RawChild } from '@/services/dummy-data';
 
 export default async function ProfileManagementPage() {

@@ -58,24 +58,24 @@ export const navList: T_navItem[] = [
             role: ['admin', 'caretaker', 'parent'],
             icon: Camera,
           },
-          {
-            title: 'Meal Plans',
-            url: '/dashboard/meal-planning/plans',
-            role: ['admin', 'caretaker', 'parent'],
-            icon: Book,
-          },
-          {
-            title: 'Recipe Suggestions',
-            url: '/dashboard/meal-planning/recipes',
-            role: ['admin', 'caretaker', 'parent'],
-            icon: ChefHat,
-          },
-          {
-            title: 'Recipe Analysis',
-            url: '/dashboard/meal-planning/recipes/new/analysis',
-            role: ['admin', 'caretaker', 'parent'],
-            icon: AlertCircle,
-          },
+          // {
+          //   title: 'Meal Plans',
+          //   url: '/dashboard/meal-planning/plans',
+          //   role: ['admin', 'caretaker', 'parent'],
+          //   icon: Book,
+          // },
+          // {
+          //   title: 'Recipe Suggestions',
+          //   url: '/dashboard/meal-planning/recipes',
+          //   role: ['admin', 'caretaker', 'parent'],
+          //   icon: ChefHat,
+          // },
+          // {
+          //   title: 'Recipe Analysis',
+          //   url: '/dashboard/meal-planning/recipes/new/analysis',
+          //   role: ['admin', 'caretaker', 'parent'],
+          //   icon: AlertCircle,
+          // },
         ],
       },
       {

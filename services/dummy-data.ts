@@ -3,72 +3,199 @@
 // ----------------------------------------------
 
 import { v4 as uuidv4 } from 'uuid';
+import { generateClassroomCode } from '@/app/(routes)/(private)/dashboard/classroom-management/_comp/utils';
+import type {
+  AllergenAlert,
+  Classroom,
+  Child,
+  Teacher,
+} from '@/app/(routes)/(private)/dashboard/classroom-management/_comp/types';
 
 // Get current user id from env variable (or fallback for development)
 // In production, use lucia_get_user() to obtain the user id.
 const currentUserId = process.env.NEXT_PUBLIC_user_id || 'b806239e-8a3a-4712-9862-1ccd9b821981';
 
-// Add or update these interfaces
-export type Teacher = {
-  id: string;
-  name: string;
-  photoUrl?: string;
-  phone: string;
-  email: string;
-};
+// Remove local interface definitions and use imported types
 
-export type Classroom = {
-  id: string;
-  code: string;
-  name: string;
-  centerName: string;
-  address: string;
-  teacher: Teacher;
-};
-
-// Update the classroom data
+// Mock data
 export const classrooms: Classroom[] = [
   {
-    id: 'cls-001',
-    code: 'CC001-K1A',
-    name: 'Kindergarten 1A',
+    id: '1',
+    code: 'CLS-2024-001',
+    name: 'Sunshine Room',
     centerName: 'Sunshine Childcare Center',
-    address: '123 Sunshine Road, #01-234, Singapore 123456',
+    address: '123 Sunshine Road, #01-234',
     teacher: {
-      id: 'tchr-001',
-      name: 'Ms. Sarah Lee',
-      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=sarah',
-      phone: '91234567',
-      email: 'sarah.lee@sunshine.edu.sg',
+      id: 't1',
+      name: 'Sarah Johnson',
+      photoUrl:
+        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&h=200&auto=format&fit=crop',
+      role: 'Head Teacher',
+      phone: '012-345-6789',
+      email: 'sarah.j@sunshine.edu.my',
     },
+    children: [
+      {
+        id: 'c1',
+        name: 'Alice Brown',
+        photoUrl:
+          'https://images.unsplash.com/photo-1548537412-08ab4940b3c3?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Peanuts', 'Eggs'],
+      },
+      {
+        id: 'c2',
+        name: 'Bob Wilson',
+        photoUrl:
+          'https://images.unsplash.com/photo-1588033173760-4663b66d39c9?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Milk'],
+      },
+      {
+        id: 'c3',
+        name: 'Charlie Davis',
+        photoUrl:
+          'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Shellfish', 'Peanuts'],
+      },
+      {
+        id: 'c4',
+        name: 'Diana Evans',
+        photoUrl:
+          'https://images.unsplash.com/photo-1588033173760-4663b66d39c9?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Soy'],
+      },
+      {
+        id: 'c5',
+        name: 'Ethan Foster',
+        photoUrl:
+          'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Eggs', 'Milk'],
+      },
+    ],
+    allergenAlerts: [
+      { name: 'Peanuts', count: 2, children: ['c1', 'c3'] },
+      { name: 'Eggs', count: 2, children: ['c1', 'c5'] },
+      { name: 'Milk', count: 2, children: ['c2', 'c5'] },
+      { name: 'Shellfish', count: 1, children: ['c3'] },
+      { name: 'Soy', count: 1, children: ['c4'] },
+    ],
+    createdAt: new Date().toISOString(),
   },
   {
-    id: 'cls-002',
-    code: 'CC002-N2B',
-    name: 'Nursery 2B',
-    centerName: 'Little Stars Preschool',
-    address: '456 Star Avenue, #02-345, Singapore 234567',
-    teacher: {
-      id: 'tchr-002',
-      name: 'Ms. Emily Wong',
-      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=emily',
-      phone: '92345678',
-      email: 'emily.wong@littlestars.edu.sg',
-    },
-  },
-  {
-    id: 'cls-003',
-    code: 'CC003-K2C',
-    name: 'Kindergarten 2C',
+    id: '2',
+    code: 'CLS-2024-002',
+    name: 'Rainbow Class',
     centerName: 'Rainbow Kids Academy',
-    address: '789 Rainbow Road, #03-456, Singapore 345678',
+    address: '456 Rainbow Road, #02-345',
     teacher: {
-      id: 'tchr-003',
-      name: 'Mr. John Tan',
-      photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=john',
-      phone: '93456789',
-      email: 'john.tan@rainbowkids.edu.sg',
+      id: 't2',
+      name: 'Michael Brown',
+      photoUrl:
+        'https://images.unsplash.com/photo-1607990281513-2c110a25bd8c?q=80&w=200&h=200&auto=format&fit=crop',
+      role: 'Senior Teacher',
+      phone: '012-345-6790',
+      email: 'michael.b@rainbow.edu',
     },
+    children: [
+      {
+        id: 'c6',
+        name: 'Fiona Grant',
+        photoUrl:
+          'https://images.unsplash.com/photo-1516942126524-75630bce5870?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Wheat'],
+      },
+      {
+        id: 'c7',
+        name: 'George Harris',
+        photoUrl:
+          'https://images.unsplash.com/photo-1517940310602-26535839fe84?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Fish', 'Shellfish'],
+      },
+      {
+        id: 'c8',
+        name: 'Hannah Irving',
+        photoUrl:
+          'https://images.unsplash.com/photo-1516942126524-75630bce5870?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: [],
+      },
+    ],
+    allergenAlerts: [
+      { name: 'Wheat', count: 1, children: ['c6'] },
+      { name: 'Fish', count: 1, children: ['c7'] },
+      { name: 'Shellfish', count: 1, children: ['c7'] },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '3',
+    code: 'CLS-2024-003',
+    name: 'Star Explorers',
+    centerName: 'Star Kids Academy',
+    address: '789 Star Avenue, #03-456',
+    teacher: {
+      id: 't3',
+      name: 'Emily Davis',
+      photoUrl:
+        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&h=200&auto=format&fit=crop',
+      role: 'Lead Teacher',
+      phone: '012-345-6791',
+    },
+    children: [
+      {
+        id: 'c9',
+        name: 'Ian Jackson',
+        photoUrl:
+          'https://images.unsplash.com/photo-1588033173760-4663b66d39c9?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Nuts'],
+      },
+      {
+        id: 'c10',
+        name: 'Julia Kim',
+        photoUrl:
+          'https://images.unsplash.com/photo-1548537412-08ab4940b3c3?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Dairy'],
+      },
+    ],
+    allergenAlerts: [
+      { name: 'Nuts', count: 1, children: ['c9'] },
+      { name: 'Dairy', count: 1, children: ['c10'] },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: '4',
+    code: 'CLS-2024-004',
+    name: 'Little Leaders',
+    centerName: 'Leaders Learning Center',
+    address: '101 Leaders Lane, #04-567',
+    teacher: {
+      id: 't4',
+      name: 'David Wilson',
+      photoUrl:
+        'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?q=80&w=200&h=200&auto=format&fit=crop',
+      role: 'Assistant Teacher',
+      phone: '012-345-6792',
+    },
+    children: [
+      {
+        id: 'c11',
+        name: 'Kevin Lee',
+        photoUrl:
+          'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Gluten'],
+      },
+      {
+        id: 'c12',
+        name: 'Lucy Martinez',
+        photoUrl:
+          'https://images.unsplash.com/photo-1548537412-08ab4940b3c3?q=80&w=200&h=200&auto=format&fit=crop',
+        allergies: ['Seafood'],
+      },
+    ],
+    allergenAlerts: [
+      { name: 'Gluten', count: 1, children: ['c11'] },
+      { name: 'Seafood', count: 1, children: ['c12'] },
+    ],
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -83,7 +210,7 @@ export interface Caretaker {
   phone: string;
   notes?: string;
   createdAt: string;
-};
+}
 
 export interface RawAllergy {
   allergen: string;
@@ -129,7 +256,7 @@ export const children = [
     name: 'Alice Smith',
     dob: '2015-06-20',
     gender: 'female',
-    photoUrl: '',
+    photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=child_001',
     allergies: [
       {
         allergen: 'Peanuts',
@@ -195,21 +322,36 @@ export const children = [
     name: 'Bob Johnson',
     dob: '2016-08-15',
     gender: 'male',
-    photoUrl: '',
+    photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=child_002',
     allergies: [
       {
-        allergen: 'Eggs',
-        notes: 'Mild rash sometimes',
-        symptoms: [{ name: 'Rash' }, { name: 'Itching' }],
+        allergen: 'Peanuts',
+        notes: 'Moderate reaction - avoid all peanut products',
+        symptoms: [{ name: 'Hives' }, { name: 'Swelling' }],
         actionPlan: {
-          immediateAction: 'Apply antihistamine cream and monitor',
-          medications: [{ name: 'Benadryl Cream', dosage: 'Apply thin layer' }],
+          immediateAction: 'Administer antihistamine and monitor. Use EpiPen if symptoms worsen.',
+          medications: [
+            { name: 'Benadryl', dosage: '10mg' },
+            { name: 'EpiPen Jr', dosage: '0.15mg' },
+          ],
+        },
+      },
+      {
+        allergen: 'Shrimp',
+        notes: 'Mild to moderate reaction to shellfish',
+        symptoms: [{ name: 'Rash' }, { name: 'Itching' }, { name: 'Nausea' }],
+        actionPlan: {
+          immediateAction: 'Administer antihistamine and monitor closely',
+          medications: [{ name: 'Benadryl', dosage: '10mg' }],
         },
       },
     ],
     symptoms: [
+      { name: 'Hives', severity: 'Moderate' },
+      { name: 'Swelling', severity: 'Moderate' },
       { name: 'Rash', severity: 'Mild' },
       { name: 'Itching', severity: 'Mild' },
+      { name: 'Nausea', severity: 'Mild' },
     ],
     emergencyContacts: [
       {
@@ -229,6 +371,7 @@ export const children = [
     id: 'child_003',
     name: 'Charlie',
     dob: '2014-03-10',
+    photoUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=child_003',
     allergies: [{ allergen: 'Shellfish', severity: 'High', notes: 'Severe reaction' }],
     parentId: currentUserId,
     classroomId: classrooms[1].id,
@@ -622,3 +765,6 @@ export const caretakers = [
 // - Each document includes a history field to track updates, tying the changes to the user and related document IDs.
 // - Data is tailored for Malaysia, specifically Penang.
 // - In production, replace the fallback currentUserId with the result of lucia_get_user().
+
+// Export the imported types for use elsewhere
+export type { AllergenAlert, Classroom, Child, Teacher };

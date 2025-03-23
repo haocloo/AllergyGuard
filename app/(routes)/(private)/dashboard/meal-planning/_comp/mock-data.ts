@@ -1,23 +1,34 @@
 import { Allergen, FoodRecipe, Ingredient, MealPlan } from './store';
+import { children } from '@/services/dummy-data';
 
 // Get current user id from env variable (or fallback for development)
 const currentUserId = process.env.NEXT_PUBLIC_user_id || 'b806239e-8a3a-4712-9862-1ccd9b821981';
 
-// Family members data for use across meal planning components
+// Family members data for use across meal planning components - using children from dummy-data.ts
 export const familyMembers = [
-  { id: '1', name: 'John', allergies: ['Peanut', 'Milk'] },
-  { id: '2', name: 'Mary', allergies: ['Egg'] },
-  { id: '3', name: 'Emma', allergies: ['Wheat', 'Soy'] },
-  { id: '4', name: 'Lucas', allergies: [] },
+  { 
+    id: 'child_001', 
+    name: 'Alice Smith', 
+    allergies: children.find(c => c.id === 'child_001')?.allergies.map(a => a.allergen) || ['Peanuts', 'Dairy'] 
+  },
+  { 
+    id: 'child_002', 
+    name: 'Bob Johnson', 
+    allergies: children.find(c => c.id === 'child_002')?.allergies.map(a => a.allergen) || ['Peanuts', 'Shrimp'] 
+  },
+  { 
+    id: 'child_003', 
+    name: 'Charlie', 
+    allergies: children.find(c => c.id === 'child_003')?.allergies.map(a => a.allergen) || ['Shellfish'] 
+  },
 ];
 
 // Child allergies for meal planning
 export const childAllergies: Allergen[] = [
-  { name: 'Peanut', severity: 'High' },
-  { name: 'Milk', severity: 'Medium' },
-  { name: 'Egg', severity: 'Low' },
-  { name: 'Wheat', severity: 'Medium' },
-  { name: 'Soy', severity: 'Low' },
+  { name: 'Peanuts', severity: 'High' },
+  { name: 'Dairy', severity: 'Medium' },
+  { name: 'Shrimp', severity: 'Medium' },
+  { name: 'Shellfish', severity: 'High' },
 ];
 
 // Mock meal plans

@@ -18,6 +18,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     remotePatterns: [
       {
         protocol: 'https',
@@ -49,6 +52,12 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'source.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.dicebear.com',
         port: '',
         pathname: '/**',
       },

@@ -10,11 +10,11 @@ export default async function Page() {
   }
 
   if (user.role === 'caretaker') {
-    return redirect('/dashboard/student');
+    return redirect('/dashboard/classroom-management');
   } else if (user.role === 'parent') {
-    return redirect('/dashboard/parent');
+    return redirect('/dashboard/profile-management');
   } else if (user.role === 'admin') {
-    return redirect('/dashboard/admin');
+    return redirect('/dashboard/profile-management');
   }
 
   return (

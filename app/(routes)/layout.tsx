@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'AllergyGuard',
     description:
-      'AllergyGuard is a mobile web-based app that helps manage children’s food allergies. It centralizes allergy profiles, detects allergens in real time, plans safe meals, and supports emergency care using AI.',
+      'AllergyGuard is a mobile web-based app that helps manage children\'s food allergies. It centralizes allergy profiles, detects allergens in real time, plans safe meals, and supports emergency care using AI.',
     keywords: [
       'allergy management',
       'food allergies',
@@ -127,10 +127,10 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning={isDev}
-      className="h-dvh w-screen max-w-[1650px] overflow-x-hidden overflow-y-hidden"
+      className="h-dvh w-screen max-w-[1650px] overflow-x-hidden"
     >
       <body
-        className={`${inter.variable} w-screen mx-auto h-full flex flex-row font-sans antialiased `}
+        className={`${inter.variable} w-screen mx-auto h-full flex flex-row font-sans antialiased`}
       >
         <NextIntlClientProvider messages={messages}>
           <NextTopLoader
@@ -146,7 +146,6 @@ export default async function RootLayout({
           />
           <GoogleAnalytics gaId={process.env.GOOGLE_ANALYTICS_ID as string} />
           <AxiomWebVitals />
-          {/* dont remove Toaster, it's for toast to work */}
           <Toaster />
           <Providers>{children}</Providers>
         </NextIntlClientProvider>

@@ -275,21 +275,23 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
           <Input 
             type="search" 
             placeholder="Search your recipes..." 
-            className="pl-10 h-11 border-gray-200"
+            className="pl-10 h-11 border-gray-200 focus:border-primary focus:ring-primary"
             value={searchQuery}
             onChange={handleSearchChange}
           />
         </div>
         <Button 
-          variant="outline" 
+          variant={selectedUsers.length > 0 ? "default" : "outline"}
           size="icon"
           onClick={handleFilterClick}
           disabled={isLoading}
-          className={`h-11 w-11 border-gray-200 ${selectedUsers.length > 0 ? 'border-primary text-primary' : ''}`}
+          className={`h-11 w-11 border-gray-200 relative transition-all duration-200 ${
+            selectedUsers.length > 0 ? 'bg-primary text-white shadow-sm' : 'hover:bg-gray-50'
+          }`}
         >
           <Filter className="h-4 w-4" />
           {selectedUsers.length > 0 && (
-            <span className="absolute top-0 right-0 h-4 w-4 bg-primary text-white rounded-full text-[10px] flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white rounded-full text-[10px] flex items-center justify-center font-medium shadow-sm">
               {selectedUsers.length}
             </span>
           )}
@@ -421,42 +423,53 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
       {/* Filter Sheet/Modal */}
       <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
         <SheetContent side="bottom" className="h-[90vh] sm:h-[70vh] p-0 rounded-t-xl">
-          <SheetHeader className="px-4 py-3 border-b sticky top-0 bg-white z-10">
+          <SheetHeader className="px-4 py-3 border-b sticky top-0 bg-white z-10 backdrop-blur-sm bg-white/90">
             <div className="flex justify-between items-center w-full">
               <Button variant="ghost" size="icon" onClick={() => setFilterSheetOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>
               <SheetTitle className="text-center flex-1">Filter Options</SheetTitle>
-              <Button variant="ghost" className="text-sm font-normal" onClick={resetFilters}>
+              <Button variant="ghost" className="text-sm font-normal hover:text-red-500 transition-colors" onClick={resetFilters}>
                 Reset
               </Button>
             </div>
           </SheetHeader>
           
-          <div className="overflow-y-auto h-[calc(100%-120px)] pb-20">
+          <div className="overflow-y-auto h-[calc(100%-120px)] pb-20 bg-gray-50">
             {/* Sort By Section */}
-            <div className="p-4 border-b">
-              <h3 className="font-medium mb-3">Sort By</h3>
-              <RadioGroup value={sortOption} onValueChange={setSortOption}>
-                <div className="flex items-center justify-between py-2">
+            <div className="p-4 border-b bg-white mb-2">
+              <h3 className="font-medium mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M11 5h10"></path>
+                  <path d="M11 9h7"></path>
+                  <path d="M11 13h4"></path>
+                  <path d="M3 17h18"></path>
+                  <path d="M3 21h18"></path>
+                  <path d="m9 9-6 6"></path>
+                  <path d="M3 9h6"></path>
+                </svg>
+                Sort By
+              </h3>
+              <RadioGroup value={sortOption} onValueChange={setSortOption} className="space-y-1">
+                <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="recommended" className="flex-1 cursor-pointer">Recommended</Label>
                   </div>
                   <RadioGroupItem value="recommended" id="recommended" />
                 </div>
-                <div className="flex items-center justify-between py-2">
+                <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="allergen-free" className="flex-1 cursor-pointer">Allergen-Free First</Label>
                   </div>
                   <RadioGroupItem value="allergen-free" id="allergen-free" />
                 </div>
-                <div className="flex items-center justify-between py-2">
+                <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="popularity" className="flex-1 cursor-pointer">Popularity</Label>
                   </div>
                   <RadioGroupItem value="popularity" id="popularity" />
                 </div>
-                <div className="flex items-center justify-between py-2">
+                <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-2">
                     <Label htmlFor="rating" className="flex-1 cursor-pointer">Rating</Label>
                   </div>
@@ -466,12 +479,20 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
             </div>
             
             {/* Family Members Section - Select who will be eating */}
-            <div className="p-4 border-b">
-              <h3 className="font-medium mb-3">Safe For Family Members</h3>
+            <div className="p-4 border-b bg-white mb-2">
+              <h3 className="font-medium mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Safe For Family Members
+              </h3>
               
               <div className="space-y-2">
                 <div 
-                  className="flex items-center justify-between py-2 cursor-pointer"
+                  className={`flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors ${selectedUsers.length === 0 ? 'bg-primary/10' : 'hover:bg-gray-50'}`}
                   onClick={() => setSelectedUsers([])}
                 >
                   <Label className="flex-1 cursor-pointer font-medium">All (No restrictions)</Label>
@@ -483,7 +504,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                 {familyMembers.map(member => (
                   <div 
                     key={member.id}
-                    className="flex items-center justify-between py-2 cursor-pointer"
+                    className={`flex items-center justify-between py-2 px-3 rounded-md cursor-pointer transition-colors ${selectedUsers.includes(member.id) ? 'bg-primary/10' : 'hover:bg-gray-50'}`}
                     onClick={() => toggleUserSelection(member.id)}
                   >
                     <div>
@@ -491,7 +512,7 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
                       {member.allergies.length > 0 && (
                         <div className="flex gap-1 mt-1 flex-wrap">
                           {member.allergies.map(allergy => (
-                            <Badge key={allergy} variant="outline" className="text-xs py-0 px-1">
+                            <Badge key={allergy} variant="outline" className="text-xs py-0 px-1 bg-red-50 text-red-700 border-red-200">
                               {allergy}
                             </Badge>
                           ))}
@@ -507,10 +528,22 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
             </div>
             
             {/* Promo Options Section */}
-            <div className="p-4 border-b">
-              <h3 className="font-medium mb-3">Recipe Options</h3>
-              <div className="flex items-center justify-between py-2">
-                <Label htmlFor="promo" className="cursor-pointer">Featured Recipes Only</Label>
+            <div className="p-4 border-b bg-white mb-2">
+              <h3 className="font-medium mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M5 12H3v9h18v-9h-2"></path>
+                  <path d="M7 8c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
+                  <path d="M15 2v8h5"></path>
+                </svg>
+                Recipe Options
+              </h3>
+              <div className="flex items-center justify-between py-2 px-3 rounded-md hover:bg-gray-50 transition-colors">
+                <Label htmlFor="promo" className="cursor-pointer flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-amber-500">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  </svg>
+                  Featured Recipes Only
+                </Label>
                 <Checkbox 
                   id="promo" 
                   checked={showPromoOnly} 
@@ -520,21 +553,26 @@ export function FoodListClient({ initialFoodRecipes }: Props) {
             </div>
             
             {/* Mode Section */}
-            <div className="p-4 border-b">
-              <h3 className="font-medium mb-3">View Mode</h3>
+            <div className="p-4 border-b bg-white">
+              <h3 className="font-medium mb-3 flex items-center text-gray-800">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+                View Mode
+              </h3>
               <Tabs value={viewMode} onValueChange={setViewMode} className="w-full">
                 <TabsList className="grid grid-cols-2 w-full">
-                  <TabsTrigger value="all">All Recipes</TabsTrigger>
-                  <TabsTrigger value="safe">Safe Recipes Only</TabsTrigger>
+                  <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-white">All Recipes</TabsTrigger>
+                  <TabsTrigger value="safe" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Safe Recipes Only</TabsTrigger>
                 </TabsList>
               </Tabs>
             </div>
           </div>
           
           {/* Apply Button - Fixed at bottom */}
-          <SheetFooter className="p-4 border-t absolute bottom-0 left-0 right-0 bg-white">
-            <Button className="w-full" onClick={applyFilters}>
-              Apply Filters
+          <SheetFooter className="p-4 border-t absolute bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+            <Button className="w-full h-12 text-base font-medium" onClick={applyFilters}>
+              Apply Filters {selectedUsers.length > 0 && `(${selectedUsers.length} selected)`}
             </Button>
           </SheetFooter>
         </SheetContent>

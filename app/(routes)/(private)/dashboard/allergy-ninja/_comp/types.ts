@@ -1,14 +1,10 @@
-import { z } from 'zod';
-import { schema_select_profile } from './validation';
-
-export type T_schema_select_profile = z.infer<typeof schema_select_profile>;
-
 export type ChildProfile = {
   id: string;
   name: string;
   age: number;
   allergies: string[]; // IDs of allergies
   avatar: string;
+  photoURL?: string; // Add optional photoURL field
   createdAt: string;
 };
 
@@ -19,7 +15,14 @@ export type Allergy = {
   category: AllergyCategory;
 };
 
-export type AllergyCategory = 'dairy' | 'nuts' | 'seafood' | 'grains' | 'fruits' | 'vegetables' | 'others';
+export type AllergyCategory =
+  | 'dairy'
+  | 'nuts'
+  | 'seafood'
+  | 'grains'
+  | 'fruits'
+  | 'vegetables'
+  | 'others';
 
 export type FoodItem = {
   id: string;
@@ -59,12 +62,3 @@ export type LeaderboardEntry = {
   score: number;
   timestamp: string;
 };
-
-export const FOOD_CATEGORIES = [
-  { value: 'fruit' as FoodCategory, label: 'Fruits' },
-  { value: 'vegetable' as FoodCategory, label: 'Vegetables' },
-  { value: 'dessert' as FoodCategory, label: 'Desserts' },
-  { value: 'main' as FoodCategory, label: 'Main Dishes' },
-  { value: 'snack' as FoodCategory, label: 'Snacks' },
-  { value: 'drink' as FoodCategory, label: 'Drinks' },
-] as const; 

@@ -73,6 +73,34 @@ const UNITS = [
   { value: 'cup', label: 'cup' },
 ];
 
+// Add an allergen mapping for specific foods
+const allergenFoodMap = {
+  peanuts: [
+    'peanut', 'groundnut', 'peanut butter', 'peanut sauce', 'satay', 'goobers', 'arachis', 
+    'kung pao', 'marzipan', 'nougat', 'trail mix'
+  ],
+  milk: [
+    'milk', 'butter', 'cheese', 'cream', 'yogurt', 'ice cream', 'custard', 'pudding', 
+    'whey', 'casein', 'lactose', 'dairy', 'ghee', 'half-and-half', 'buttermilk'
+  ],
+  eggs: [
+    'egg', 'mayonnaise', 'meringue', 'custard', 'hollandaise', 'aioli', 'carbonara',
+    'eggnog', 'frittata', 'quiche', 'marshmallow', 'mousse'
+  ],
+  shellfish: [
+    'shrimp', 'prawn', 'crab', 'lobster', 'crayfish', 'langoustine', 'scampi',
+    'crawfish', 'krill', 'shellfish', 'seafood', 'paella', 'bouillabaisse',
+    'jambalaya', 'gumbo', 'bisque'
+  ]
+};
+
+// Find if a food item is related to an allergen
+const isRelatedToAllergen = (foodName: string, allergen: string) => {
+  const lowerName = foodName.toLowerCase();
+  const relatedFoods = allergenFoodMap[allergen.toLowerCase() as keyof typeof allergenFoodMap] || [];
+  return relatedFoods.some(food => lowerName.includes(food));
+};
+
 export function IngredientEntryClient() {
   const router = useRouter();
   const editorRef = useRef<any>(null);
@@ -99,10 +127,28 @@ export function IngredientEntryClient() {
   const [recipeImportOpen, setRecipeImportOpen] = useState(false);
   const [recipeText, setRecipeText] = useState('');
 
+  // Add a state to store selected user allergies
+  const [selectedUserAllergies, setSelectedUserAllergies] = useState<string[]>([]);
+
   // Load generated recipe from localStorage if available
   useEffect(() => {
     // Check if there's a generated recipe in localStorage
     const generatedRecipeJson = localStorage.getItem('generatedRecipe');
+    
+    // Also check if there's user selection data from the previous step
+    const userSelectionsJson = localStorage.getItem('userSelections');
+    
+    // Load user allergies if available
+    if (userSelectionsJson) {
+      try {
+        const userSelections = JSON.parse(userSelectionsJson);
+        if (userSelections.allergensToAvoid && Array.isArray(userSelections.allergensToAvoid)) {
+          setSelectedUserAllergies(userSelections.allergensToAvoid.map((a: string) => a.toLowerCase()));
+        }
+      } catch (error) {
+        console.error('Error parsing user selections:', error);
+      }
+    }
     
     if (generatedRecipeJson) {
       try {
@@ -170,7 +216,7 @@ export function IngredientEntryClient() {
                   return {
                     ingredient: ing,
                     isSafe: allergens.length === 0,
-                    allergens: allergens,
+                    allergens,
                     nutritionalInfo: {
                       calories: Math.floor(Math.random() * 200),
                       protein: Math.floor(Math.random() * 20),
@@ -308,118 +354,85 @@ export function IngredientEntryClient() {
   const handleCheck = () => {
     setIsAnalyzing(true);
     
-    // Simulate API call for ingredient analysis
+    // First, get any user allergies from localStorage
+    try {
+      const userSelectionsStr = localStorage.getItem('userSelections');
+      if (userSelectionsStr) {
+        const userSelections = JSON.parse(userSelectionsStr);
+        if (userSelections.allergensToAvoid) {
+          setSelectedUserAllergies(userSelections.allergensToAvoid);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user selections:', error);
+    }
+    
+    // Then perform the allergen analysis
     setTimeout(() => {
       const results: AnalysisResult[] = ingredients.map((ing) => {
-        // More sophisticated allergen detection logic
         const name = ing.name.toLowerCase();
-        let allergens = [];
+        const allergens: {
+          name: string;
+          severity: 'High' | 'Medium' | 'Low';
+        }[] = [];
         
-        // Specific allergen detection
-        if (name.includes('peanut')) {
-          allergens.push({ name: 'Peanut', severity: 'High' as const });
-        }
-        if (name.includes('milk') || name.includes('butter') || name.includes('cream')) {
-          allergens.push({ name: 'Milk', severity: 'Medium' as const });
-        }
-        if (name.includes('wheat') || name.includes('flour')) {
-          allergens.push({ name: 'Wheat', severity: 'Medium' as const });
-        }
-        if (name.includes('egg')) {
-          allergens.push({ name: 'Egg', severity: 'Medium' as const });
-        }
-        if (name.includes('soy') || name.includes('soya') || name.includes('tofu')) {
-          allergens.push({ name: 'Soy', severity: 'Medium' as const });
-        }
-        if (name.includes('tree nut') || name.includes('almond') || name.includes('cashew') || 
-            name.includes('walnut') || name.includes('hazelnut') || name.includes('pecan')) {
-          allergens.push({ name: 'Tree nuts', severity: 'High' as const });
-        }
-        if (name.includes('fish') || name.includes('salmon') || name.includes('tuna') || name.includes('cod')) {
-          allergens.push({ name: 'Fish', severity: 'High' as const });
-        }
-        if (name.includes('shellfish') || name.includes('shrimp') || name.includes('crab') || 
-            name.includes('lobster') || name.includes('prawn')) {
-          allergens.push({ name: 'Shellfish', severity: 'High' as const });
-        }
+        // Check for peanuts - specifically identify peanut as an allergen
+        // Add debug logs to check what's happening
+        console.log(`Checking ingredient: ${name}`);
+        console.log(`Selected allergies: ${selectedUserAllergies.join(', ')}`);
         
-        // Special case for spicy egg noodle recipe ingredients
-        if (recipeName.toLowerCase().includes('spicy egg noodle')) {
-          if (name.includes('egg') || name === 'eggs' || name.includes('egg noodle')) {
-            // Make sure eggs are properly detected for the egg noodle recipe
-            if (!allergens.some(a => a.name === 'Egg')) {
-              allergens.push({ name: 'Egg', severity: 'Medium' as const });
-            }
-          }
-          
-          // Check for potential gluten in noodles
-          if (name.includes('noodle') && !name.includes('rice noodle')) {
-            allergens.push({ name: 'Wheat', severity: 'Medium' as const });
-          }
-          
-          // Check for soy in soy sauce
-          if (name.includes('soy sauce')) {
-            allergens.push({ name: 'Soy', severity: 'Medium' as const });
+        if (selectedUserAllergies.includes('Peanuts') || selectedUserAllergies.includes('peanuts')) {
+          if (name.includes('peanut') || name.includes('groundnut')) {
+            console.log(`Peanut allergen detected in: ${name}`);
+            allergens.push({ name: 'Peanuts', severity: 'High' as const });
           }
         }
         
-        // Nutritional info based on ingredient name (simplified)
-        let nutritionalInfo;
-        if (name.includes('chicken')) {
-          nutritionalInfo = { calories: 120, protein: 25, carbs: 0, fat: 3 };
-        } else if (name.includes('rice') || name.includes('noodle')) {
-          nutritionalInfo = { calories: 130, protein: 3, carbs: 28, fat: 0 };
-        } else if (name.includes('egg')) {
-          nutritionalInfo = { calories: 70, protein: 6, carbs: 1, fat: 5 };
-        } else if (name.includes('broccoli') || name.includes('carrot') || name.includes('pepper')) {
-          nutritionalInfo = { calories: 55, protein: 4, carbs: 11, fat: 0 };
-        } else {
-          // Default values
-          nutritionalInfo = { 
-            calories: Math.floor(Math.random() * 200), 
-            protein: Math.floor(Math.random() * 20), 
-            carbs: Math.floor(Math.random() * 30), 
-            fat: Math.floor(Math.random() * 15)
-          };
+        // Check for dairy/milk allergies
+        if (selectedUserAllergies.includes('Dairy') || 
+            selectedUserAllergies.includes('dairy') ||
+            selectedUserAllergies.includes('Milk') ||
+            selectedUserAllergies.includes('milk')) {
+          // Use the allergenFoodMap to check if this ingredient is dairy-related
+          if (isRelatedToAllergen(name, 'milk')) {
+            console.log(`Dairy/milk allergen detected in: ${name}`);
+            allergens.push({ name: 'Dairy', severity: 'Medium' as const });
+          }
         }
         
-        // Generate substitutions for allergen-containing ingredients
-        const substitutions = allergens.length > 0 ? [
-          { 
-            id: '1', 
-            name: name.includes('egg') ? 'Silken Tofu' : 
-                  name.includes('milk') ? 'Almond Milk' : 
-                  name.includes('wheat') || name.includes('noodle') ? 'Rice Noodles' : 
-                  'Allergen-Free Alternative', 
-            description: 'A safe alternative with similar properties', 
-            matchScore: 85
-          },
-          { 
-            id: '2', 
-            name: name.includes('egg') ? 'Chickpea Flour Mixture' : 
-                  name.includes('milk') ? 'Coconut Milk' : 
-                  name.includes('wheat') ? 'Gluten-Free Flour' : 
-                  'Second Alternative', 
-            description: 'Different flavor profile but works well as a substitute', 
-            matchScore: 75 
-          },
-          { 
-            id: '3', 
-            name: name.includes('egg') ? 'Banana (for binding)' : 
-                  name.includes('milk') ? 'Oat Milk' : 
-                  name.includes('wheat') ? 'Almond Flour' : 
-                  'Third Alternative', 
-            description: 'Unique alternative with different nutritional benefits', 
-            matchScore: 65
+        // Check for egg allergies
+        if (selectedUserAllergies.includes('Eggs') ||
+            selectedUserAllergies.includes('eggs') ||
+            selectedUserAllergies.includes('Egg') ||
+            selectedUserAllergies.includes('egg')) {
+          if (isRelatedToAllergen(name, 'eggs')) {
+            console.log(`Egg allergen detected in: ${name}`);
+            allergens.push({ name: 'Eggs', severity: 'Medium' as const });
           }
-        ] : undefined;
+        }
+        
+        // Check for shellfish allergies
+        if (selectedUserAllergies.includes('Shellfish') ||
+            selectedUserAllergies.includes('shellfish') ||
+            selectedUserAllergies.includes('Shrimp') ||
+            selectedUserAllergies.includes('shrimp')) {
+          if (isRelatedToAllergen(name, 'shellfish')) {
+            console.log(`Shellfish allergen detected in: ${name}`);
+            allergens.push({ name: 'Shellfish', severity: 'High' as const });
+          }
+        }
         
         return {
           ingredient: ing,
           isSafe: allergens.length === 0,
           allergens,
-          nutritionalInfo,
-          substitutions
+          nutritionalInfo: {
+            calories: Math.floor(Math.random() * 200) + 50,
+            protein: Math.floor(Math.random() * 15) + 2,
+            carbs: Math.floor(Math.random() * 20) + 5,
+            fat: Math.floor(Math.random() * 10) + 2
+          },
+          substitutions: allergens.length > 0 ? getSubstitutionsForIngredient(ing.name, allergens) : []
         };
       });
       
@@ -657,6 +670,617 @@ export function IngredientEntryClient() {
         toast.error("Failed to parse recipe. Please try a different format.");
       }
     }
+  };
+
+  // Add a helper function to get appropriate substitutions based on ingredient and allergens
+  const getSubstitutionsForIngredient = (ingredientName: string, allergens: Array<{name: string, severity: string}>) => {
+    const lowerName = ingredientName.toLowerCase();
+    const allergenNames = allergens.map(a => a.name);
+    const substitutions = [];
+    
+    // Peanut substitutions
+    if (allergenNames.includes('Peanuts') && isRelatedToAllergen(lowerName, 'peanuts')) {
+      // Specific substitutions for peanut butter
+      if (lowerName.includes('peanut butter')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Sunflower seed butter',
+            description: 'Similar texture, nut-free alternative',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Tahini (sesame paste)',
+            description: 'Rich flavor, works well in most recipes',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'WowButter (soy-based)',
+            description: 'Designed to taste like peanut butter, school-safe',
+            matchScore: 95
+          }
+        );
+      } 
+      // Specific substitutions for peanut sauce
+      else if (lowerName.includes('peanut sauce') || lowerName.includes('satay sauce')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Sunflower seed sauce',
+            description: 'Made with sunflower butter instead of peanuts',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut curry sauce',
+            description: 'Alternative flavor profile but works in similar dishes',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Tahini-based sauce',
+            description: 'Sesame-based alternative with similar consistency',
+            matchScore: 85
+          }
+        );
+      }
+      // Specific substitutions for whole peanuts
+      else if (lowerName === 'peanuts' || 
+              lowerName === 'peanut' || 
+              lowerName.includes('peanut') ||
+              lowerName.match(/^peanuts\b/) || 
+              lowerName.match(/\broasted peanuts\b/)) {
+        console.log('Peanut detected for substitutions:', lowerName); // Debug log
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Roasted soybeans',
+            description: 'Similar texture and protein content',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Roasted chickpeas',
+            description: 'Crunchy texture, works well in similar applications',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Tiger nuts',
+            description: 'Not actually nuts, but tubers with similar crunch',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Pumpkin seeds',
+            description: 'Good substitute in trail mixes and granolas',
+            matchScore: 80
+          }
+        );
+      }
+      // For any other peanut-related food
+      else {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Sunflower seeds',
+            description: 'Similar crunch, nut-free alternative',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Pumpkin seeds',
+            description: 'Nutritious alternative with different flavor profile',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Roasted chickpeas',
+            description: 'Crunchy protein-rich alternative',
+            matchScore: 75
+          }
+        );
+      }
+    }
+    
+    // Dairy substitutions
+    else if ((allergenNames.includes('Dairy') || allergenNames.includes('Milk')) && 
+             isRelatedToAllergen(lowerName, 'milk')) {
+      // Milk substitutions
+      if (lowerName.includes('milk') || lowerName === 'milk') {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Oat milk',
+            description: 'Creamy texture, works well in most recipes',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Almond milk',
+            description: 'Lighter flavor, good for baking',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Soy milk',
+            description: 'High protein content, good for savory dishes',
+            matchScore: 85
+          }
+        );
+      } 
+      // Butter substitutions
+      else if (lowerName.includes('butter') && !lowerName.includes('peanut')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Vegan butter',
+            description: 'Direct substitute, dairy-free',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut oil',
+            description: 'Solid at room temperature, good for baking',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Olive oil',
+            description: 'Good for cooking, not ideal for baking',
+            matchScore: 75
+          }
+        );
+      } 
+      // Cheese substitutions
+      else if (lowerName.includes('cheese')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Vegan cheese',
+            description: 'Plant-based direct alternative',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Nutritional yeast',
+            description: 'Adds cheesy flavor to dishes',
+            matchScore: 75
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Tofu (for soft cheeses)',
+            description: 'Works for ricotta or cream cheese',
+            matchScore: 70
+          }
+        );
+      } 
+      // Ice cream substitutions
+      else if (lowerName.includes('ice cream') || lowerName.includes('gelato')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut milk ice cream',
+            description: 'Rich and creamy dairy-free alternative',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Sorbet',
+            description: 'Fruit-based, naturally dairy-free',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Frozen banana puree',
+            description: 'Natural, healthy alternative',
+            matchScore: 75
+          }
+        );
+      } 
+      // Cream substitutions
+      else if (lowerName.includes('cream') || lowerName.includes('yogurt')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut cream',
+            description: 'Rich alternative for cooking and desserts',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Cashew cream',
+            description: 'Homemade option, very versatile',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Silken tofu',
+            description: 'Good for creamy sauces and desserts',
+            matchScore: 80
+          }
+        );
+      } 
+      // Custard or pudding substitutions
+      else if (lowerName.includes('custard') || lowerName.includes('pudding')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut milk pudding',
+            description: 'Rich dairy-free alternative',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Avocado chocolate pudding',
+            description: 'Healthy, creamy alternative',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Chia seed pudding',
+            description: 'Different texture but nutritious option',
+            matchScore: 75
+          }
+        );
+      }
+      // Generic dairy substitute if specific match not found
+      else {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Plant-based alternative',
+            description: 'Choose a dairy-free version',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut-based substitute',
+            description: 'Works for many dairy applications',
+            matchScore: 80
+          }
+        );
+      }
+    }
+    
+    // Egg substitutions
+    else if (allergenNames.includes('Eggs') && isRelatedToAllergen(lowerName, 'eggs')) {
+      // Basic egg substitution
+      if (lowerName.includes('egg') && (lowerName === 'egg' || lowerName.includes('eggs'))) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Flax egg (1 tbsp ground flax + 3 tbsp water)',
+            description: 'Best for binding in baking',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Applesauce (¼ cup per egg)',
+            description: 'Works well in sweet baked goods',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Commercial egg replacer',
+            description: 'Follow package instructions',
+            matchScore: 90
+          }
+        );
+      } 
+      // Mayonnaise substitution
+      else if (lowerName.includes('mayonnaise') || lowerName.includes('mayo')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Vegan mayonnaise',
+            description: 'Direct substitute, commercially available',
+            matchScore: 95
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Avocado puree',
+            description: 'Natural creamy alternative',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Hummus',
+            description: 'Different flavor but works as a spread',
+            matchScore: 75
+          }
+        );
+      } 
+      // Meringue substitution
+      else if (lowerName.includes('meringue')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Aquafaba (chickpea water)',
+            description: 'Whips like egg whites',
+            matchScore: 90
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Whipped coconut cream',
+            description: 'Different but can work as topping',
+            matchScore: 70
+          }
+        );
+      } 
+      // Custard substitution
+      else if (lowerName.includes('custard')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Silken tofu custard',
+            description: 'Similar texture when blended',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Coconut milk + cornstarch',
+            description: 'Creates thick, creamy texture',
+            matchScore: 80
+          }
+        );
+      }
+      // Generic egg substitute for other egg-containing foods
+      else {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Commercial egg replacer',
+            description: 'All-purpose egg substitute',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Appropriate egg alternative for this recipe',
+            description: 'Depends on egg function in recipe',
+            matchScore: 80
+          }
+        );
+      }
+    }
+    
+    // Shellfish substitutions
+    if ((allergenNames.includes('Shellfish') || allergenNames.includes('Shrimp')) && 
+        isRelatedToAllergen(lowerName, 'shellfish')) {
+      // Specific shrimp substitutions
+      if (lowerName.includes('shrimp') || lowerName.includes('prawn')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Hearts of palm',
+            description: 'Similar texture, plant-based alternative',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'King oyster mushroom scallops',
+            description: 'Sliced and sautéed for similar texture',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Firm white fish (if not fish-allergic)',
+            description: 'Safe seafood alternative',
+            matchScore: 85
+          }
+        );
+      } 
+      // Crab substitutions
+      else if (lowerName.includes('crab')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Jackfruit (young, green)',
+            description: 'Flaky texture similar to crab meat',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Hearts of palm',
+            description: 'Works well in crab cakes',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Artichoke hearts',
+            description: 'Good for crab dip alternatives',
+            matchScore: 75
+          }
+        );
+      } 
+      // Lobster substitutions
+      else if (lowerName.includes('lobster')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Hearts of palm',
+            description: 'Good plant-based alternative',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Firm white fish (if not fish-allergic)',
+            description: 'Similar texture for lobster rolls',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: "Lion's mane mushroom",
+            description: "Similar texture when cooked",
+            matchScore: 80
+          }
+        );
+      } 
+      // Seafood dish substitutions
+      else if (lowerName.includes('seafood') || lowerName.includes('paella') || 
+               lowerName.includes('gumbo') || lowerName.includes('jambalaya')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Variety of vegetables',
+            description: 'Make a vegetable-focused version',
+            matchScore: 75
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Firm tofu and mushrooms',
+            description: 'Good protein alternatives',
+            matchScore: 80
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Chicken (if not chicken-allergic)',
+            description: 'Common substitution in seafood dishes',
+            matchScore: 85
+          }
+        );
+      }
+      // Generic shellfish substitute
+      else {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Plant-based seafood alternatives',
+            description: 'Commercial products available',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Firm tofu pieces',
+            description: 'Can be seasoned similarly, different texture',
+            matchScore: 75
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Mushrooms',
+            description: 'Provide umami flavor and meaty texture',
+            matchScore: 80
+          }
+        );
+      }
+    }
+    
+    // Wheat/Gluten substitutions
+    else if (allergenNames.includes('Wheat') && 
+             (lowerName.includes('flour') || lowerName.includes('bread') || 
+              lowerName.includes('pasta') || lowerName.includes('wheat'))) {
+      substitutions.push(
+        {
+          id: crypto.randomUUID(),
+          name: 'Gluten-free flour blend',
+          description: 'All-purpose substitute for baking',
+          matchScore: 90
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Almond flour',
+          description: 'Good for cookies and quick breads',
+          matchScore: 80
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Rice flour',
+          description: 'Light texture, good for coating',
+          matchScore: 75
+        }
+      );
+      
+      if (lowerName.includes('pasta')) {
+        substitutions.push(
+          {
+            id: crypto.randomUUID(),
+            name: 'Rice noodles',
+            description: 'Light texture, gluten-free',
+            matchScore: 85
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Chickpea pasta',
+            description: 'Higher protein, gluten-free option',
+            matchScore: 80
+          }
+        );
+      }
+    }
+    
+    // Soy substitutions
+    else if (allergenNames.includes('Soy') && 
+             (lowerName.includes('soy') || lowerName.includes('tofu') || 
+              lowerName.includes('tempeh') || lowerName.includes('edamame'))) {
+      substitutions.push(
+        {
+          id: crypto.randomUUID(),
+          name: 'Chickpeas',
+          description: 'Good protein alternative',
+          matchScore: 85
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Coconut aminos',
+          description: 'Replaces soy sauce',
+          matchScore: 90
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Seitan',
+          description: 'Good texture substitute (contains gluten)',
+          matchScore: 80
+        }
+      );
+    }
+    
+    // Tree nut substitutions
+    else if (allergenNames.includes('Tree nuts') && 
+             (lowerName.includes('almond') || lowerName.includes('cashew') || 
+              lowerName.includes('walnut') || lowerName.includes('pecan'))) {
+      substitutions.push(
+        {
+          id: crypto.randomUUID(),
+          name: 'Roasted sunflower seeds',
+          description: 'Crunchy nut-free alternative',
+          matchScore: 85
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Roasted chickpeas',
+          description: 'Crunchy protein-rich alternative',
+          matchScore: 80
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Pepitas (pumpkin seeds)',
+          description: 'Good in salads and for topping',
+          matchScore: 75
+        }
+      );
+    }
+    
+    // If no specific substitutions are found, provide generic ones
+    if (substitutions.length === 0) {
+      substitutions.push(
+        {
+          id: crypto.randomUUID(),
+          name: `Alternative to ${ingredientName}`,
+          description: 'Allergy-safe alternative',
+          matchScore: 85
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Another option',
+          description: 'Different taste profile but safe',
+          matchScore: 75
+        }
+      );
+    }
+    
+    return substitutions;
   };
 
   return (
