@@ -84,9 +84,9 @@ export function SymptomSeverityForm({
                 SEVERITY_COLORS[currentSeverity]
               )}
             >
-              <div className="flex items-center justify-between gap-6">
+              <div className="flex flex-col items-center gap-2">
                 <Label className="text-base font-medium">{symptom.name}</Label>
-                <div className="relative min-w-[280px]">
+                <div className="relative w-full">
                   <ToggleGroup
                     type="single"
                     value={currentSeverity}

@@ -346,7 +346,7 @@ export function RecipeDetailClient({ serverRecipe, recipeId }: Props) {
               alt={recipe.name}
               width={64}
               height={64}
-              className="object-cover"
+              className="size-full object-cover"
             />
           ) : (
             <div className="h-full w-full bg-gray-100 flex items-center justify-center">
