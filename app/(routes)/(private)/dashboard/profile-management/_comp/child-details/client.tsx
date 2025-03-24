@@ -729,7 +729,7 @@ export function ChildDetailsClient({ initialChild }: Props) {
                         Edit Symptoms
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogContent className="max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>Edit Symptoms</DialogTitle>
                       </DialogHeader>

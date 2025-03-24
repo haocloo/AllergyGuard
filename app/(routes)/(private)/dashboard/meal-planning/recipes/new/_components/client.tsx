@@ -626,18 +626,6 @@ export function MealPrepFormClient() {
           <h1 className="text-2xl sm:text-2xl font-bold text-primary">Meal Preparation</h1>
           <p className="text-sm text-muted-foreground">Tell us what you're planning to cook</p>
         </div>
-
-        <div className="flex gap-2">
-          <Button
-            variant="cosmic"
-            size="sm"
-            className="h-9 gap-2 border-dashed border-gray-300 mt-2 sm:mt-0"
-            onClick={handleRecipeImport}
-          >
-            <FileText className="h-4 w-4" />
-            <span>Paste Recipe</span>
-          </Button>
-        </div>
       </div>
 
       <Card className="overflow-hidden border-2">
@@ -646,7 +634,7 @@ export function MealPrepFormClient() {
             {/* Question 1: Servings */}
             <div className="space-y-2">
               <Label htmlFor="servings" className="text-base font-medium">
-                1) How many servings? <span className="text-red-500">*</span>
+                1) How many servings? 
               </Label>
               <p className="text-sm text-muted-foreground mb-2">
                 Required: Enter the number of people this meal is for.
@@ -665,7 +653,7 @@ export function MealPrepFormClient() {
             {/* Question 2: Who are you serving - Multi-select Dropdown */}
             <div className="space-y-2">
               <Label className="text-base font-medium">
-                2) Who are you serving? <span className="text-red-500">*</span>
+                2) Who are you serving? 
               </Label>
               <p className="text-sm text-muted-foreground mb-2">
                 Required: Select at least one person you're preparing this meal for.

@@ -17,6 +17,7 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const [gameActive, setGameActive] = useState(false);
   const [activeTab, setActiveTab] = useState('howtoplay');
+  const [scrollLocked, setScrollLocked] = useState(false);
 
   // Initialize profiles and allergies
   useEffect(() => {
@@ -24,13 +25,67 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
     setAllergies(initialAllergies);
   }, [initialChildProfiles, initialAllergies, setChildProfiles, setAllergies]);
 
+  // Scroll locking functions
+  const disableScroll = () => {
+    // Store the current scroll position
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+    // Prevent scrolling by setting position to fixed and preserving current position
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollTop}px`;
+    document.body.style.left = `-${scrollLeft}px`;
+    document.body.style.width = '100%';
+
+    setScrollLocked(true);
+  };
+
+  const enableScroll = () => {
+    // Restore scroll position
+    const scrollY = document.body.style.top;
+    const scrollX = document.body.style.left;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.left = '';
+    document.body.style.width = '';
+
+    window.scrollTo(parseInt(scrollX || '0') * -1, parseInt(scrollY || '0') * -1);
+
+    setScrollLocked(false);
+  };
+
+  // Automatically lock/unlock scrolling when game is active/inactive
+  useEffect(() => {
+    if (gameActive) {
+      disableScroll();
+    } else {
+      enableScroll();
+    }
+
+    // Cleanup on unmount
+    return () => {
+      enableScroll();
+    };
+  }, [gameActive]);
+
+  // Handle manual toggle of scroll lock when game is active
+  const toggleScrollLock = () => {
+    if (gameActive) {
+      if (scrollLocked) {
+        enableScroll();
+      } else {
+        disableScroll();
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full px-1 sm:px-4  mx-auto pb-20">
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-2xl font-bold text-primary">Allergy Ninja Game</h1>
         <p className="text-sm text-muted-foreground">
-            Slice safe foods, avoid your allergens, and become an Allergy Ninja Master!
+          Slice safe foods, avoid your allergens, and become an Allergy Ninja Master!
         </p>
       </div>
 
@@ -158,12 +213,58 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                   : 'Click Start Playing to begin your training!'}
               </p>
             </div>
+
+            {/* Scroll Lock Toggle (only shown when game is active) */}
+            {gameActive && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={toggleScrollLock}
+                  className={`px-4 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition-colors ${
+                    scrollLocked
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+                  }`}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    {scrollLocked ? (
+                      <>
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                      </>
+                    ) : (
+                      <>
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                      </>
+                    )}
+                  </svg>
+                  {scrollLocked ? 'Scrolling Locked' : 'Lock Scrolling'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Center Column - Game or Ninja Character */}
         <div className="lg:col-span-2 flex justify-center items-center">
-          <div className="w-[640px] h-[480px] scale-100 relative overflow-hidden rounded-lg shadow-lg border-4 border-orange-100 dark:border-orange-900/30">
+          <div
+            className={`w-[640px] h-[480px] scale-100 relative overflow-hidden rounded-lg shadow-lg border-4 ${
+              scrollLocked && gameActive
+                ? 'border-green-200 dark:border-green-900/50'
+                : 'border-orange-100 dark:border-orange-900/30'
+            }`}
+          >
             {/* No profile selected overlay */}
             {!selectedChildId && (
               <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-sm flex flex-col justify-center items-center p-6 text-center">
@@ -235,24 +336,6 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                             {allergyName}
                           </span>
                         </Badge>
-                        // <span
-                        //   key={`${selectedChildId}-${index}`}
-                        //   className="px-3 py-1 bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200 rounded-full text-xs font-medium flex items-center"
-                        // >
-                        //   <svg
-                        //     className="w-3 h-3 mr-1"
-                        //     fill="currentColor"
-                        //     viewBox="0 0 20 20"
-                        //     xmlns="http://www.w3.org/2000/svg"
-                        //   >
-                        //     <path
-                        //       fillRule="evenodd"
-                        //       d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                        //       clipRule="evenodd"
-                        //     ></path>
-                        //   </svg>
-                        //   {allergyName}
-                        // </span>
                       )
                     )
                   ) : (
@@ -292,6 +375,28 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
                   </svg>
                   Start Playing
                 </button>
+
+                <p className="text-xs text-gray-300 mt-4">
+                  <span className="inline-flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-1"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Scrolling will be locked during gameplay to prevent accidental scrolling
+                  </span>
+                </p>
               </div>
             )}
 
@@ -306,6 +411,70 @@ export function GameClient({ initialChildProfiles, initialAllergies }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Game Control Footer (only visible when game is active) */}
+      {gameActive && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-black/70 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-3">
+            <button
+              onClick={() => setGameActive(false)}
+              className="text-white hover:text-red-300 transition-colors"
+              title="Exit Game"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6L6 18"></path>
+                <path d="M6 6l12 12"></path>
+              </svg>
+            </button>
+
+            <div className="h-6 w-px bg-gray-500"></div>
+
+            <button
+              onClick={toggleScrollLock}
+              className={`flex items-center gap-2 text-sm font-medium ${
+                scrollLocked ? 'text-green-300' : 'text-white'
+              }`}
+              title={scrollLocked ? 'Unlock Scrolling' : 'Lock Scrolling'}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {scrollLocked ? (
+                  <>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                  </>
+                ) : (
+                  <>
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                  </>
+                )}
+              </svg>
+              {scrollLocked ? 'Scrolling Locked' : 'Lock Scrolling'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Tabs Section */}
       <div className="w-full bg-white dark:bg-slate-900 rounded-lg shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
