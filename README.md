@@ -170,7 +170,6 @@ bun db:mig
 - `/services`: Higher-level functions interacting with external APIs or abstracting database operations.
 - `/hooks`: Custom React hooks.
 - `/public`: Static assets (images, fonts, etc.).
-- `/styles`: Global CSS files.
 
 ## User Roles
 
