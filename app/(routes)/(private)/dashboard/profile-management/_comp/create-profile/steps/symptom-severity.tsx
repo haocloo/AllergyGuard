@@ -69,7 +69,7 @@ export function SymptomSeverityForm({
       <div>
         <h2 className="text-lg font-semibold">Symptom Severity</h2>
         <p className="text-sm text-muted-foreground">Set the severity level for each symptom</p>
-      </div>
+      </div> 
 
       <div className="space-y-4">
         {allSymptoms?.map((symptom) => {
